@@ -109,19 +109,21 @@ export default async function RequestDetail({ params }: { params: { id: string }
         image: session.user.image,
       }}
     >
-      <div className="mx-auto max-w-[820px]">
-        <Link href={backLink} className="text-[14px] hover:underline" style={{ color: "var(--brand)" }}>
-          ← Back to Requests
-        </Link>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <h1 className="text-[28px] md:text-[34px] font-bold" style={{ color: "var(--forest)" }}>{request.title}</h1>
-          <span className="badge font-semibold">{STATUS_LABEL[request.status]}</span>
+      <div className="space-y-6">
+        <div>
+          <Link href={backLink} className="text-[14px] hover:underline" style={{ color: "var(--brand)" }}>
+            ← Back to Requests
+          </Link>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <h1 className="text-[28px] md:text-[34px] font-bold" style={{ color: "var(--forest)" }}>{request.title}</h1>
+            <span className="badge font-semibold">{STATUS_LABEL[request.status]}</span>
+          </div>
+          <p className="mt-1 text-[14px] md:text-[15px]" style={{ color: "var(--slate)" }}>
+            {request.category.name}{request.subservice ? ` · ${request.subservice.name}` : ""} · {request.serviceArea?.name ?? request.locality}
+          </p>
         </div>
-        <p className="mt-1 text-[14px] md:text-[15px]" style={{ color: "var(--slate)" }}>
-          {request.category.name}{request.subservice ? ` · ${request.subservice.name}` : ""} · {request.serviceArea?.name ?? request.locality}
-        </p>
 
-        <div className="mt-8 grid gap-6 md:grid-cols-[1.3fr_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
           <div className="card">
             <h2 className="mb-3 text-[20px]">Details</h2>
             <p className="text-[15px] leading-relaxed" style={{ color: "var(--ink)" }}>{request.description}</p>
