@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --forest: #14331f;
+  --brand: #1f5235;
+  --emerald: #2e7d53;
+  --sage: #9cc9a9;
+  --mist: #eaf3ec;
+  --paper: #fbfcfa;
+  --ink: #16201a;
+  --slate: #586259;
+  --line: #e1e9e2;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3 text-[15px] font-medium transition border border-transparent cursor-pointer;
+  }
+  .btn-primary {
+    background: var(--brand);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--forest);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--forest);
+    border-color: var(--line);
+  }
+  .btn-ghost:hover {
+    background: var(--mist);
+    border-color: var(--emerald);
+  }
+  .eyebrow {
+    @apply text-[13px] font-semibold uppercase tracking-[0.14em];
+    color: var(--emerald);
+  }
+  .card {
+    @apply rounded-2xl border bg-white p-6;
+    border-color: var(--line);
+  }
+  .input {
+    @apply w-full rounded-[11px] border bg-paper px-3.5 py-3 text-[15px] outline-none transition;
+    border-color: var(--line);
+  }
+  .input:focus {
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 3px rgba(46, 125, 83, 0.12);
+  }
+  .label {
+    @apply mb-1.5 block text-[12px] font-semibold;
+    color: var(--slate);
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold;
+    background: var(--mist);
+    color: var(--brand);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    color: var(--forest);
+    line-height: 1.12;
+    letter-spacing: -0.01em;
+  }
+}

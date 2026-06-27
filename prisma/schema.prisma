@@ -1,0 +1,1062 @@
+// =============================================================================
+// Cloud AIF — Shivamogga Local Services Marketplace
+// Production-grade Prisma schema
+//
+// Design notes:
+// - cuid() chosen over uuid() for primary keys: collision-resistant, sortable-ish,
+//   URL-safe, and cheaper to index than v4 UUIDs in Postgres.
+// - Core identity (User) is intentionally thin. Role-specific data lives in
+//   CustomerProfile / ProviderProfile (1:1) so the User table never accumulates
+//   nullable role-specific columns.
+// - Provider data is normalized across ~10 scoped models rather than one wide table.
+// - Soft-delete (deletedAt) only where recovery/audit matters; not blanket-applied.
+// - JSON used ONLY for genuinely open-ended, category-specific metadata, always
+//   sitting beside strong relational columns — never as a substitute for structure.
+// - Every state machine is an enum; transitions for requests are recorded in
+//   RequestStatusHistory for full auditability.
+// - NextAuth (Auth.js) adapter models (Account/Session/VerificationToken) included.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  // Supabase: pooled connection for the app, direct connection for migrations.
+  directUrl = env("DIRECT_URL")
+}
+
+// =============================================================================
+// ENUMS — state machines & controlled vocabularies
+// =============================================================================
+
+enum UserRole {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+/// Provider account/operational lifecycle (distinct from doc-level verification).
+enum ProviderStatus {
+  DRAFT // profile created, not yet submitted
+  PENDING_VERIFICATION // submitted, awaiting admin pickup
+  UNDER_REVIEW // admin actively reviewing
+  NEEDS_MORE_INFO // admin requested changes/resubmission
+  APPROVED // visible & active
+  REJECTED // denied
+  SUSPENDED // temporarily disabled by admin
+  INACTIVE // self-deactivated or auto-idled
+}
+
+/// Overall verification decision state, mirrors review outcomes.
+enum VerificationStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+}
+
+enum DocumentType {
+  ID_PROOF
+  ADDRESS_PROOF
+  CERTIFICATION
+  TAX_DOCUMENT
+  BUSINESS_REGISTRATION
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+  RESUBMIT_REQUIRED
+}
+
+/// Full service-request lifecycle. Transitions recorded in RequestStatusHistory.
+enum RequestStatus {
+  DRAFT
+  SUBMITTED
+  MATCHING
+  ASSIGNED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  EXPIRED
+  DISPUTED
+}
+
+enum AssignmentStatus {
+  PENDING // offered/assigned, awaiting provider response
+  ACCEPTED
+  DECLINED
+  WITHDRAWN // pulled back by admin/customer/system
+  EXPIRED // provider did not respond in time
+  COMPLETED // this provider fulfilled the job
+}
+
+/// Who/what created an assignment — keeps the model future-proof for AI matching.
+enum AssignmentSource {
+  SYSTEM
+  ADMIN
+  CUSTOMER
+  SELF_ACCEPT
+}
+
+enum ReviewStatus {
+  PENDING_MODERATION
+  PUBLISHED
+  HIDDEN
+  REMOVED
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+  REJECTED
+}
+
+enum ComplaintPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ComplaintType {
+  SERVICE_QUALITY
+  NO_SHOW
+  BEHAVIOR
+  PRICING
+  SAFETY
+  FRAUD
+  OTHER
+}
+
+enum AdminActionType {
+  PROVIDER_APPROVED
+  PROVIDER_REJECTED
+  PROVIDER_SUSPENDED
+  PROVIDER_REINSTATED
+  PROVIDER_INFO_REQUESTED
+  DOCUMENT_APPROVED
+  DOCUMENT_REJECTED
+  REQUEST_ASSIGNED
+  REQUEST_CANCELLED
+  REVIEW_MODERATED
+  COMPLAINT_UPDATED
+  CATEGORY_CREATED
+  CATEGORY_UPDATED
+  SUBSERVICE_CREATED
+  SUBSERVICE_UPDATED
+  USER_SUSPENDED
+  USER_REINSTATED
+  SETTING_UPDATED
+  CONTENT_UPDATED
+  OTHER
+}
+
+enum AvailabilityType {
+  WEEKLY_RECURRING
+  DATE_OVERRIDE // e.g. holiday / one-off unavailability or extra slot
+}
+
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum ServiceMode {
+  AT_HOME // provider travels to customer
+  AT_VENUE // customer travels to provider
+  REMOTE // online (e.g. tutoring)
+  HYBRID
+}
+
+enum WorkType {
+  SOLO
+  TEAM
+  BUSINESS
+}
+
+enum ContactPreference {
+  PHONE
+  EMAIL
+  WHATSAPP
+  ANY
+}
+
+enum UrgencyLevel {
+  FLEXIBLE
+  WITHIN_WEEK
+  WITHIN_48_HOURS
+  EMERGENCY
+}
+
+enum NotificationType {
+  REQUEST_SUBMITTED
+  REQUEST_ASSIGNED
+  REQUEST_ACCEPTED
+  REQUEST_STATUS_CHANGED
+  VERIFICATION_UPDATE
+  REVIEW_RECEIVED
+  COMPLAINT_UPDATE
+  SYSTEM_ANNOUNCEMENT
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH // reserved for future mobile clients
+}
+
+enum StaticPageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PricingUnit {
+  FLAT
+  PER_HOUR
+  PER_VISIT
+  PER_SQFT
+  PER_ROOM
+  PER_SESSION
+  CUSTOM
+}
+
+enum AddressType {
+  CUSTOMER_SERVICE
+  PROVIDER_BUSINESS
+  PROVIDER_PERSONAL
+}
+
+// =============================================================================
+// IDENTITY & AUTH  (NextAuth / Auth.js compatible)
+// =============================================================================
+
+model User {
+  id            String     @id @default(cuid())
+  email         String     @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  phone         String?    @unique
+  role          UserRole   @default(CUSTOMER)
+  status        UserStatus @default(ACTIVE)
+  passwordHash  String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // soft-delete: preserve FK integrity for past requests/reviews
+
+  // Auth.js relations
+  accounts Account[]
+  sessions Session[]
+
+  // Profiles (1:1)
+  customerProfile CustomerProfile?
+  providerProfile ProviderProfile?
+
+  // Activity relations
+  serviceRequests   ServiceRequest[]    @relation("CustomerRequests")
+  reviewsAuthored   Review[]            @relation("ReviewAuthor")
+  complaintsFiled   Complaint[]         @relation("ComplaintComplainant")
+  notifications     Notification[]
+  adminActions      AdminActionLog[]    @relation("AdminActor")
+  supportTickets    SupportTicket[]     @relation("TicketRequester")
+  verificationsMade ProviderVerificationReview[] @relation("VerificationReviewer")
+  assignmentsMade   ProviderAssignment[]         @relation("AssignmentCreatedBy")
+
+  @@index([role, status])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// =============================================================================
+// USER PROFILES
+// =============================================================================
+
+model CustomerProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  displayName      String?
+  defaultLocality  String? // quick-reference; full addresses in Address[]
+  preferredContact ContactPreference @default(ANY)
+
+  addresses Address[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("customer_profiles")
+}
+
+model ProviderProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // --- Identity / public ---
+  legalName   String
+  displayName String
+  publicSlug  String  @unique // /providers/[slug]
+  businessName String?
+  headline    String? // short tagline for cards
+  bio         String? @db.Text
+  profileDescription String? @db.Text
+  profileImage String?
+
+  // --- Classification ---
+  workType          WorkType @default(SOLO)
+  primaryCategoryId String?
+  primaryCategory   Category? @relation("ProviderPrimaryCategory", fields: [primaryCategoryId], references: [id])
+  experienceYears   Int      @default(0)
+  languages         String[] // e.g. ["Kannada","Hindi","English"]
+
+  // --- Operations ---
+  serviceRadiusKm   Int?
+  emergencyContact  String?
+  indicativePriceMin Int?
+  indicativePriceMax Int?
+
+  // --- Lifecycle / trust ---
+  status             ProviderStatus     @default(DRAFT)
+  verificationStatus VerificationStatus @default(PENDING)
+  verifiedBadge      Boolean            @default(false)
+  isActive           Boolean            @default(false) // visible to customers only when true
+  completenessScore  Int                @default(0) // 0-100, derived
+  suspendedReason    String?
+  suspendedAt        DateTime?
+
+  // --- Denormalized trust metrics (kept in sync via app logic / snapshots) ---
+  ratingAverage   Float @default(0)
+  ratingCount     Int   @default(0)
+  jobsCompleted   Int   @default(0)
+  leadResponseRate Float @default(0) // 0-1
+  termsAcceptedAt DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // --- Normalized child collections ---
+  documents     ProviderDocument[]
+  categories    ProviderCategory[]
+  subservices   ProviderSubservice[]
+  serviceAreas  ProviderServiceArea[]
+  availability  ProviderAvailability[]
+  portfolio     ProviderPortfolioItem[]
+  pricing       ProviderPricing[]
+  reviewsRecv   Review[]                @relation("ProviderReviews")
+  assignments   ProviderAssignment[]
+  verifications ProviderVerificationReview[]
+  complaints    Complaint[]             @relation("ComplaintProvider")
+  addresses     Address[]
+  metricSnapshots ProviderMetricSnapshot[]
+
+  @@index([status, isActive])
+  @@index([primaryCategoryId])
+  @@index([verificationStatus])
+  @@index([deletedAt])
+  @@map("provider_profiles")
+}
+
+// =============================================================================
+// PROVIDER VERIFICATION & SETUP
+// =============================================================================
+
+model ProviderDocument {
+  id         String         @id @default(cuid())
+  providerId String
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  type     DocumentType
+  status   DocumentStatus @default(PENDING)
+  fileUrl  String // private storage key — never exposed to public routes
+  fileName String?
+  notes    String?        // admin notes on this doc
+  expiresAt DateTime?
+
+  reviewedById String?
+  reviewedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerId, type])
+  @@index([status])
+  @@map("provider_documents")
+}
+
+/// Many-to-many provider<->category (a provider may span categories).
+model ProviderCategory {
+  id         String          @id @default(cuid())
+  providerId String
+  categoryId String
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  category   Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([providerId, categoryId])
+  @@index([categoryId])
+  @@map("provider_categories")
+}
+
+/// Many-to-many provider<->subservice (the granular service offerings).
+model ProviderSubservice {
+  id           String          @id @default(cuid())
+  providerId   String
+  subserviceId String
+  provider     ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  subservice   Subservice      @relation(fields: [subserviceId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([providerId, subserviceId])
+  @@index([subserviceId])
+  @@map("provider_subservices")
+}
+
+model ProviderServiceArea {
+  id            String          @id @default(cuid())
+  providerId    String
+  serviceAreaId String
+  provider      ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  serviceArea   ServiceArea     @relation(fields: [serviceAreaId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([providerId, serviceAreaId])
+  @@index([serviceAreaId])
+  @@map("provider_service_areas")
+}
+
+model ProviderAvailability {
+  id         String          @id @default(cuid())
+  providerId String
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  type      AvailabilityType @default(WEEKLY_RECURRING)
+  dayOfWeek DayOfWeek? // set when WEEKLY_RECURRING
+  date      DateTime? // set when DATE_OVERRIDE
+  startTime String // "HH:mm" 24h
+  endTime   String
+  isAvailable Boolean @default(true) // false => blackout for DATE_OVERRIDE
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerId, type])
+  @@map("provider_availability")
+}
+
+model ProviderPortfolioItem {
+  id         String          @id @default(cuid())
+  providerId String
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  title       String?
+  description String?
+  imageUrl    String
+  sortOrder   Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([providerId])
+  @@map("provider_portfolio_items")
+}
+
+model ProviderPricing {
+  id           String          @id @default(cuid())
+  providerId   String
+  provider     ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  subserviceId String?
+  subservice   Subservice?     @relation(fields: [subserviceId], references: [id], onDelete: SetNull)
+
+  label     String // e.g. "Bathroom deep clean"
+  unit      PricingUnit @default(FLAT)
+  amountMin Int // stored in paise to avoid float drift
+  amountMax Int?
+  currency  String      @default("INR")
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([subserviceId])
+  @@map("provider_pricing")
+}
+
+/// One review record per (provider verification decision) — full audit trail.
+model ProviderVerificationReview {
+  id         String          @id @default(cuid())
+  providerId String
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  reviewerId String
+  reviewer   User   @relation("VerificationReviewer", fields: [reviewerId], references: [id])
+
+  decision        VerificationStatus
+  notes           String?            @db.Text
+  requestedChanges String?           @db.Text
+  documentSnapshot Json? // snapshot of reviewed doc set (ids/types/statuses)
+
+  reviewedAt DateTime @default(now())
+
+  @@index([providerId])
+  @@index([reviewerId])
+  @@map("provider_verification_reviews")
+}
+
+model ProviderMetricSnapshot {
+  id         String          @id @default(cuid())
+  providerId String
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  ratingAverage    Float
+  ratingCount      Int
+  jobsCompleted    Int
+  leadResponseRate Float
+  capturedAt       DateTime @default(now())
+
+  @@index([providerId, capturedAt])
+  @@map("provider_metric_snapshots")
+}
+
+// =============================================================================
+// TAXONOMY & GEOGRAPHY
+// =============================================================================
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  iconKey     String? // maps to a frontend icon set
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  subservices       Subservice[]
+  providerLinks     ProviderCategory[]
+  serviceRequests   ServiceRequest[]
+  primaryForProviders ProviderProfile[] @relation("ProviderPrimaryCategory")
+
+  @@index([isActive, sortOrder])
+  @@map("categories")
+}
+
+model Subservice {
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  name        String
+  slug        String
+  description String?
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  providerLinks     ProviderSubservice[]
+  serviceRequests   ServiceRequest[]
+  pricing           ProviderPricing[]
+  requirementTemplate RequestRequirementTemplate?
+
+  @@unique([categoryId, slug])
+  @@index([isActive])
+  @@map("subservices")
+}
+
+/// Localities/wards within Shivamogga. cityName future-proofs multi-city.
+model ServiceArea {
+  id        String  @id @default(cuid())
+  name      String
+  slug      String  @unique
+  cityName  String  @default("Shivamogga")
+  state     String  @default("Karnataka")
+  pincode   String?
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  providerLinks   ProviderServiceArea[]
+  serviceRequests ServiceRequest[]
+
+  @@index([cityName, isActive])
+  @@map("service_areas")
+}
+
+/// Normalized address — reused by customers, providers, and requests.
+model Address {
+  id   String      @id @default(cuid())
+  type AddressType
+
+  line1     String
+  line2     String?
+  locality  String?
+  city      String  @default("Shivamogga")
+  state     String  @default("Karnataka")
+  pincode   String?
+  latitude  Float?
+  longitude Float?
+
+  customerProfileId String?
+  customerProfile   CustomerProfile? @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  providerProfileId String?
+  providerProfile   ProviderProfile? @relation(fields: [providerProfileId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerProfileId])
+  @@index([providerProfileId])
+  @@map("addresses")
+}
+
+// =============================================================================
+// MARKETPLACE OPERATIONS — REQUESTS, ASSIGNMENTS, REVIEWS, COMPLAINTS
+// =============================================================================
+
+model ServiceRequest {
+  id String @id @default(cuid())
+
+  // Customer (a guest-to-user flow can still attach a User on submit).
+  customerId String
+  customer   User   @relation("CustomerRequests", fields: [customerId], references: [id])
+
+  categoryId   String
+  category     Category    @relation(fields: [categoryId], references: [id])
+  subserviceId String?
+  subservice   Subservice? @relation(fields: [subserviceId], references: [id])
+
+  serviceAreaId String?
+  serviceArea   ServiceArea? @relation(fields: [serviceAreaId], references: [id])
+
+  title       String
+  description String  @db.Text
+
+  // Location (free-form snapshot kept alongside the normalized serviceArea link)
+  locality    String?
+  addressLine String?
+  pincode     String?
+  phone       String?
+  alternatePhone String?
+  latitude    Float?
+  longitude   Float?
+
+  preferredDate DateTime?
+  preferredTime String?
+  serviceMode   ServiceMode?
+  urgency       UrgencyLevel      @default(FLEXIBLE)
+  contactPreference ContactPreference @default(ANY)
+  budgetMin     Int?
+  budgetMax     Int?
+
+  // Category-specific structured answers live relationally (preferred) AND a JSON
+  // fallback for ad-hoc fields not yet templated. Both, deliberately.
+  metadata Json?
+
+  status RequestStatus @default(DRAFT)
+
+  completedAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  expiresAt          DateTime?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  images          ServiceRequestImage[]
+  assignments     ProviderAssignment[]
+  statusHistory   RequestStatusHistory[]
+  requirementAnswers RequestRequirementAnswer[]
+  review          Review?
+  complaints      Complaint[]
+
+  @@index([status])
+  @@index([customerId])
+  @@index([categoryId, subserviceId])
+  @@index([serviceAreaId])
+  @@index([createdAt])
+  @@map("service_requests")
+}
+
+model ServiceRequestImage {
+  id        String         @id @default(cuid())
+  requestId String
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  url       String
+  caption   String?
+  sortOrder Int     @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@index([requestId])
+  @@map("service_request_images")
+}
+
+model ProviderAssignment {
+  id         String         @id @default(cuid())
+  requestId  String
+  request    ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerId String
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  source       AssignmentSource @default(SYSTEM)
+  createdById  String? // admin/customer who created it, if any
+  createdBy    User?   @relation("AssignmentCreatedBy", fields: [createdById], references: [id])
+
+  status       AssignmentStatus @default(PENDING)
+  responseNote String?
+  assignedAt   DateTime  @default(now())
+  respondedAt  DateTime?
+  acceptedAt   DateTime?
+  declinedAt   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // A provider can only be assigned to a given request once.
+  @@unique([requestId, providerId])
+  @@index([providerId, status])
+  @@index([status])
+  @@map("provider_assignments")
+}
+
+/// Append-only audit of every request status transition.
+model RequestStatusHistory {
+  id        String         @id @default(cuid())
+  requestId String
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  fromStatus RequestStatus?
+  toStatus   RequestStatus
+  changedById String? // user who triggered it (nullable for system)
+  note        String?
+
+  createdAt DateTime @default(now())
+
+  @@index([requestId, createdAt])
+  @@map("request_status_history")
+}
+
+model Review {
+  id        String         @id @default(cuid())
+  requestId String         @unique // one review per completed request
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  authorId   String
+  author     User            @relation("ReviewAuthor", fields: [authorId], references: [id])
+  providerId String
+  provider   ProviderProfile @relation("ProviderReviews", fields: [providerId], references: [id], onDelete: Cascade)
+
+  rating  Int // 1..5 — validated in app layer (@db cannot range-check)
+  comment String? @db.Text
+
+  // Optional structured dimensions
+  punctuality    Int?
+  professionalism Int?
+  quality        Int?
+  communication  Int?
+  valueForMoney  Int?
+
+  status         ReviewStatus @default(PENDING_MODERATION)
+  moderationNote String?
+  moderatedById  String?
+  moderatedAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reply ReviewReply?
+
+  @@index([providerId, status])
+  @@index([status])
+  @@map("reviews")
+}
+
+model ReviewReply {
+  id       String @id @default(cuid())
+  reviewId String @unique
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("review_replies")
+}
+
+model Complaint {
+  id        String         @id @default(cuid())
+  requestId String?
+  request   ServiceRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  complainantId String
+  complainant   User   @relation("ComplaintComplainant", fields: [complainantId], references: [id])
+
+  providerId String?
+  provider   ProviderProfile? @relation("ComplaintProvider", fields: [providerId], references: [id], onDelete: SetNull)
+
+  type     ComplaintType
+  priority ComplaintPriority @default(MEDIUM)
+  status   ComplaintStatus   @default(OPEN)
+
+  subject     String
+  description String @db.Text
+
+  resolutionNote String?  @db.Text
+  handledById    String?
+  resolvedAt     DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, priority])
+  @@index([providerId])
+  @@index([complainantId])
+  @@map("complaints")
+}
+
+// =============================================================================
+// REQUIREMENT TEMPLATES — structured category-specific question sets
+// (the relational backbone behind ServiceRequest.metadata)
+// =============================================================================
+
+model RequestRequirementTemplate {
+  id           String     @id @default(cuid())
+  subserviceId String     @unique
+  subservice   Subservice @relation(fields: [subserviceId], references: [id], onDelete: Cascade)
+
+  // schema: ordered array of field defs { key,label,type,options,required }
+  schema Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("request_requirement_templates")
+}
+
+model RequestRequirementAnswer {
+  id        String         @id @default(cuid())
+  requestId String
+  request   ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  fieldKey   String
+  fieldLabel String
+  valueText  String? @db.Text
+  valueNumber Float?
+  valueBool  Boolean?
+  valueJson  Json? // for multi-select / structured answers
+
+  createdAt DateTime @default(now())
+
+  @@unique([requestId, fieldKey])
+  @@index([requestId])
+  @@map("request_requirement_answers")
+}
+
+// =============================================================================
+// NOTIFICATIONS
+// =============================================================================
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    NotificationType
+  channel NotificationChannel @default(IN_APP)
+  title   String
+  body    String?             @db.Text
+  data    Json? // deep-link payload (entity type/id) for web + future mobile
+
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// =============================================================================
+// ADMIN / CMS / PLATFORM
+// =============================================================================
+
+model AdminActionLog {
+  id      String @id @default(cuid())
+  actorId String
+  actor   User   @relation("AdminActor", fields: [actorId], references: [id])
+
+  action           AdminActionType
+  targetEntityType String // "ProviderProfile", "Review", ...
+  targetEntityId   String?
+  summary          String?
+  beforeState      Json?
+  afterState       Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetEntityType, targetEntityId])
+  @@map("admin_action_logs")
+}
+
+model FAQ {
+  id         String  @id @default(cuid())
+  question   String
+  answer     String  @db.Text
+  category   String? // grouping (e.g. "Providers","Payments")
+  sortOrder  Int     @default(0)
+  isPublished Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isPublished, sortOrder])
+  @@map("faqs")
+}
+
+model StaticPage {
+  id      String           @id @default(cuid())
+  slug    String           @unique // privacy, terms, about, support
+  title   String
+  body    String           @db.Text
+  status  StaticPageStatus @default(DRAFT)
+  metaDescription String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("static_pages")
+}
+
+/// Key-value platform configuration (typed via `valueType` for safe parsing).
+model PlatformSetting {
+  id        String  @id @default(cuid())
+  key       String  @unique
+  value     String  @db.Text
+  valueType String  @default("string") // string|number|boolean|json
+  group     String? // "support","providers","featured"
+  label     String?
+  isPublic  Boolean @default(false) // safe to expose to client?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([group])
+  @@map("platform_settings")
+}
+
+model Testimonial {
+  id         String  @id @default(cuid())
+  authorName String
+  authorRole String? // "Homeowner, Vidyanagar"
+  quote      String  @db.Text
+  rating     Int     @default(5)
+  imageUrl   String?
+  isFeatured Boolean @default(false)
+  sortOrder  Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isFeatured, sortOrder])
+  @@map("testimonials")
+}
+
+model SupportTicket {
+  id          String @id @default(cuid())
+  requesterId String?
+  requester   User?  @relation("TicketRequester", fields: [requesterId], references: [id], onDelete: SetNull)
+
+  email   String // captured even for logged-out users
+  subject String
+  message String          @db.Text
+  status  ComplaintStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@map("support_tickets")
+}
