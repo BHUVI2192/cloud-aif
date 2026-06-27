@@ -167,7 +167,7 @@ export default function DashboardShell({
               </svg>
             </Link>
           ) : null}
-          <span className="text-[17px] font-bold font-display" style={{ color: "var(--forest)" }}>
+          <span className="text-[17px] font-semibold font-display italic" style={{ color: "var(--forest)" }}>
             {title}
           </span>
         </div>
@@ -269,7 +269,7 @@ export default function DashboardShell({
       <main className="p-4 pb-24 md:p-10">
         {/* Top bar with title + notification bell (Hidden on Mobile, handled by sticky mobile header instead) */}
         <div className="mb-6 hidden md:flex items-center justify-between">
-          <h1 className="text-[30px] font-display font-semibold leading-tight" style={{ color: "var(--forest)" }}>{title}</h1>
+          <h1 className="text-[30px] font-display font-semibold italic leading-tight" style={{ color: "var(--forest)" }}>{title}</h1>
           <NotificationBell />
         </div>
         {children}

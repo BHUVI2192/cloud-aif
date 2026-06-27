@@ -77,7 +77,7 @@ export default function AssignmentActions({
   if (assignmentStatus === "ACCEPTED") {
     if (showCompleteConfirm) {
       return (
-        <>
+        <div className="sticky-bottom-bar md:static md:p-0 md:bg-transparent md:shadow-none md:border-t-0">
           <div className="rounded-xl p-4 space-y-3" style={{ background: "#f0fdf4", border: "1px solid #bbf7d0" }}>
             <p className="text-[14px] font-semibold" style={{ color: "#15803d" }}>
               Confirm that the job is fully done and the customer is satisfied?
@@ -101,13 +101,13 @@ export default function AssignmentActions({
             </div>
           </div>
           {renderToast()}
-        </>
+        </div>
       );
     }
     return (
-      <>
+      <div className="sticky-bottom-bar md:static md:p-0 md:bg-transparent md:shadow-none md:border-t-0">
         <button
-          className="btn btn-primary !py-2 !text-[14px]"
+          className="btn btn-primary w-full md:w-auto !py-2 !text-[14px]"
           style={{ background: "#16a34a" }}
           disabled={!!loading}
           onClick={() => setShowCompleteConfirm(true)}
@@ -115,14 +115,14 @@ export default function AssignmentActions({
           ✓ Mark Job as Completed
         </button>
         {renderToast()}
-      </>
+      </div>
     );
   }
 
   // For PENDING jobs — show Accept / Decline
   if (showDeclineForm) {
     return (
-      <>
+      <div className="sticky-bottom-bar md:static md:p-0 md:bg-transparent md:shadow-none md:border-t-0">
         <div className="rounded-xl p-4 space-y-3" style={{ background: "#fdf2f2", border: "1px solid #fbd5d5" }}>
           <p className="text-[13px] font-semibold" style={{ color: "#a32d2d" }}>
             Please provide a reason for declining (optional):
@@ -153,22 +153,22 @@ export default function AssignmentActions({
           </div>
         </div>
         {renderToast()}
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="sticky-bottom-bar md:static md:p-0 md:bg-transparent md:shadow-none md:border-t-0">
       <div className="flex gap-2">
         <button
-          className="btn btn-primary !py-2 !text-[14px]"
+          className="btn btn-primary flex-1 md:flex-initial !py-2.5 !text-[14px]"
           disabled={!!loading}
           onClick={() => respond("ACCEPT")}
         >
           {loading === "ACCEPT" ? "Accepting…" : "✓ Accept Job"}
         </button>
         <button
-          className="btn btn-ghost !py-2 !text-[14px]"
+          className="btn btn-ghost flex-1 md:flex-initial !py-2.5 !text-[14px]"
           style={{ color: "#a32d2d", borderColor: "#fbd5d5" }}
           disabled={!!loading}
           onClick={() => setShowDeclineForm(true)}
@@ -177,6 +177,6 @@ export default function AssignmentActions({
         </button>
       </div>
       {renderToast()}
-    </>
+    </div>
   );
 }

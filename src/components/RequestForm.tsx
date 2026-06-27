@@ -230,36 +230,36 @@ export default function RequestForm({
   }
 
   return (
-    <div className="card space-y-4">
+    <div className="card space-y-4 pb-24 md:pb-6 bg-white border border-line" style={{ borderRadius: "20px" }}>
       <Field label="Title" error={errors.title}>
-        <input className="input" value={form.title} onChange={(e) => set("title", e.target.value)} />
+        <input className="input text-[14px]" value={form.title} onChange={(e) => set("title", e.target.value)} />
       </Field>
       <Field label="Describe what you need" error={errors.description}>
-        <textarea className="input min-h-[110px]" value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="e.g. Two ceiling fans to install and one switchboard that trips frequently." />
+        <textarea className="input min-h-[110px] text-[14px]" value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="e.g. Two ceiling fans to install and one switchboard that trips frequently." />
       </Field>
       
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Locality" error={errors.serviceAreaId}>
-          <select className="input" value={form.serviceAreaId} onChange={(e) => set("serviceAreaId", e.target.value)}>
+          <select className="input text-[14px]" value={form.serviceAreaId} onChange={(e) => set("serviceAreaId", e.target.value)}>
             <option value="">Select locality…</option>
             {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
         </Field>
         <Field label="Preferred date">
-          <input type="date" className="input" value={form.preferredDate} onChange={(e) => set("preferredDate", e.target.value)} />
+          <input type="date" className="input text-[14px]" value={form.preferredDate} onChange={(e) => set("preferredDate", e.target.value)} />
         </Field>
       </div>
 
       <Field label="Address / landmark">
-        <input className="input" value={form.addressLine} onChange={(e) => set("addressLine", e.target.value)} placeholder="House number, Street name, Near Landmark" />
+        <input className="input text-[14px]" value={form.addressLine} onChange={(e) => set("addressLine", e.target.value)} placeholder="House number, Street name, Near Landmark" />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Primary Contact Number" error={errors.phone}>
-          <input type="tel" className="input" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="10-digit mobile number" />
+          <input type="tel" inputMode="numeric" className="input text-[14px]" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="10-digit mobile number" />
         </Field>
         <Field label="Alternate Contact Number (optional)" error={errors.alternatePhone}>
-          <input type="tel" className="input" value={form.alternatePhone} onChange={(e) => set("alternatePhone", e.target.value)} placeholder="Alternate mobile number" />
+          <input type="tel" inputMode="numeric" className="input text-[14px]" value={form.alternatePhone} onChange={(e) => set("alternatePhone", e.target.value)} placeholder="Alternate mobile number" />
         </Field>
       </div>
 
@@ -275,7 +275,7 @@ export default function RequestForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Urgency">
-          <select className="input" value={form.urgency} onChange={(e) => set("urgency", e.target.value)}>
+          <select className="input text-[14px]" value={form.urgency} onChange={(e) => set("urgency", e.target.value)}>
             <option value="FLEXIBLE">Flexible</option>
             <option value="WITHIN_WEEK">Within a week</option>
             <option value="WITHIN_48_HOURS">Within 48 hours</option>
@@ -283,7 +283,7 @@ export default function RequestForm({
           </select>
         </Field>
         <Field label="Preferred contact">
-          <select className="input" value={form.contactPreference} onChange={(e) => set("contactPreference", e.target.value)}>
+          <select className="input text-[14px]" value={form.contactPreference} onChange={(e) => set("contactPreference", e.target.value)}>
             <option value="ANY">Any</option>
             <option value="PHONE">Phone</option>
             <option value="WHATSAPP">WhatsApp</option>
@@ -293,17 +293,20 @@ export default function RequestForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Budget min (₹, optional)">
-          <input type="number" className="input" value={form.budgetMin} onChange={(e) => set("budgetMin", e.target.value)} />
+          <input type="number" inputMode="numeric" className="input text-[14px]" value={form.budgetMin} onChange={(e) => set("budgetMin", e.target.value)} />
         </Field>
         <Field label="Budget max (₹, optional)">
-          <input type="number" className="input" value={form.budgetMax} onChange={(e) => set("budgetMax", e.target.value)} />
+          <input type="number" inputMode="numeric" className="input text-[14px]" value={form.budgetMax} onChange={(e) => set("budgetMax", e.target.value)} />
         </Field>
       </div>
 
       {errors.form && <p className="text-[13px]" style={{ color: "#a32d2d" }}>{errors.form}</p>}
-      <button className="btn btn-primary w-full" disabled={submitting} onClick={submit}>
-        {submitting ? "Submitting…" : "Submit request"}
-      </button>
+      
+      <div className="sticky-bottom-bar md:static md:p-0 md:bg-transparent md:shadow-none md:border-t-0 md:mt-4">
+        <button className="btn btn-primary w-full shadow-md md:shadow-none" disabled={submitting} onClick={submit}>
+          {submitting ? "Submitting…" : "Submit request"}
+        </button>
+      </div>
     </div>
   );
 }

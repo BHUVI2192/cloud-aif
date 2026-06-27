@@ -61,8 +61,8 @@ export default function RequestStatusActions({
   if (!canCancel && !canStart && !canComplete) return null;
 
   return (
-    <div className="card mt-6" style={{ background: "var(--mist)", borderColor: "var(--sage)" }}>
-      <h3 className="text-[16px] font-semibold mb-3" style={{ color: "var(--forest)" }}>Manage Request Status</h3>
+    <div className="sticky-bottom-bar md:static md:mt-6 md:card md:bg-white md:border md:border-line md:p-6" style={{ borderRadius: "20px" }}>
+      <h3 className="text-[14px] md:text-[16px] font-bold mb-3 hidden md:block" style={{ color: "var(--forest)" }}>Manage Request Status</h3>
       
       {showCancelForm ? (
         <div className="space-y-3">

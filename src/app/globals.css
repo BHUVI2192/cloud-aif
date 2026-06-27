@@ -1,19 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --forest: #14331f;
-  --brand: #1f5235;
-  --emerald: #2e7d53;
-  --sage: #9cc9a9;
-  --mist: #eaf3ec;
-  --paper: #fbfcfa;
-  --ink: #16201a;
-  --slate: #586259;
-  --line: #e1e9e2;
+  --forest: #0d2215;
+  --brand: #18432a;
+  --emerald: #246541;
+  --sage: #b3d7be;
+  --mist: #f0f6f2;
+  --paper: #ffffff;
+  --ink: #111814;
+  --slate: #64746b;
+  --line: #ebf0ec;
 }
 
 html {
@@ -124,4 +124,19 @@ body {
 }
 .animate-slide-up {
   animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 📱 Sticky bottom-docked action panel for mobile thumb reach */
+.sticky-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background-color: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 14px 20px 20px 20px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
 }
