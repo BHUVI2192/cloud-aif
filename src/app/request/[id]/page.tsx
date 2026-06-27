@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import SiteHeader from "@/components/SiteHeader";
-import SiteFooter from "@/components/SiteFooter";
+import DashboardShell from "@/components/DashboardShell";
+import { ADMIN_NAV, PROVIDER_NAV, CUSTOMER_NAV } from "@/lib/nav";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import ReviewBox from "@/components/ReviewBox";
@@ -82,16 +82,42 @@ export default async function RequestDetail({ params }: { params: { id: string }
 
   const accepted = request.assignments.find((a) => a.status === "ACCEPTED");
 
+  // Determine role-specific navigation for DashboardShell
+  const sidebarNav = isAdmin
+    ? ADMIN_NAV
+    : userRole === "PROVIDER"
+    ? PROVIDER_NAV
+    : CUSTOMER_NAV;
+
+  const activeLink = userRole === "PROVIDER"
+    ? "/provider/requests"
+    : userRole === "CUSTOMER"
+    ? "/customer"
+    : "/admin/requests";
+
+  const backLink = userRole === "CUSTOMER" ? "/customer" : userRole === "PROVIDER" ? "/provider/requests" : "/admin/requests";
+
   return (
-    <>
-      <SiteHeader />
-      <section className="mx-auto max-w-[820px] px-7 py-14">
-        <Link href="/services" className="text-[14px]" style={{ color: "var(--emerald)" }}>← Browse services</Link>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <h1 className="text-[34px]">{request.title}</h1>
-          <span className="badge">{STATUS_LABEL[request.status]}</span>
+    <DashboardShell
+      title={`Request Details`}
+      nav={sidebarNav}
+      active={activeLink}
+      user={{
+        name: session.user.name,
+        email: session.user.email,
+        role: userRole,
+        image: session.user.image,
+      }}
+    >
+      <div className="mx-auto max-w-[820px]">
+        <Link href={backLink} className="text-[14px] hover:underline" style={{ color: "var(--brand)" }}>
+          ← Back to Requests
+        </Link>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <h1 className="text-[28px] md:text-[34px] font-bold" style={{ color: "var(--forest)" }}>{request.title}</h1>
+          <span className="badge font-semibold">{STATUS_LABEL[request.status]}</span>
         </div>
-        <p className="mt-1 text-[15px]" style={{ color: "var(--slate)" }}>
+        <p className="mt-1 text-[14px] md:text-[15px]" style={{ color: "var(--slate)" }}>
           {request.category.name}{request.subservice ? ` · ${request.subservice.name}` : ""} · {request.serviceArea?.name ?? request.locality}
         </p>
 
@@ -248,13 +274,14 @@ export default async function RequestDetail({ params }: { params: { id: string }
             )}
           </div>
 
-          <RequestStatusActions
-            requestId={request.id}
-            currentStatus={request.status}
-            isOwner={isOwner}
-            isAdmin={isAdmin}
-            isProvider={isAssignedProvider}
-          />
+          <div className="space-y-6">
+            <RequestStatusActions
+              requestId={request.id}
+              currentStatus={request.status}
+              isOwner={isOwner}
+              isAdmin={isAdmin}
+              isProvider={isAssignedProvider}
+            />
 
           {isAdmin && (
             <AdminAssignmentPanel
@@ -276,10 +303,10 @@ export default async function RequestDetail({ params }: { params: { id: string }
               ))}
             </ol>
           </div>
+          </div>
         </div>
-      </section>
-      <SiteFooter />
-    </>
+      </div>
+    </DashboardShell>
   );
 }
 
