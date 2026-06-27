@@ -194,13 +194,30 @@ export default async function RequestDetail({ params }: { params: { id: string }
                     )}
                   </div>
                   {accepted.provider.user?.phone && (
-                    <a
-                      href={`tel:${accepted.provider.user.phone}`}
-                      className="btn btn-primary mt-4 text-[14px] w-full text-center"
-                      style={{ display: "block", background: "#16a34a" }}
-                    >
-                      📞 Call Your Provider
-                    </a>
+                    <div className="mt-4 space-y-2">
+                      <a
+                        href={`tel:${accepted.provider.user.phone}`}
+                        className="btn btn-primary text-[14px] w-full text-center"
+                        style={{ display: "block", background: "#16a34a" }}
+                      >
+                        📞 Call Your Provider
+                      </a>
+                      <a
+                        href={`https://wa.me/91${accepted.provider.user.phone.replace(/\D/g, "").slice(-10)}?text=Hi%20${encodeURIComponent(accepted.provider.displayName)},%20I'm%20contacting%20you%20from%20Cloud%20AIF%20regarding%20my%20service%20request%20"${encodeURIComponent(request.title)}".`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary text-[14px] w-full text-center transition"
+                        style={{
+                          display: "block",
+                          color: "#25D366",
+                          borderColor: "#25D366",
+                          background: "transparent",
+                          fontWeight: 600,
+                        }}
+                      >
+                        💬 Message on WhatsApp
+                      </a>
+                    </div>
                   )}
                 </div>
               </div>

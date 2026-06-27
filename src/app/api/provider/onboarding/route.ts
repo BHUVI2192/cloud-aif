@@ -33,12 +33,13 @@ export async function POST(req: Request) {
     // Create uploads directories if they don't exist
     const publicDir = path.join(process.cwd(), "public");
     const profilePicsDir = path.join(publicDir, "uploads", "profile-pics");
-    const documentsDir = path.join(publicDir, "uploads", "documents");
+    // Move KYC documents to a private root-level secure directory
+    const secureDocumentsDir = path.join(process.cwd(), "secure_uploads", "documents");
 
     await mkdir(profilePicsDir, { recursive: true });
-    await mkdir(documentsDir, { recursive: true });
+    await mkdir(secureDocumentsDir, { recursive: true });
 
-    // Save profile photo
+    // Save profile photo (Public)
     const profilePicExt = path.extname(profilePic.name) || ".jpg";
     const profilePicFilename = `${session.user.id}_profile${profilePicExt}`;
     const profilePicPath = path.join(profilePicsDir, profilePicFilename);
@@ -46,21 +47,21 @@ export async function POST(req: Request) {
     await writeFile(profilePicPath, profilePicBuffer);
     const profileImageUrl = `/uploads/profile-pics/${profilePicFilename}`;
 
-    // Save ID Proof
+    // Save ID Proof (Secure)
     const idProofExt = path.extname(idProof.name) || ".pdf";
     const idProofFilename = `${session.user.id}_id_proof${idProofExt}`;
-    const idProofPath = path.join(documentsDir, idProofFilename);
+    const idProofPath = path.join(secureDocumentsDir, idProofFilename);
     const idProofBuffer = Buffer.from(await idProof.arrayBuffer());
     await writeFile(idProofPath, idProofBuffer);
-    const idProofUrl = `/uploads/documents/${idProofFilename}`;
+    const idProofUrl = `/api/admin/documents/${idProofFilename}`;
 
-    // Save Address Proof
+    // Save Address Proof (Secure)
     const addressProofExt = path.extname(addressProof.name) || ".pdf";
     const addressProofFilename = `${session.user.id}_address_proof${addressProofExt}`;
-    const addressProofPath = path.join(documentsDir, addressProofFilename);
+    const addressProofPath = path.join(secureDocumentsDir, addressProofFilename);
     const addressProofBuffer = Buffer.from(await addressProof.arrayBuffer());
     await writeFile(addressProofPath, addressProofBuffer);
-    const addressProofUrl = `/uploads/documents/${addressProofFilename}`;
+    const addressProofUrl = `/api/admin/documents/${addressProofFilename}`;
 
     // Generate unique slug for the provider
     const slugBase = displayName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");

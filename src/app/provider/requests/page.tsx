@@ -119,16 +119,41 @@ export default async function ProviderRequests() {
             {/* Contact Info */}
             <div className="rounded-xl border p-4 space-y-2" style={{ borderColor: "var(--line)" }}>
               <p className="text-[12px] font-semibold uppercase tracking-wider" style={{ color: "var(--slate)" }}>Customer Contact</p>
-              {r.phone && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[16px]">📞</span>
-                  <a href={`tel:${r.phone}`} className="text-[14px] font-semibold" style={{ color: "var(--brand)" }}>{r.phone}</a>
-                </div>
-              )}
-              {r.alternatePhone && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[16px]">📱</span>
-                  <a href={`tel:${r.alternatePhone}`} className="text-[14px]" style={{ color: "var(--brand)" }}>{r.alternatePhone}</a>
+              {a.status === "ACCEPTED" ? (
+                <>
+                  {r.phone && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[16px]">📞</span>
+                        <a href={`tel:${r.phone}`} className="text-[14px] font-semibold" style={{ color: "var(--brand)" }}>{r.phone}</a>
+                      </div>
+                      <a
+                        href={`https://wa.me/91${r.phone.replace(/\D/g, "").slice(-10)}?text=Hi,%20I'm%20your%20assigned%20Cloud%20AIF%20service%20provider%20for%20your%20request%20"${encodeURIComponent(r.title)}".`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary py-1.5 px-3 text-[13px] w-full text-center transition"
+                        style={{
+                          display: "block",
+                          color: "#25D366",
+                          borderColor: "#25D366",
+                          background: "transparent",
+                          fontWeight: 600,
+                        }}
+                      >
+                        💬 Message on WhatsApp
+                      </a>
+                    </div>
+                  )}
+                  {r.alternatePhone && (
+                    <div className="flex items-center gap-2 pt-2 border-t" style={{ borderColor: "var(--line)" }}>
+                      <span className="text-[16px]">📱</span>
+                      <a href={`tel:${r.alternatePhone}`} className="text-[14px]" style={{ color: "var(--slate)" }}>{r.alternatePhone}</a>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-[13px]" style={{ color: "var(--slate)" }}>
+                  🔒 Accept this job to view customer contact info.
                 </div>
               )}
             </div>

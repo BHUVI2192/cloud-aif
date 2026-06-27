@@ -40,6 +40,7 @@
  */
 
 import { db } from "@/lib/db";
+import { sendEmail } from "@/lib/email";
 import {
   AssignmentSource,
   AssignmentStatus,
@@ -388,6 +389,8 @@ export async function runMatcherForRequest(
     : RESPONSE_WINDOW_MS;
   const expiresAt = new Date(now.getTime() + responseWindow);
 
+  const emailsToDispatch: { to: string; subject: string; text: string }[] = [];
+
   await db.$transaction(async (tx) => {
     for (const p of topProviders) {
       // Skip if already assigned (idempotent)
@@ -406,23 +409,47 @@ export async function runMatcherForRequest(
         },
       });
 
-      // Notify provider
-      const providerUser = await tx.providerProfile.findUnique({
+      // Fetch provider details for notification
+      const providerProfile = await tx.providerProfile.findUnique({
         where: { id: p.providerId },
-        select: { userId: true },
+        select: {
+          userId: true,
+          displayName: true,
+          user: { select: { email: true, name: true } },
+        },
       });
-      if (providerUser) {
+
+      if (providerProfile) {
         const urgencyEmoji = request.urgency === "EMERGENCY" ? "🚨" : "🔔";
+        const bodyText = `"${request.title}" in ${request.locality ?? "your area"}. `
+          + `Score: ${(p.score * 100).toFixed(0)}%. `
+          + `Respond within ${request.urgency === "EMERGENCY" ? "30 min" : "2 hours"}!`;
+
         await tx.notification.create({
           data: {
-            userId: providerUser.userId,
+            userId: providerProfile.userId,
             type: NotificationType.REQUEST_ASSIGNED,
             title: `${urgencyEmoji} New Job Available`,
-            body: `"${request.title}" in ${request.locality ?? "your area"}. `
-              + `Score: ${(p.score * 100).toFixed(0)}%. `
-              + `Respond within ${request.urgency === "EMERGENCY" ? "30 min" : "2 hours"}!`,
+            body: bodyText,
           },
         });
+
+        // Queue email details to send after transaction commits
+        if (providerProfile.user?.email) {
+          emailsToDispatch.push({
+            to: providerProfile.user.email,
+            subject: `${urgencyEmoji} Cloud AIF: New Job Lead - ${request.title}`,
+            text: `Hello ${providerProfile.user.name || providerProfile.displayName},\n\nA new service request has been assigned to you:\n\n`
+              + `Title: ${request.title}\n`
+              + `Description: ${request.description}\n`
+              + `Locality: ${request.locality ?? "Shivamogga"}\n`
+              + `Urgency: ${request.urgency.replace(/_/g, " ")}\n\n`
+              + `${bodyText}\n\n`
+              + `Please log into your dashboard to accept or decline the job:\n`
+              + `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/provider/requests\n\n`
+              + `Best regards,\nCloud AIF Team`,
+          });
+        }
       }
     }
 
@@ -453,6 +480,11 @@ export async function runMatcherForRequest(
         needsAdminAttention: false,
       },
     });
+  });
+
+  // Dispatch emails asynchronously outside of transaction block to avoid blocking DB connection pool
+  Promise.all(emailsToDispatch.map((email) => sendEmail(email))).catch((err) => {
+    console.error("[matcher] Failed to dispatch match notification emails", err);
   });
 
   return { matched: topProviders.length, flaggedForAdmin: false };
