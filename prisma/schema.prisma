@@ -740,6 +740,11 @@ model ServiceRequest {
   cancellationReason String?
   expiresAt          DateTime?
 
+  // Auto-matching engine state
+  matchAttempts        Int       @default(0)
+  lastMatchedAt        DateTime?
+  needsAdminAttention  Boolean   @default(false)
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
@@ -756,6 +761,8 @@ model ServiceRequest {
   @@index([categoryId, subserviceId])
   @@index([serviceAreaId])
   @@index([createdAt])
+  @@index([needsAdminAttention, status])
+  @@index([lastMatchedAt, status])
   @@map("service_requests")
 }
 

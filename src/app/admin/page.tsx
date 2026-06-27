@@ -20,6 +20,7 @@ export default async function AdminHome() {
     completedRequests,
     recentProviders,
     recentRequests,
+    stuckRequests,
   ] = await Promise.all([
     db.providerProfile.count({ where: { status: { in: ["PENDING_VERIFICATION", "UNDER_REVIEW", "NEEDS_MORE_INFO"] } } }),
     db.serviceRequest.count({ where: { status: { in: ["SUBMITTED", "MATCHING", "ASSIGNED", "ACCEPTED", "IN_PROGRESS"] } } }),
@@ -38,6 +39,12 @@ export default async function AdminHome() {
       orderBy: { createdAt: "desc" },
       take: 5,
       select: { id: true, title: true, status: true, createdAt: true, category: { select: { name: true } } },
+    }),
+    db.serviceRequest.findMany({
+      where: { needsAdminAttention: true, status: { in: ["SUBMITTED", "MATCHING"] } },
+      orderBy: { lastMatchedAt: "asc" },
+      take: 10,
+      select: { id: true, title: true, status: true, matchAttempts: true, lastMatchedAt: true, locality: true, category: { select: { name: true } } },
     }),
   ]);
 
@@ -155,6 +162,46 @@ export default async function AdminHome() {
           </div>
         </div>
       </div>
+
+      {/* ⚠ Needs Admin Attention — auto-matcher couldn't fill these */}
+      {stuckRequests.length > 0 && (
+        <div className="mt-6 rounded-2xl border p-5" style={{ background: "#fdf2f2", borderColor: "#fbd5d5" }}>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-[20px]">⚠️</span>
+            <h2 className="text-[17px] font-semibold" style={{ color: "#a32d2d" }}>
+              Needs Your Attention ({stuckRequests.length})
+            </h2>
+            <span className="ml-2 text-[12px] font-medium px-2.5 py-0.5 rounded-full" style={{ background: "#fbd5d5", color: "#a32d2d" }}>
+              Auto-matcher couldn&apos;t find providers
+            </span>
+          </div>
+          <p className="text-[13px] mb-4" style={{ color: "#7f1d1d" }}>
+            These requests were submitted by customers but no matching provider was found after multiple attempts.
+            Please manually assign a provider or contact the customer.
+          </p>
+          <div className="space-y-2">
+            {stuckRequests.map((r) => (
+              <Link
+                key={r.id}
+                href={`/request/${r.id}`}
+                className="flex items-center justify-between rounded-xl border px-4 py-3 transition hover:bg-red-50"
+                style={{ borderColor: "#fbd5d5", background: "#fff" }}
+              >
+                <div>
+                  <div className="text-[14px] font-semibold" style={{ color: "#a32d2d" }}>{r.title}</div>
+                  <div className="text-[12px] mt-0.5" style={{ color: "#7f1d1d" }}>
+                    {r.category?.name} · {r.locality ?? "Shivamogga"} · {r.matchAttempts} match attempt{r.matchAttempts !== 1 ? "s" : ""} failed
+                    {r.lastMatchedAt && ` · Last tried ${new Date(r.lastMatchedAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}`}
+                  </div>
+                </div>
+                <span className="text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: "#fbd5d5", color: "#a32d2d" }}>
+                  Assign Manually →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </DashboardShell>
   );
 }

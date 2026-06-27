@@ -1,5 +1,6 @@
 import Link from "next/link";
 import SignOutButton from "./SignOutButton";
+import NotificationBell from "./NotificationBell";
 
 export default function DashboardShell({
   title,
@@ -25,6 +26,7 @@ export default function DashboardShell({
 
   return (
     <div className="min-h-screen md:grid md:grid-cols-[260px_1fr]">
+      {/* Sidebar */}
       <aside className="border-r p-6 md:min-h-screen" style={{ borderColor: "var(--line)", background: "#fff" }}>
         <Link href={homeHref} className="mb-8 flex items-center gap-2.5 font-display text-[20px] font-semibold" style={{ color: "var(--forest)" }}>
           <span className="grid h-[32px] w-[32px] place-items-center rounded-[9px] text-[16px] text-white" style={{ background: "var(--brand)" }}>C</span>
@@ -32,7 +34,12 @@ export default function DashboardShell({
         </Link>
         <nav className="space-y-1">
           {nav.map((n) => (
-            <Link key={n.href} href={n.href} className="block rounded-[10px] px-3.5 py-2.5 text-[14px] font-medium transition" style={n.href === active ? { background: "var(--mist)", color: "var(--forest)" } : { color: "var(--slate)" }}>
+            <Link
+              key={n.href}
+              href={n.href}
+              className="block rounded-[10px] px-3.5 py-2.5 text-[14px] font-medium transition"
+              style={n.href === active ? { background: "var(--mist)", color: "var(--forest)" } : { color: "var(--slate)" }}
+            >
               {n.label}
             </Link>
           ))}
@@ -56,8 +63,15 @@ export default function DashboardShell({
           <SignOutButton />
         </div>
       </aside>
+
+      {/* Main content */}
       <main className="p-7 md:p-10">
-        <h1 className="mb-6 text-[30px]">{title}</h1>
+        {/* Top bar with title + notification bell */}
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-[30px] font-display font-semibold" style={{ color: "var(--forest)" }}>{title}</h1>
+          {/* Show bell for non-admin roles to avoid confusion with admin-specific notifications */}
+          <NotificationBell />
+        </div>
         {children}
       </main>
     </div>
