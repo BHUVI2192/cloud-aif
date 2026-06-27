@@ -60,7 +60,8 @@ function MapPicker({
       if (!script) {
         script = document.createElement("script");
         script.id = "google-maps-script";
-        script.src = `https://maps.googleapis.com/maps/api/js`;
+        const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
         script.async = true;
         script.defer = true;
         document.head.appendChild(script);
