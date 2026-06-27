@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface Provider {
@@ -25,6 +25,15 @@ interface AdminAssignmentPanelProps {
 export default function AdminAssignmentPanel({ requestId, providers }: AdminAssignmentPanelProps) {
   const router = useRouter();
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toastMsg) {
+      const timer = setTimeout(() => setToastMsg(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMsg]);
 
   async function assignProvider(providerId: string) {
     setLoadingId(providerId);
@@ -38,10 +47,10 @@ export default function AdminAssignmentPanel({ requestId, providers }: AdminAssi
         router.refresh();
       } else {
         const data = await res.json();
-        alert(data.error || "Failed to assign provider.");
+        setToastMsg(data.error || "Failed to assign provider.");
       }
     } catch {
-      alert("An error occurred.");
+      setToastMsg("An error occurred.");
     } finally {
       setLoadingId(null);
     }
@@ -91,6 +100,16 @@ export default function AdminAssignmentPanel({ requestId, providers }: AdminAssi
               </div>
             );
           })}
+        </div>
+      )}
+
+      {toastMsg && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-[#14331f] text-white px-5 py-3 rounded-xl shadow-xl text-[13px] font-semibold animate-slide-up flex items-center gap-2 border border-emerald/20 min-w-[280px] justify-between">
+          <div className="flex items-center gap-2">
+            <span>ℹ️</span>
+            <span>{toastMsg}</span>
+          </div>
+          <button onClick={() => setToastMsg(null)} className="text-[16px] font-bold opacity-80 hover:opacity-100 pl-3">×</button>
         </div>
       )}
     </div>

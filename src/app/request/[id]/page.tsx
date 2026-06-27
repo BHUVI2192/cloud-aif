@@ -108,6 +108,7 @@ export default async function RequestDetail({ params }: { params: { id: string }
         role: userRole,
         image: session.user.image,
       }}
+      backHref={backLink}
     >
       <div className="space-y-6">
         <div>

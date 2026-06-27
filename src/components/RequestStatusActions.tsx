@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 interface RequestStatusActionsProps {
@@ -21,6 +21,15 @@ export default function RequestStatusActions({
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState("");
   const [showCancelForm, setShowCancelForm] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // Auto-dismiss toast
+  useEffect(() => {
+    if (toastMsg) {
+      const timer = setTimeout(() => setToastMsg(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMsg]);
 
   async function updateStatus(nextStatus: "IN_PROGRESS" | "COMPLETED" | "CANCELLED") {
     setLoading(true);
@@ -35,10 +44,10 @@ export default function RequestStatusActions({
         setShowCancelForm(false);
         router.refresh();
       } else {
-        alert("Failed to update status.");
+        setToastMsg("Failed to update status.");
       }
     } catch {
-      alert("An error occurred.");
+      setToastMsg("An error occurred.");
     } finally {
       setLoading(false);
     }
@@ -113,6 +122,16 @@ export default function RequestStatusActions({
               Cancel Request
             </button>
           )}
+        </div>
+      )}
+
+      {toastMsg && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-[#14331f] text-white px-5 py-3 rounded-xl shadow-xl text-[13px] font-semibold animate-slide-up flex items-center gap-2 border border-emerald/20 min-w-[280px] justify-between">
+          <div className="flex items-center gap-2">
+            <span>ℹ️</span>
+            <span>{toastMsg}</span>
+          </div>
+          <button onClick={() => setToastMsg(null)} className="text-[16px] font-bold opacity-80 hover:opacity-100 pl-3">×</button>
         </div>
       )}
     </div>

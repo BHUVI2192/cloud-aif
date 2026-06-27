@@ -63,12 +63,14 @@ export default function DashboardShell({
   active,
   children,
   user,
+  backHref,
 }: {
   title: string;
   nav: { label: string; href: string }[];
   active: string;
   children: React.ReactNode;
   user: { name?: string | null; email?: string | null; role: string; image?: string | null };
+  backHref?: string;
 }) {
   const [showMobileDrawer, setShowMobileDrawer] = useState(false);
 
@@ -108,9 +110,9 @@ export default function DashboardShell({
   const hasMoreMenu = nav.length > bottomShortcuts.length;
 
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[260px_1fr]">
+    <div className="min-h-screen md:grid md:grid-cols-[260px_1fr] bg-paper">
       {/* 🖥 Desktop Sidebar (Hidden on Mobile) */}
-      <aside className="hidden md:block border-r p-6 min-h-screen" style={{ borderColor: "var(--line)", background: "#fff" }}>
+      <aside className="hidden md:block border-r p-6 min-h-screen sticky top-0 h-screen" style={{ borderColor: "var(--line)", background: "#fff" }}>
         <Link href={homeHref} className="mb-8 flex items-center gap-2.5 font-display text-[20px] font-semibold" style={{ color: "var(--forest)" }}>
           <span className="grid h-[32px] w-[32px] place-items-center rounded-[9px] text-[16px] text-white" style={{ background: "var(--brand)" }}>C</span>
           Cloud AIF
@@ -120,7 +122,7 @@ export default function DashboardShell({
             <Link
               key={n.href}
               href={n.href}
-              className="block rounded-[10px] px-3.5 py-2.5 text-[14px] font-medium transition"
+              className="block rounded-[10px] px-3.5 py-2.5 text-[14px] font-medium transition duration-200 active:scale-[0.98]"
               style={n.href === active ? { background: "var(--mist)", color: "var(--forest)" } : { color: "var(--slate)" }}
             >
               {n.label}
@@ -147,31 +149,75 @@ export default function DashboardShell({
         </div>
       </aside>
 
+      {/* 📱 Sticky Mobile Header (Top bar showing current view/back arrow) */}
+      <header
+        className="sticky top-0 z-30 flex h-[58px] items-center justify-between border-b px-4 md:hidden backdrop-blur-md bg-white/90"
+        style={{ borderColor: "var(--line)" }}
+      >
+        <div className="flex items-center gap-2.5">
+          {backHref ? (
+            <Link
+              href={backHref}
+              className="grid h-9 w-9 place-items-center rounded-full transition active:bg-mist"
+              style={{ color: "var(--brand)" }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+            </Link>
+          ) : null}
+          <span className="text-[17px] font-bold font-display" style={{ color: "var(--forest)" }}>
+            {title}
+          </span>
+        </div>
+        <NotificationBell />
+      </header>
+
       {/* 📱 Mobile Bottom Navigation Bar (Visible on Mobile Only) */}
       <div
         className="fixed bottom-0 left-0 right-0 z-40 flex h-[64px] items-center justify-around border-t md:hidden"
         style={{ background: "#ffffff", borderColor: "var(--line)", boxShadow: "0 -2px 10px rgba(0,0,0,0.05)" }}
       >
-        {bottomShortcuts.map((s) => (
-          <Link
-            key={s.href}
-            href={s.href}
-            className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-medium transition"
-            style={{ color: s.href === active ? "var(--brand)" : "var(--slate)" }}
-          >
-            <span className="mb-0.5">{NAV_ICONS[s.label] ?? NAV_ICONS.Overview}</span>
-            {s.label}
-          </Link>
-        ))}
+        {bottomShortcuts.map((s) => {
+          const isCurrent = s.href === active;
+          return (
+            <Link
+              key={s.href}
+              href={s.href}
+              className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-medium transition active:scale-[0.95]"
+              style={{ color: isCurrent ? "var(--brand)" : "var(--slate)" }}
+            >
+              <span
+                className={`inline-flex items-center justify-center px-4 py-1.5 rounded-full transition-all duration-200 ${
+                  isCurrent ? "bg-mist text-brand" : "text-slate"
+                }`}
+              >
+                {NAV_ICONS[s.label] ?? NAV_ICONS.Overview}
+              </span>
+              <span className={`mt-0.5 transition-all duration-200 ${isCurrent ? "font-semibold text-brand" : "text-slate"}`}>
+                {s.label}
+              </span>
+            </Link>
+          );
+        })}
 
         {hasMoreMenu && (
           <button
             onClick={() => setShowMobileDrawer(true)}
-            className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-medium transition"
+            className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-medium transition active:scale-[0.95]"
             style={{ color: showMobileDrawer ? "var(--brand)" : "var(--slate)" }}
           >
-            <span className="mb-0.5">{NAV_ICONS.Menu}</span>
-            More
+            <span
+              className={`inline-flex items-center justify-center px-4 py-1.5 rounded-full transition-all duration-200 ${
+                showMobileDrawer ? "bg-mist text-brand" : "text-slate"
+              }`}
+            >
+              {NAV_ICONS.Menu}
+            </span>
+            <span className={`mt-0.5 ${showMobileDrawer ? "font-semibold text-brand" : "text-slate"}`}>
+              More
+            </span>
           </button>
         )}
       </div>
@@ -194,7 +240,7 @@ export default function DashboardShell({
                   key={n.href}
                   href={n.href}
                   onClick={() => setShowMobileDrawer(false)}
-                  className="flex items-center gap-2 rounded-xl p-3 text-[13px] font-semibold border transition"
+                  className="flex items-center gap-2 rounded-xl p-3 text-[13px] font-semibold border transition duration-200 active:scale-[0.97]"
                   style={n.href === active ? { background: "var(--mist)", color: "var(--forest)", borderColor: "var(--brand)" } : { color: "var(--slate)", borderColor: "var(--line)" }}
                 >
                   <span className="shrink-0">{NAV_ICONS[n.label] ?? "•"}</span>
@@ -220,10 +266,10 @@ export default function DashboardShell({
       )}
 
       {/* Main Content Area */}
-      <main className="p-5 pb-24 md:p-10">
-        {/* Top bar with title + notification bell */}
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-[24px] md:text-[30px] font-display font-semibold leading-tight" style={{ color: "var(--forest)" }}>{title}</h1>
+      <main className="p-4 pb-24 md:p-10">
+        {/* Top bar with title + notification bell (Hidden on Mobile, handled by sticky mobile header instead) */}
+        <div className="mb-6 hidden md:flex items-center justify-between">
+          <h1 className="text-[30px] font-display font-semibold leading-tight" style={{ color: "var(--forest)" }}>{title}</h1>
           <NotificationBell />
         </div>
         {children}

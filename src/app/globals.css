@@ -81,3 +81,47 @@ body {
     letter-spacing: -0.01em;
   }
 }
+
+/* 📱 Native Mobile App UX Utilities */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn, button, a {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Material physics scaling feedback on click */
+.btn:active, button:active {
+  transform: scale(0.97);
+}
+
+.card-interactive {
+  transition: all 0.2s ease-in-out;
+}
+.card-interactive:active {
+  transform: scale(0.99);
+  background-color: var(--mist) !important;
+}
+
+/* Suppress scrollbars for horizontal list swipe */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+.animate-slide-up {
+  animation: slide-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
