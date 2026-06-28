@@ -148,4 +148,11 @@ a, button, input, select, textarea, .btn, [role="button"] {
   border-top: 1px solid var(--line);
   padding: 14px 20px 20px 20px;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  transition: bottom 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Push up fixed bottom bars when rendered inside dashboard shell on mobile */
+.has-bottom-nav .sticky-bottom-bar {
+  bottom: 64px;
+  box-shadow: 0 -4px 15px rgba(9, 13, 22, 0.04);
 }

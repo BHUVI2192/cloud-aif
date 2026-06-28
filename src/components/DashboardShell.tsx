@@ -110,7 +110,7 @@ export default function DashboardShell({
   const hasMoreMenu = nav.length > bottomShortcuts.length;
 
   return (
-    <div className="min-h-screen md:grid md:grid-cols-[260px_1fr] bg-paper">
+    <div className="min-h-screen md:grid md:grid-cols-[260px_1fr] bg-paper has-bottom-nav">
       {/* 🖥 Desktop Sidebar (Hidden on Mobile) */}
       <aside className="hidden md:block border-r p-6 min-h-screen sticky top-0 h-screen" style={{ borderColor: "var(--line)", background: "#fff" }}>
         <Link href={homeHref} className="mb-8 flex items-center gap-2.5 font-display text-[20px] font-semibold" style={{ color: "var(--forest)" }}>
@@ -269,7 +269,7 @@ export default function DashboardShell({
       )}
 
       {/* Main Content Area */}
-      <main className="p-4 pb-24 md:p-10">
+      <main className="p-4 pb-36 md:p-10">
         {/* Top bar with title + notification bell (Hidden on Mobile, handled by sticky mobile header instead) */}
         <div className="mb-6 hidden md:flex items-center justify-between">
           <h1 className="text-[28px] font-bold tracking-tight leading-tight" style={{ color: "var(--forest)" }}>{title}</h1>
