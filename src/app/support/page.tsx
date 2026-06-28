@@ -1,12 +1,19 @@
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
+import SupportForm from "@/components/SupportForm";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export default async function SupportPage() {
   const settings = await db.platformSetting.findMany({ where: { key: { in: ["support_email", "support_phone"] } } });
-  const get = (k: string) => settings.find((s) => s.key === k)?.value ?? "—";
+  const get = (k: string) => {
+    const val = settings.find((s) => s.key === k)?.value;
+    if (k === "support_email") {
+      return val && val !== "support@cloudaif.in" ? val : "cnbhuvan011@gmail.com";
+    }
+    return val ?? "—";
+  };
 
   return (
     <>
@@ -25,15 +32,7 @@ export default async function SupportPage() {
             <div className="text-[16px]" style={{ color: "var(--forest)" }}>{get("support_phone")}</div>
           </div>
         </div>
-        <div className="card mt-6">
-          <h2 className="mb-3 text-[20px]">Send us a message</h2>
-          <div className="space-y-3">
-            <div><label className="label">Email</label><input className="input" /></div>
-            <div><label className="label">Subject</label><input className="input" /></div>
-            <div><label className="label">Message</label><textarea className="input min-h-[100px]" /></div>
-            <button className="btn btn-primary">Send message</button>
-          </div>
-        </div>
+        <SupportForm />
       </section>
       <SiteFooter />
     </>

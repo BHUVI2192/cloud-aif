@@ -119,7 +119,7 @@ async function main() {
 
   console.log("Seeding platform settings...");
   const settings: [string, string, string, string][] = [
-    ["support_email", "support@cloudaif.in", "string", "support"],
+    ["support_email", "cnbhuvan011@gmail.com", "string", "support"],
     ["support_phone", "+91 80000 00000", "string", "support"],
     ["default_city", "Shivamogga", "string", "general"],
     ["provider_auto_approve", "false", "boolean", "providers"],
