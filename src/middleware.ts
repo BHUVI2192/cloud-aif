@@ -13,7 +13,8 @@ function isPublicRoute(pathname: string): boolean {
     "/support",
     "/faq",
     "/terms",
-    "/privacy"
+    "/privacy",
+    "/.well-known"
   ];
   return publicPrefixes.some(prefix => pathname.startsWith(prefix));
 }
@@ -130,6 +131,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - uploads (uploaded files so they can be viewed)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|uploads).*)",
+    "/((?!api|_next/static|_next/image|\\.well-known|favicon\\.ico|uploads).*)",
   ],
 };

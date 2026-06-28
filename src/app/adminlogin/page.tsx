@@ -127,10 +127,14 @@ function AdminLoginInner() {
   );
 }
 
+import AdminMobileBlocker from "@/components/AdminMobileBlocker";
+
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="p-10">Loading…</div>}>
-      <AdminLoginInner />
-    </Suspense>
+    <AdminMobileBlocker>
+      <Suspense fallback={<div className="p-10">Loading…</div>}>
+        <AdminLoginInner />
+      </Suspense>
+    </AdminMobileBlocker>
   );
 }
