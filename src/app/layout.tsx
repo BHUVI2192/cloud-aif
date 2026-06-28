@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
@@ -7,8 +7,14 @@ export const metadata: Metadata = {
   description:
     "A trusted local services marketplace connecting Shivamogga homes with verified professionals.",
   manifest: "/manifest.json",
+};
+
+export const viewport: Viewport = {
   themeColor: "#14331f",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
