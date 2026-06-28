@@ -11,9 +11,9 @@
   --sage: #cbdad0;
   --mist: #f4f8f5;
   --paper: #ffffff;        /* Pure white background */
-  --ink: #0d121c;          /* High contrast main text */
-  --slate: #5c6b73;        /* Elegant gray for body copy */
-  --line: #f1f5f9;         /* Thin borders */
+  --ink: #0f172a;          /* High contrast main text */
+  --slate: #64748b;        /* Soft slate grey (cool tones) */
+  --line: #f1f5f9;         /* Very thin border line */
 }
 
 html {
@@ -28,42 +28,46 @@ body {
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3 text-[15px] font-semibold transition border border-transparent cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3 text-[14px] font-bold transition-all duration-300 ease-out border border-transparent cursor-pointer;
   }
   .btn-primary {
     background: var(--brand);
     color: #fff;
+    box-shadow: 0 4px 12px rgba(16, 79, 50, 0.12);
   }
   .btn-primary:hover {
     background: #0b3723;
+    box-shadow: 0 6px 16px rgba(16, 79, 50, 0.2);
   }
   .btn-ghost {
     background: transparent;
     color: var(--forest);
-    border-color: var(--line);
+    border-color: #e2e8f0;
   }
   .btn-ghost:hover {
     background: var(--mist);
     border-color: var(--brand);
   }
   .eyebrow {
-    @apply text-[12px] font-bold uppercase tracking-[0.14em];
+    @apply text-[11px] font-extrabold uppercase tracking-[0.16em];
     color: var(--emerald);
   }
   .card {
-    @apply rounded-2xl border bg-white p-6;
-    border-color: var(--line);
+    @apply rounded-2xl border bg-white p-6 transition-all duration-300 ease-out;
+    border-color: rgba(241, 245, 249, 0.9);
+    box-shadow: 0 10px 30px -10px rgba(9, 13, 22, 0.02), 0 1px 3px rgba(9, 13, 22, 0.01);
   }
   .input {
-    @apply w-full rounded-[11px] border bg-paper px-3.5 py-3 text-[15px] outline-none transition;
-    border-color: var(--line);
+    @apply w-full rounded-[11px] border bg-[#f8fafc] px-3.5 py-3 text-[14px] outline-none transition-all duration-300 ease-out;
+    border-color: #e2e8f0;
   }
   .input:focus {
-    border-color: var(--emerald);
-    box-shadow: 0 0 0 3px rgba(16, 79, 50, 0.08);
+    background: #ffffff;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(16, 79, 50, 0.06), 0 4px 12px rgba(9, 13, 22, 0.02);
   }
   .label {
-    @apply mb-1.5 block text-[12px] font-bold;
+    @apply mb-1.5 block text-[11px] font-bold tracking-wide;
     color: var(--slate);
   }
   .badge {
@@ -75,10 +79,10 @@ body {
   h2,
   h3 {
     font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--forest);
     line-height: 1.15;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
 }
 

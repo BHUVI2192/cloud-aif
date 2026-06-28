@@ -151,8 +151,8 @@ export default function DashboardShell({
 
       {/* 📱 Sticky Mobile Header (Top bar showing current view/back arrow) */}
       <header
-        className="sticky top-0 z-30 flex h-[58px] items-center justify-between border-b px-4 md:hidden backdrop-blur-md bg-white/90"
-        style={{ borderColor: "var(--line)" }}
+        className="sticky top-0 z-30 flex h-[58px] items-center justify-between border-b px-4 md:hidden backdrop-blur-md bg-white/80"
+        style={{ borderColor: "rgba(241,245,249,0.8)", boxShadow: "0 2px 12px rgba(9,13,22,0.01)" }}
       >
         <div className="flex items-center gap-2.5">
           {backHref ? (
@@ -167,7 +167,7 @@ export default function DashboardShell({
               </svg>
             </Link>
           ) : null}
-          <span className="text-[17px] font-semibold font-display italic" style={{ color: "var(--forest)" }}>
+          <span className="text-[16px] font-bold tracking-tight" style={{ color: "var(--forest)" }}>
             {title}
           </span>
         </div>
@@ -177,7 +177,7 @@ export default function DashboardShell({
       {/* 📱 Mobile Bottom Navigation Bar (Visible on Mobile Only) */}
       <div
         className="fixed bottom-0 left-0 right-0 z-40 flex h-[64px] items-center justify-around border-t md:hidden"
-        style={{ background: "#ffffff", borderColor: "var(--line)", boxShadow: "0 -2px 10px rgba(0,0,0,0.05)" }}
+        style={{ background: "#ffffff", borderColor: "var(--line)", boxShadow: "0 -2px 15px rgba(9,13,22,0.03)" }}
       >
         {bottomShortcuts.map((s) => {
           const isCurrent = s.href === active;
@@ -185,7 +185,7 @@ export default function DashboardShell({
             <Link
               key={s.href}
               href={s.href}
-              className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-medium transition active:scale-[0.95]"
+              className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-bold transition active:scale-[0.95]"
               style={{ color: isCurrent ? "var(--brand)" : "var(--slate)" }}
             >
               <span
@@ -195,7 +195,7 @@ export default function DashboardShell({
               >
                 {NAV_ICONS[s.label] ?? NAV_ICONS.Overview}
               </span>
-              <span className={`mt-0.5 transition-all duration-200 ${isCurrent ? "font-semibold text-brand" : "text-slate"}`}>
+              <span className={`mt-0.5 transition-all duration-200 ${isCurrent ? "font-bold text-brand" : "text-slate"}`}>
                 {s.label}
               </span>
             </Link>
@@ -205,7 +205,7 @@ export default function DashboardShell({
         {hasMoreMenu && (
           <button
             onClick={() => setShowMobileDrawer(true)}
-            className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-medium transition active:scale-[0.95]"
+            className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-bold transition active:scale-[0.95]"
             style={{ color: showMobileDrawer ? "var(--brand)" : "var(--slate)" }}
           >
             <span
@@ -215,7 +215,7 @@ export default function DashboardShell({
             >
               {NAV_ICONS.Menu}
             </span>
-            <span className={`mt-0.5 ${showMobileDrawer ? "font-semibold text-brand" : "text-slate"}`}>
+            <span className={`mt-0.5 ${showMobileDrawer ? "font-bold text-brand" : "text-slate"}`}>
               More
             </span>
           </button>
@@ -231,7 +231,7 @@ export default function DashboardShell({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b pb-3 mb-2" style={{ borderColor: "var(--line)" }}>
-              <span className="text-[16px] font-bold" style={{ color: "var(--forest)" }}>All Navigation</span>
+              <span className="text-[15px] font-bold" style={{ color: "var(--forest)" }}>All Navigation</span>
               <button onClick={() => setShowMobileDrawer(false)} className="text-[20px] font-bold" style={{ color: "var(--slate)" }}>×</button>
             </div>
             <div className="grid grid-cols-2 gap-3 pb-6">
@@ -240,8 +240,8 @@ export default function DashboardShell({
                   key={n.href}
                   href={n.href}
                   onClick={() => setShowMobileDrawer(false)}
-                  className="flex items-center gap-2 rounded-xl p-3 text-[13px] font-semibold border transition duration-200 active:scale-[0.97]"
-                  style={n.href === active ? { background: "var(--mist)", color: "var(--forest)", borderColor: "var(--brand)" } : { color: "var(--slate)", borderColor: "var(--line)" }}
+                  className="flex items-center gap-2 rounded-xl p-3 text-[13px] font-bold border transition duration-200 active:scale-[0.97]"
+                  style={n.href === active ? { background: "var(--mist)", color: "var(--brand)", borderColor: "var(--brand)" } : { color: "var(--slate)", borderColor: "var(--line)" }}
                 >
                   <span className="shrink-0">{NAV_ICONS[n.label] ?? "•"}</span>
                   {n.label}
@@ -255,8 +255,8 @@ export default function DashboardShell({
                   <img src={user.image} alt="Profile" className="w-10 h-10 rounded-full object-cover border" style={{ borderColor: "var(--line)" }} />
                 )}
                 <div>
-                  <div className="text-[13px] font-semibold" style={{ color: "var(--forest)" }}>{user.name ?? user.email}</div>
-                  <div className="text-[11px] capitalize" style={{ color: "var(--slate)" }}>{user.role.replace(/_/g, " ").toLowerCase()}</div>
+                  <div className="text-[13px] font-bold" style={{ color: "var(--forest)" }}>{user.name ?? user.email}</div>
+                  <div className="text-[11px] capitalize font-bold" style={{ color: "var(--slate)" }}>{user.role.replace(/_/g, " ").toLowerCase()}</div>
                 </div>
               </div>
               <SignOutButton />
@@ -269,7 +269,7 @@ export default function DashboardShell({
       <main className="p-4 pb-24 md:p-10">
         {/* Top bar with title + notification bell (Hidden on Mobile, handled by sticky mobile header instead) */}
         <div className="mb-6 hidden md:flex items-center justify-between">
-          <h1 className="text-[30px] font-display font-semibold italic leading-tight" style={{ color: "var(--forest)" }}>{title}</h1>
+          <h1 className="text-[28px] font-bold tracking-tight leading-tight" style={{ color: "var(--forest)" }}>{title}</h1>
           <NotificationBell />
         </div>
         {children}
