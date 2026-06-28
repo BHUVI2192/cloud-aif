@@ -122,6 +122,7 @@ export default function DashboardShell({
             <Link
               key={n.href}
               href={n.href}
+              prefetch={true}
               className="block rounded-[10px] px-3.5 py-2.5 text-[14px] font-medium transition duration-200 active:scale-[0.98]"
               style={n.href === active ? { background: "var(--mist)", color: "var(--forest)" } : { color: "var(--slate)" }}
             >
@@ -185,6 +186,7 @@ export default function DashboardShell({
             <Link
               key={s.href}
               href={s.href}
+              prefetch={true}
               className="flex flex-col items-center justify-center w-16 h-full text-[10px] font-bold transition active:scale-[0.95]"
               style={{ color: isCurrent ? "var(--brand)" : "var(--slate)" }}
             >
@@ -239,6 +241,7 @@ export default function DashboardShell({
                 <Link
                   key={n.href}
                   href={n.href}
+                  prefetch={true}
                   onClick={() => setShowMobileDrawer(false)}
                   className="flex items-center gap-2 rounded-xl p-3 text-[13px] font-bold border transition duration-200 active:scale-[0.97]"
                   style={n.href === active ? { background: "var(--mist)", color: "var(--brand)", borderColor: "var(--brand)" } : { color: "var(--slate)", borderColor: "var(--line)" }}

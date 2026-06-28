@@ -28,32 +28,32 @@ export default function SiteHeader() {
             <>
               {role === "CUSTOMER" && (
                 <>
-                  <Link href="/services" className="hover:text-forest transition duration-150">Request Service</Link>
-                  <Link href="/customer" className="hover:text-forest transition duration-150">My Requests</Link>
-                  <Link href="/support" className="hover:text-forest transition duration-150">Support</Link>
+                  <Link href="/services" prefetch={true} className="hover:text-forest transition duration-150">Request Service</Link>
+                  <Link href="/customer" prefetch={true} className="hover:text-forest transition duration-150">My Requests</Link>
+                  <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">Support</Link>
                 </>
               )}
               {role === "PROVIDER" && (
                 <>
-                  <Link href="/provider" className="hover:text-forest transition duration-150">My Jobs</Link>
-                  <Link href="/provider/availability" className="hover:text-forest transition duration-150">My Schedule</Link>
-                  <Link href="/provider/profile" className="hover:text-forest transition duration-150">My Profile</Link>
-                  <Link href="/support" className="hover:text-forest transition duration-150">Support</Link>
+                  <Link href="/provider" prefetch={true} className="hover:text-forest transition duration-150">My Jobs</Link>
+                  <Link href="/provider/availability" prefetch={true} className="hover:text-forest transition duration-150">My Schedule</Link>
+                  <Link href="/provider/profile" prefetch={true} className="hover:text-forest transition duration-150">My Profile</Link>
+                  <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">Support</Link>
                 </>
               )}
               {(role === "ADMIN" || role === "SUPER_ADMIN") && (
                 <>
-                  <Link href="/admin" className="hover:text-forest transition duration-150">Admin Dashboard</Link>
-                  <Link href="/support" className="hover:text-forest transition duration-150">Support</Link>
+                  <Link href="/admin" prefetch={true} className="hover:text-forest transition duration-150">Admin Dashboard</Link>
+                  <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">Support</Link>
                 </>
               )}
             </>
           ) : (
             <>
-              <Link href="/services" className="hover:text-forest transition duration-150">Services</Link>
-              <Link href="/how-it-works" className="hover:text-forest transition duration-150">How it works</Link>
-              <Link href="/become-a-provider" className="hover:text-forest transition duration-150">For providers</Link>
-              <Link href="/support" className="hover:text-forest transition duration-150">Support</Link>
+              <Link href="/services" prefetch={true} className="hover:text-forest transition duration-150">Services</Link>
+              <Link href="/how-it-works" prefetch={true} className="hover:text-forest transition duration-150">How it works</Link>
+              <Link href="/become-a-provider" prefetch={true} className="hover:text-forest transition duration-150">For providers</Link>
+              <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">Support</Link>
             </>
           )}
         </div>
@@ -71,7 +71,7 @@ export default function SiteHeader() {
                 </span>
               </div>
               {dash && (
-                <Link className="btn btn-primary text-[13px] !py-2 !px-4" style={{ minHeight: "auto" }} href={dash}>
+                <Link className="btn btn-primary text-[13px] !py-2 !px-4" prefetch={true} style={{ minHeight: "auto" }} href={dash}>
                   Dashboard
                 </Link>
               )}
@@ -85,8 +85,8 @@ export default function SiteHeader() {
             </>
           ) : (
             <>
-              <Link className="btn btn-ghost hidden md:inline-flex text-[13px] !py-2 !px-4" href="/become-a-provider" style={{ border: "1px solid #e2e8f0" }}>Become a provider</Link>
-              <Link className="btn btn-primary text-[13px] !py-2.5 !px-5" href="/login">Sign in</Link>
+              <Link className="btn btn-ghost hidden md:inline-flex text-[13px] !py-2 !px-4" prefetch={true} href="/become-a-provider" style={{ border: "1px solid #e2e8f0" }}>Become a provider</Link>
+              <Link className="btn btn-primary text-[13px] !py-2.5 !px-5" prefetch={true} href="/login">Sign in</Link>
             </>
           )}
         </div>
