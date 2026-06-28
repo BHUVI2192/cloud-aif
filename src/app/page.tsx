@@ -45,9 +45,9 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="relative p-8 border border-line bg-white shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[28px]">
-            <div className="mb-6 flex items-center justify-between">
-              <span className="text-[12px] font-extrabold uppercase tracking-wider" style={{ color: "var(--brand)" }}>
+          <div className="relative p-5 sm:p-8 border border-line bg-white shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[28px] overflow-hidden">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <span className="text-[12px] font-extrabold uppercase tracking-wider text-brand">
                 ⚡ Platform match flow
               </span>
               <span className="badge">Real-Time Engine</span>
@@ -80,21 +80,23 @@ export default function HomePage() {
               </div>
               
               {/* Step 3 */}
-              <div className="flex gap-4 relative z-10">
+              <div className="flex gap-4 relative z-10 min-w-0">
                 <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl font-bold text-[16px] bg-brand text-white">
                   ✓
                 </div>
-                <div className="flex-1 rounded-2xl border border-line bg-slate-50/50 p-4 shadow-sm">
+                <div className="flex-1 rounded-2xl border border-line bg-slate-50/50 p-3 sm:p-4 shadow-sm min-w-0">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand">3. Match connected</span>
-                  <div className="mt-2.5 flex items-center gap-3">
-                    <div className="grid h-[36px] w-[36px] place-items-center rounded-lg font-bold text-white text-[13px] bg-brand">
-                      S
+                  <div className="mt-2.5 flex items-center justify-between gap-2.5 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="grid h-[32px] w-[32px] shrink-0 place-items-center rounded-lg font-bold text-white text-[12px] bg-brand">
+                        S
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-bold text-slate-900 truncate">Suresh Electricals</div>
+                        <div className="text-[11px] text-slate-500 truncate">9 yrs exp · Vidyanagar</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-[13px] font-bold text-slate-900">Suresh Electricals</div>
-                      <div className="text-[11px] text-slate-500">9 yrs exp · Vidyanagar</div>
-                    </div>
-                    <div className="ml-auto text-[11px] font-extrabold bg-white text-emerald-700 px-2 py-0.5 rounded border border-line">
+                    <div className="shrink-0 text-[11px] font-extrabold bg-white text-emerald-700 px-1.5 py-0.5 rounded border border-line">
                       ★ 4.8
                     </div>
                   </div>
