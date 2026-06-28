@@ -45,35 +45,61 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="card border border-line bg-white shadow-xl hover:shadow-2xl transition-all duration-500" style={{ borderRadius: "24px" }}>
-            <div className="mb-5 flex items-center justify-between">
-              <span className="font-display text-[15px] font-bold italic" style={{ color: "var(--forest)" }}>
-                Active request match
+          <div className="relative p-8 border border-line bg-white shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[28px]">
+            <div className="mb-6 flex items-center justify-between">
+              <span className="text-[12px] font-extrabold uppercase tracking-wider" style={{ color: "var(--brand)" }}>
+                ⚡ Platform match flow
               </span>
-              <span className="badge">✓ Verified</span>
+              <span className="badge">Real-Time Engine</span>
             </div>
-            {[
-              ["Category", "Home Repair"],
-              ["Service", "Electrician"],
-              ["Locality", "Vidyanagar, Shivamogga"],
-              ["When", "Today, anytime"]
-            ].map(([l, v]) => (
-              <div key={l} className="mb-3.5">
-                <span className="label text-[11px] font-bold uppercase tracking-wider">{l}</span>
-                <div className="input flex items-center justify-between text-[14px] font-medium bg-[#f8fafc] border-line py-2.5">
-                  {v} <span className="text-[12px] opacity-60">▼</span>
+            
+            <div className="space-y-6 relative">
+              {/* Vertical connecting line */}
+              <div className="absolute left-[21px] top-6 bottom-6 w-[1.5px] border-l border-dashed border-slate-200"></div>
+              
+              {/* Step 1 */}
+              <div className="flex gap-4 relative z-10">
+                <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl font-bold text-[16px] bg-mist text-brand">
+                  💬
+                </div>
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">1. User request</span>
+                  <p className="text-[14px] font-semibold text-slate-700 mt-0.5">"Need an electrician in Durgigudi today"</p>
                 </div>
               </div>
-            ))}
-            <div className="mt-5 flex items-center gap-3 border-t pt-4" style={{ borderColor: "var(--line)" }}>
-              <div className="grid h-[42px] w-[42px] place-items-center rounded-xl font-bold text-white text-[15px]" style={{ background: "var(--brand)" }}>
-                S
+              
+              {/* Step 2 */}
+              <div className="flex gap-4 relative z-10">
+                <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl font-bold text-[16px] bg-emerald-50 text-emerald-700 animate-pulse">
+                  ⚙
+                </div>
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">2. Auto-Matching</span>
+                  <p className="text-[14px] font-medium text-slate-600 mt-0.5">Scanning verified pros active in locality...</p>
+                </div>
               </div>
-              <div>
-                <div className="text-[14px] font-bold" style={{ color: "var(--forest)" }}>Suresh Electricals</div>
-                <div className="text-[12px]" style={{ color: "var(--slate)" }}>9 yrs exp · 41 jobs completed</div>
+              
+              {/* Step 3 */}
+              <div className="flex gap-4 relative z-10">
+                <div className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-xl font-bold text-[16px] bg-brand text-white">
+                  ✓
+                </div>
+                <div className="flex-1 rounded-2xl border border-line bg-slate-50/50 p-4 shadow-sm">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand">3. Match connected</span>
+                  <div className="mt-2.5 flex items-center gap-3">
+                    <div className="grid h-[36px] w-[36px] place-items-center rounded-lg font-bold text-white text-[13px] bg-brand">
+                      S
+                    </div>
+                    <div>
+                      <div className="text-[13px] font-bold text-slate-900">Suresh Electricals</div>
+                      <div className="text-[11px] text-slate-500">9 yrs exp · Vidyanagar</div>
+                    </div>
+                    <div className="ml-auto text-[11px] font-extrabold bg-white text-emerald-700 px-2 py-0.5 rounded border border-line">
+                      ★ 4.8
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="ml-auto text-[13px] font-bold bg-mist text-brand px-2 py-0.5 rounded-md">★ 4.8</div>
             </div>
           </div>
         </div>
