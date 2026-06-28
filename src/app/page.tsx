@@ -191,7 +191,7 @@ export default function HomePage() {
               ))}
             </ul>
           </div>
-          <div className="grid grid-cols-2 gap-8 rounded-[24px] p-10 border border-line bg-white shadow-xl">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-8 rounded-[24px] p-6 sm:p-10 border border-line bg-white shadow-xl">
             {[
               ["100%", "Providers verified"],
               ["5", "Service families"],
@@ -199,7 +199,7 @@ export default function HomePage() {
               ["4.8★", "Avg. review rating"]
             ].map(([n, l]) => (
               <div key={l}>
-                <b className="block text-[44px] font-bold leading-none italic" style={{ color: "var(--forest)" }}>{n}</b>
+                <b className="block text-[30px] sm:text-[44px] font-bold leading-none italic" style={{ color: "var(--forest)" }}>{n}</b>
                 <span className="text-[13px] font-bold" style={{ color: "var(--brand)" }}>{l}</span>
               </div>
             ))}
