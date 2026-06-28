@@ -1,19 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --forest: #0d2215;
-  --brand: #18432a;
-  --emerald: #246541;
-  --sage: #b3d7be;
-  --mist: #f0f6f2;
-  --paper: #ffffff;
-  --ink: #111814;
-  --slate: #64746b;
-  --line: #ebf0ec;
+  --forest: #090d16;       /* Deep charcoal-black for headings */
+  --brand: #104f32;        /* Premium pine green accent */
+  --emerald: #166534;      /* Solid contrast green for details */
+  --sage: #cbdad0;
+  --mist: #f4f8f5;
+  --paper: #ffffff;        /* Pure white background */
+  --ink: #0d121c;          /* High contrast main text */
+  --slate: #5c6b73;        /* Elegant gray for body copy */
+  --line: #f1f5f9;         /* Thin borders */
 }
 
 html {
@@ -22,20 +22,20 @@ html {
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3 text-[15px] font-medium transition border border-transparent cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-6 py-3 text-[15px] font-semibold transition border border-transparent cursor-pointer;
   }
   .btn-primary {
     background: var(--brand);
     color: #fff;
   }
   .btn-primary:hover {
-    background: var(--forest);
+    background: #0b3723;
   }
   .btn-ghost {
     background: transparent;
@@ -44,10 +44,10 @@ body {
   }
   .btn-ghost:hover {
     background: var(--mist);
-    border-color: var(--emerald);
+    border-color: var(--brand);
   }
   .eyebrow {
-    @apply text-[13px] font-semibold uppercase tracking-[0.14em];
+    @apply text-[12px] font-bold uppercase tracking-[0.14em];
     color: var(--emerald);
   }
   .card {
@@ -60,25 +60,25 @@ body {
   }
   .input:focus {
     border-color: var(--emerald);
-    box-shadow: 0 0 0 3px rgba(46, 125, 83, 0.12);
+    box-shadow: 0 0 0 3px rgba(16, 79, 50, 0.08);
   }
   .label {
-    @apply mb-1.5 block text-[12px] font-semibold;
+    @apply mb-1.5 block text-[12px] font-bold;
     color: var(--slate);
   }
   .badge {
-    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-semibold;
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold;
     background: var(--mist);
     color: var(--brand);
   }
   h1,
   h2,
   h3 {
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 500;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-weight: 700;
     color: var(--forest);
-    line-height: 1.12;
-    letter-spacing: -0.01em;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
   }
 }
 
