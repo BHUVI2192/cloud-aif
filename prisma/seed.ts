@@ -134,6 +134,8 @@ async function main() {
   }
 
   console.log("Seeding FAQs & static pages...");
+  // Clear old entries to prevent duplicates upon repeated seed execution
+  await prisma.fAQ.deleteMany({});
   const faqs = [
     ["How do I request a service?", "Pick a category, choose the service you need, select your locality, and submit the requirement form. A verified provider will be matched to you."],
     ["Are providers verified?", "Yes. Every provider submits ID and address proof and is manually reviewed by our team before becoming visible."],
@@ -152,6 +154,8 @@ async function main() {
   }
 
   console.log("Seeding testimonials...");
+  // Clear old testimonials to prevent duplicates
+  await prisma.testimonial.deleteMany({});
   const testimonials = [
     ["Anitha R.", "Homeowner, Vidyanagar", "Found a reliable electrician within an hour. The verification badge gave me real peace of mind."],
     ["Mahesh K.", "Resident, Gandhi Bazaar", "Booked a full home cleaning before Diwali. Professional and on time."],
