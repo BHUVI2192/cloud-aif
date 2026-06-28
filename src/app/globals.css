@@ -82,19 +82,24 @@ body {
   }
 }
 
-/* 📱 Native Mobile App UX Utilities */
+/* 📱 Native Mobile App UX & Instant Tap Performance Utilities */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn, button, a {
-  user-select: none;
-  -webkit-user-select: none;
+a, button, input, select, textarea, .btn, [role="button"] {
+  touch-action: manipulation; /* Disables 300ms mobile double-tap zoom delay */
 }
 
-/* Material physics scaling feedback on click */
-.btn:active, button:active {
-  transform: scale(0.97);
+.btn, button, a, [role="button"] {
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.15s ease, opacity 0.15s ease;
+}
+
+/* Instant haptic scaling feedback on tap */
+.btn:active, button:active, [role="button"]:active {
+  transform: scale(0.95) !important;
 }
 
 .card-interactive {
