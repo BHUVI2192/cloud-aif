@@ -106,7 +106,7 @@ function LoginInner() {
             <label className="label">Email address</label>
             <input
               type="email"
-              className="input"
+              className={`input ${error ? "input-error" : ""}`}
               placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -119,7 +119,7 @@ function LoginInner() {
             <label className="label">Password</label>
             <input
               type="password"
-              className="input"
+              className={`input ${error ? "input-error" : ""}`}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

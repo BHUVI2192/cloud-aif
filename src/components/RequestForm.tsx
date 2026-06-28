@@ -232,15 +232,15 @@ export default function RequestForm({
   return (
     <div className="card space-y-4 pb-24 md:pb-6 bg-white border border-line" style={{ borderRadius: "20px" }}>
       <Field label="Title" error={errors.title}>
-        <input className="input text-[14px]" value={form.title} onChange={(e) => set("title", e.target.value)} />
+        <input className={`input text-[14px] ${errors.title ? "input-error" : ""}`} value={form.title} onChange={(e) => set("title", e.target.value)} />
       </Field>
       <Field label="Describe what you need" error={errors.description}>
-        <textarea className="input min-h-[110px] text-[14px]" value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="e.g. Two ceiling fans to install and one switchboard that trips frequently." />
+        <textarea className={`input min-h-[110px] text-[14px] ${errors.description ? "input-error" : ""}`} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="e.g. Two ceiling fans to install and one switchboard that trips frequently." />
       </Field>
       
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Locality" error={errors.serviceAreaId}>
-          <select className="input text-[14px]" value={form.serviceAreaId} onChange={(e) => set("serviceAreaId", e.target.value)}>
+          <select className={`input text-[14px] ${errors.serviceAreaId ? "input-error" : ""}`} value={form.serviceAreaId} onChange={(e) => set("serviceAreaId", e.target.value)}>
             <option value="">Select locality…</option>
             {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
@@ -256,10 +256,10 @@ export default function RequestForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Primary Contact Number" error={errors.phone}>
-          <input type="tel" inputMode="numeric" className="input text-[14px]" value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="10-digit mobile number" />
+          <input type="tel" inputMode="numeric" className={`input text-[14px] ${errors.phone ? "input-error" : ""}`} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="10-digit mobile number" />
         </Field>
         <Field label="Alternate Contact Number (optional)" error={errors.alternatePhone}>
-          <input type="tel" inputMode="numeric" className="input text-[14px]" value={form.alternatePhone} onChange={(e) => set("alternatePhone", e.target.value)} placeholder="Alternate mobile number" />
+          <input type="tel" inputMode="numeric" className={`input text-[14px] ${errors.alternatePhone ? "input-error" : ""}`} value={form.alternatePhone} onChange={(e) => set("alternatePhone", e.target.value)} placeholder="Alternate mobile number" />
         </Field>
       </div>
 

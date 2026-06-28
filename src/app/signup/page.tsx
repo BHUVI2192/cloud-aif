@@ -88,7 +88,7 @@ function SignupInner() {
           <label className="label">Full name</label>
           <input
             type="text"
-            className="input"
+            className={`input ${error ? "input-error" : ""}`}
             placeholder="John Doe"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -101,7 +101,7 @@ function SignupInner() {
           <label className="label">Email address</label>
           <input
             type="email"
-            className="input"
+            className={`input ${error ? "input-error" : ""}`}
             placeholder="name@example.com"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -114,7 +114,7 @@ function SignupInner() {
           <label className="label">Password</label>
           <input
             type="password"
-            className="input"
+            className={`input ${error ? "input-error" : ""}`}
             placeholder="••••••••"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
