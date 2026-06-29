@@ -48,15 +48,22 @@ export async function POST(req: Request) {
       // Save portfolio image
       const publicDir = path.join(process.cwd(), "public");
       const portfolioDir = path.join(publicDir, "uploads", "portfolio");
-      await mkdir(portfolioDir, { recursive: true });
 
-      const ext = path.extname(imageFile.name) || ".jpg";
-      const filename = `${session.user.id}_portfolio_${Date.now()}${ext}`;
-      const filepath = path.join(portfolioDir, filename);
-      const buffer = Buffer.from(await imageFile.arrayBuffer());
-      await writeFile(filepath, buffer);
-
-      const imageUrl = `/uploads/portfolio/${filename}`;
+      let imageUrl = "";
+      try {
+        await mkdir(portfolioDir, { recursive: true });
+        const ext = path.extname(imageFile.name) || ".jpg";
+        const filename = `${session.user.id}_portfolio_${Date.now()}${ext}`;
+        const filepath = path.join(portfolioDir, filename);
+        const buffer = Buffer.from(await imageFile.arrayBuffer());
+        await writeFile(filepath, buffer);
+        imageUrl = `/uploads/portfolio/${filename}`;
+      } catch (fsError) {
+        console.warn("Filesystem is read-only. Saving portfolio image as Base64 Data URL...", fsError);
+        const buffer = Buffer.from(await imageFile.arrayBuffer());
+        const mime = imageFile.type || "image/jpeg";
+        imageUrl = `data:${mime};base64,${buffer.toString("base64")}`;
+      }
 
       const maxSort = await db.providerPortfolioItem.aggregate({
         where: { providerId: provider.id },
