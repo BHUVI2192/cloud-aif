@@ -28,6 +28,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields or files" }, { status: 400 });
     }
 
+    const trimmedPhone = phone.trim();
+    // Validate phone number uniqueness before database transaction to prevent Unique Constraint crashes
+    const existingPhoneUser = await db.user.findFirst({
+      where: {
+        phone: trimmedPhone,
+        id: { not: session.user.id }
+      }
+    });
+
+    if (existingPhoneUser) {
+      return NextResponse.json(
+        { error: "This phone number is already registered with another account. Please use a different number." },
+        { status: 400 }
+      );
+    }
+
     const experienceYears = parseInt(experienceYearsStr, 10) || 0;
 
     // Create uploads directories if they don't exist
@@ -94,7 +110,7 @@ export async function POST(req: Request) {
       await tx.user.update({
         where: { id: session.user.id },
         data: {
-          phone,
+          phone: trimmedPhone,
           image: profileImageUrl, // set provider profile photo as DP
           role: "PROVIDER"
         }
