@@ -1,0 +1,371 @@
+"use client";
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+type Language = "en" | "kn";
+
+interface LanguageContextProps {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+}
+
+const DICTIONARY: Record<Language, Record<string, string>> = {
+  en: {
+    become_a_provider: "Become a provider",
+    provider_verification_form: "Provider Verification Form",
+    legal_name: "Legal Name (matching ID)",
+    display_name: "Display / Business Name",
+    primary_category: "Primary Category",
+    select_category: "Select a category...",
+    years_of_experience: "Years of Experience",
+    contact_mobile: "Contact Mobile Number",
+    profile_photo: "Profile Photo",
+    upload_photo: "Upload Profile Photo",
+    headshot_note: "Clear headshot (JPEG/PNG) to display on your public profile.",
+    verification_docs: "Verification Documents",
+    id_proof: "Identity Proof (Aadhaar Card, PAN Card, or DL)",
+    address_proof: "Address Proof (Utility Bill, Rental Agreement, or Voter ID)",
+    choose_file: "Choose File",
+    no_file_selected: "No file selected",
+    submit_verification: "Submit Verification Profile",
+    submitting: "Submitting...",
+    inspection_fee: "Transparent Inspection Fee (₹)",
+    inspection_fee_placeholder: "e.g. 150",
+    inspection_fee_note: "Fee charged for visiting and inspecting the job site in Shivamogga.",
+    
+    // Request Form
+    request_service: "Request a Service",
+    title: "Title",
+    title_placeholder: "e.g. Need urgent electrician",
+    description: "Description",
+    description_placeholder: "Please describe your requirement in details...",
+    landmark: "Nearest Landmark",
+    landmark_placeholder: "e.g. Near Gopi Circle, Opp. Government School",
+    urgency: "Urgency",
+    preferred_contact: "Preferred contact",
+    budget_min: "Budget min (₹, optional)",
+    budget_max: "Budget max (₹, optional)",
+    submit_request: "Submit request",
+    voice_note: "Voice Note Description (Optional)",
+    record_voice: "🎤 Record Voice Note",
+    stop_recording: "⏹️ Stop Recording",
+    play_voice: "🔊 Listen to Voice Description",
+    delete_voice: "🗑️ Delete Voice",
+    any: "Any",
+    phone: "Phone",
+    whatsapp: "WhatsApp",
+    email: "Email",
+    flexible: "Flexible",
+    within_week: "Within week",
+    within_48_hours: "48 hours",
+    emergency: "🚨 Emergency",
+
+    // General UI
+    sign_out: "Sign out",
+    search_service: "What service do you need today?",
+    search_placeholder: "Search for plumbers, electricians...",
+    popular_categories: "Popular Categories",
+    localities: "Localities covered in Shivamogga",
+    group_discount: "👥 Street Group Booking applied! 15% discount on travel fees",
+    verified_local: "Verified Local ✓",
+    home: "Home",
+    how_it_works: "How it works",
+    for_providers: "For providers",
+    support: "Support",
+    dashboard: "Dashboard",
+    grow_business_leads: "Grow your local business with verified leads.",
+    grow_business_desc: "Join Shivamogga's trusted services network. No listing fees in v1 — just verified customers looking for what you do.",
+    start_application: "Start your application",
+    steps_sign_in: "Sign in",
+    steps_sign_in_desc: "Create your account in seconds.",
+    steps_details: "Submit your details",
+    steps_details_desc: "Tell us your service, experience and areas.",
+    steps_docs: "Upload documents",
+    steps_docs_desc: "ID and address proof for verification.",
+    steps_approved: "Get approved",
+    steps_approved_desc: "Our team reviews and activates your profile.",
+    steps_leads: "Receive leads",
+    steps_leads_desc: "Matched requests land in your dashboard.",
+    
+    // Landing Page Additions
+    services: "Services",
+    sign_in: "Sign In",
+    serving_localities: "Serving Shivamogga Localities",
+    hero_title_1: "Trusted local pros, ",
+    hero_title_2: "verified",
+    hero_title_3: " first.",
+    hero_desc: "Handpicked service professionals in Shivamogga — background-checked and ready for your next request.",
+    see_how_it_works: "See how it works",
+    what_we_cover: "What we cover",
+    id_verified: "ID-verified",
+    zero_pre_payments: "Zero pre-payments",
+    local_100: "100% Local",
+    platform_match_flow: "Platform match flow",
+    real_time_engine: "Real-Time Engine",
+    user_request: "User request",
+    electrician_example: '"Need an electrician in Durgigudi today"',
+    auto_matching: "Auto-matching",
+    scanning_pros: "Scanning verified pros active in locality...",
+    match_connected: "Match connected",
+    suresh_electricals: "Suresh Electricals",
+    suresh_exp: "9 yrs exp · Vidyanagar",
+    families_title_1: "Five service ",
+    families_title_2: "families",
+    families_title_3: ", one trusted network.",
+    families_desc: "Every professional is background checked before they go live on our platform.",
+    more_coming_soon: "More coming soon",
+    provider_cta_title_1: "Run a local service? ",
+    provider_cta_title_2: "Get found",
+    provider_cta_title_3: " near you.",
+    provider_cta_desc: "Sign up, complete verification, and receive direct requests — free of charge in v1.",
+    coverage_title_1: "Now live across ",
+    coverage_title_2: "Shivamogga",
+    coverage_desc: "We are focused locally. Currently serving the following neighborhoods.",
+    
+    // Category Additions
+    explore_categories: "Explore Categories",
+    expanding_categories: "We are expanding categories across Shivamogga.",
+    cat_home_repair_handyman: "Home Repair & Handyman",
+    desc_home_repair_handyman: "Electricians, plumbers, carpenters and quick fixes.",
+    cat_cleaning_pest_control: "Cleaning & Pest Control",
+    desc_cleaning_pest_control: "Deep cleaning, sofa care and pest control.",
+    cat_painting_home_improvement: "Painting & Home Improvement",
+    desc_painting_home_improvement: "Painting, waterproofing and small renovations.",
+    cat_salon_spa_beauty: "Salon, Spa & Beauty",
+    desc_salon_spa_beauty: "At-home styling, facials, bridal makeup and spa.",
+    cat_education_tutoring_coaching: "Education, Tutoring & Coaching",
+    desc_education_tutoring_coaching: "Tuition, exam coaching, languages and skills.",
+    
+    // Additional home page text
+    how_it_works_subtitle_1: "Four steps from ",
+    how_it_works_subtitle_2: "request",
+    how_it_works_subtitle_3: " to resolved.",
+    step_1_title: "Tell us the job",
+    step_1_desc: "Pick a category and describe what you need.",
+    step_2_title: "We match a pro",
+    step_2_desc: "A verified professional near you is assigned.",
+    step_3_title: "Get it done",
+    step_3_desc: "They visit and complete the work offline.",
+    step_4_title: "Rate & review",
+    step_4_desc: "Share feedback to keep the network safe.",
+    trust_title: "Trust, built in",
+    trust_subtitle_1: "Verified providers only — ",
+    trust_subtitle_2: "no exceptions",
+    trust_subtitle_3: ".",
+    trust_item_1_title: "Manual document review",
+    trust_item_1_desc: "Credentials and proofs verified by hand.",
+    trust_item_2_title: "Completed bookings only",
+    trust_item_2_desc: "Only real jobs can leave feedback.",
+    trust_item_3_title: "Private documents",
+    trust_item_3_desc: "Credentials are never shown publicly.",
+    stat_1_val: "100%",
+    stat_1_lbl: "Providers verified",
+    stat_2_val: "5",
+    stat_2_lbl: "Service families",
+    stat_3_val: "12+",
+    stat_3_lbl: "Localities active",
+    stat_4_val: "4.8★",
+    stat_4_lbl: "Avg. review rating",
+    coverage_eyebrow: "Coverage",
+  },
+  kn: {
+    become_a_provider: "ಸೇವೆ ಒದಗಿಸುವವರಿಗಾಗಿ",
+    provider_verification_form: "ಸೇವೆ ಒದಗಿಸುವವರ ಪರಿಶೀಲನಾ ಫಾರ್ಮ್",
+    legal_name: "ಕಾನೂನುಬದ್ಧ ಹೆಸರು (ಐಡಿಗೆ ಹೊಂದುವಂತೆ)",
+    display_name: "ಪ್ರದರ್ಶನ / ವ್ಯವಹಾರದ ಹೆಸರು",
+    primary_category: "ಮುಖ್ಯ ವಿಭಾಗ",
+    select_category: "ವಿಭಾಗವನ್ನು ಆರಿಸಿ...",
+    years_of_experience: "ಅನುಭವದ ವರ್ಷಗಳು",
+    contact_mobile: "ಸಂಪರ್ಕ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ",
+    profile_photo: "ಪ್ರೊಫೈಲ್ ಫೋಟೋ",
+    upload_photo: "ಪ್ರೊಫೈಲ್ ಫೋಟೋ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    headshot_note: "ನಿಮ್ಮ ಸಾರ್ವಜನಿಕ ಪ್ರೊಫೈಲ್‌ನಲ್ಲಿ ಪ್ರದರ್ಶಿಸಲು ಸ್ಪಷ್ಟವಾದ ಹೆಡ್‌ಶಾಟ್ ಫೋಟೋ (JPEG/PNG).",
+    verification_docs: "ಪರಿಶೀಲನಾ ದಾಖಲೆಗಳು",
+    id_proof: "ಗುರುತಿನ ಚೀಟಿ (ಆಧಾರ್ ಕಾರ್ಡ್, ಪ್ಯಾನ್ ಕಾರ್ಡ್, ಅಥವಾ ಡಿಎಲ್)",
+    address_proof: "ವಿಳಾಸದ ಚೀಟಿ (ಬೆಳಕಿನ ಬಿಲ್, ಬಾಡಿಗೆ ಒಪ್ಪಂದ, ಅಥವಾ ಮತದಾರರ ಗುರುತಿನ ಚೀಟಿ)",
+    choose_file: "ಫೈಲ್ ಆರಿಸಿ",
+    no_file_selected: "ಯಾವುದೇ ಫೈಲ್ ಆಯ್ಕೆಯಾಗಿಲ್ಲ",
+    submit_verification: "ಪರಿಶೀಲನಾ ಪ್ರೊಫೈಲ್ ಸಲ್ಲಿಸಿ",
+    submitting: "ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ...",
+    inspection_fee: "ಪಾರದರ್ಶಕ ತಪಾಸಣಾ ಶುಲ್ಕ (₹)",
+    inspection_fee_placeholder: "ಉದಾಹರಣೆಗೆ: 150",
+    inspection_fee_note: "ಶಿವಮೊಗ್ಗದಲ್ಲಿ ಭೇಟಿ ನೀಡಿ ಕೆಲಸದ ಸ್ಥಳವನ್ನು ಪರಿಶೀಲಿಸಲು ವಿಧಿಸಲಾಗುವ ತಪಾಸಣಾ ಶುಲ್ಕ.",
+
+    // Request Form
+    request_service: "ಸೇವೆಗೆ ವಿನಂತಿಸಿ",
+    title: "ಶೀರ್ಷಿಕೆ",
+    title_placeholder: "ಉದಾಹರಣೆಗೆ: ತುರ್ತು ಎಲೆಕ್ತ್ರಿಷಿಯನ್ ಬೇಕಾಗಿದ್ದಾರೆ",
+    description: "ವಿವರಣೆ",
+    description_placeholder: "ನಿಮ್ಮ ಸಮಸ್ಯೆಯನ್ನು ದಯವಿಟ್ಟು ವಿವರವಾಗಿ ತಿಳಿಸಿ...",
+    landmark: "ಹತ್ತಿರದ ಪ್ರಮುಖ ಗುರುತು (Landmark)",
+    landmark_placeholder: "ಉದಾಹರಣೆಗೆ: ಗೋಪಿ ಸರ್ಕಲ್ ಹತ್ತಿರ, ಸರ್ಕಾರಿ ಶಾಲೆಯ ಎದುರು",
+    urgency: "ತುರ್ತು ಪರಿಸ್ಥಿತಿ",
+    preferred_contact: "ಸಂಪರ್ಕ ವಿಧಾನ",
+    budget_min: "ಕನಿಷ್ಠ ಬಜೆಟ್ (₹, ಐಚ್ಛಿಕ)",
+    budget_max: "ಗರಿಷ್ಠ ಬಜೆಟ್ (₹, ಐಚ್ಛಿಕ)",
+    submit_request: "ವಿನಂತಿಯನ್ನು ಸಲ್ಲಿಸಿ",
+    voice_note: "ಧ್ವನಿ ರೆಕಾರ್ಡಿಂಗ್ ವಿವರಣೆ (ಐಚ್ಛಿಕ)",
+    record_voice: "🎤 ಧ್ವನಿ ರೆಕಾರ್ಡ್ ಮಾಡಿ",
+    stop_recording: "⏹️ ರೆಕಾರ್ಡಿಂಗ್ ನಿಲ್ಲಿಸಿ",
+    play_voice: "🔊 ಧ್ವನಿಯನ್ನು ಕೇಳಿ",
+    delete_voice: "🗑️ ಧ್ವನಿಯನ್ನು ಅಳಿಸಿ",
+    any: "ಯಾವುದಾದರೂ",
+    phone: "ಫೋನ್ ಕರೆ",
+    whatsapp: "ವಾಟ್ಸಾಪ್",
+    email: "ಇಮೇಲ್",
+    flexible: "ಯಾವಾಗಲಾದರೂ",
+    within_week: "ಒಂದು ವಾರದೊಳಗೆ",
+    within_48_hours: "೪೮ ಗಂಟೆಗಳಲ್ಲಿ",
+    emergency: "🚨 ತುರ್ತು ಪರಿಸ್ಥಿತಿ",
+
+    // General UI
+    sign_out: "ಸೈನ್ ಔಟ್",
+    search_service: "ಇಂದು ನಿಮಗೆ ಯಾವ ಸೇವೆ ಬೇಕು?",
+    search_placeholder: "ಪ್ಲಂಬರ್‌ಗಳು, ಎಲೆಕ್ಟ್ರಿಷಿಯನ್‌ಗಳಿಗಾಗಿ ಹುಡುಕಿ...",
+    popular_categories: "ಜನಪ್ರಿಯ ವಿಭಾಗಗಳು",
+    localities: "ಶಿವಮೊಗ್ಗದ ಸೇವಾ ಪ್ರದೇಶಗಳು",
+    group_discount: "👥 ಒಂದೇ ಬೀದಿಯ ಗುಂಪು ಬುಕ್ಕಿಂಗ್ ಅನ್ವಯಿಸಿದೆ! ಭೇಟಿ ಶುಲ್ಕದಲ್ಲಿ 15% ರಿಯಾಯಿತಿ",
+    verified_local: "ಪರಿಶೀಲಿಸಿದ ಸ್ಥಳೀಯರು ✓",
+    home: "ಮುಖಪುಟ",
+    how_it_works: "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
+    for_providers: "ಸೇವೆ ಒದಗಿಸುವವರಿಗಾಗಿ",
+    support: "ಬೆಂಬಲ",
+    dashboard: "ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    grow_business_leads: "ಪರಿಶೀಲಿಸಿದ ಗ್ರಾಹಕ ವಿನಂತಿಗಳೊಂದಿಗೆ ನಿಮ್ಮ ಸ್ಥಳೀಯ ವ್ಯವಹಾರವನ್ನು ಬೆಳೆಸಿಕೊಳ್ಳಿ.",
+    grow_business_desc: "ಶಿವಮೊಗ್ಗದ ವಿಶ್ವಾಸಾರ್ಹ ಸೇವಾ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೇರಿಕೊಳ್ಳಿ. ಯಾವುದೇ ನೋಂದಣಿ ಶುಲ್ಕವಿಲ್ಲ — ನಿಮ್ಮ ಸೇವೆ ಬಯಸುವ ಗ್ರಾಹಕರು ಇಲ್ಲಿದ್ದಾರೆ.",
+    start_application: "ನಿಮ್ಮ ಅರ್ಜಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿ",
+    steps_sign_in: "ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    steps_sign_in_desc: "ಕೆಲವೇ ಕ್ಷಣಗಳಲ್ಲಿ ನಿಮ್ಮ ಖಾತೆಯನ್ನು ರಚಿಸಿ.",
+    steps_details: "ನಿಮ್ಮ ವಿವರಗಳನ್ನು ಸಲ್ಲಿಸಿ",
+    steps_details_desc: "ನಿಮ್ಮ ಸೇವೆ, ಅನುಭವ ಮತ್ತು ಸೇವಾ ಪ್ರದೇಶಗಳನ್ನು ತಿಳಿಸಿ.",
+    steps_docs: "ದಾಖಲೆಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ",
+    steps_docs_desc: "ಪರಿಶೀಲನೆಗಾಗಿ ಗುರುತಿನ ಮತ್ತು ವಿಳಾಸದ ಪುರಾವೆ.",
+    steps_approved: "ಅನುಮೋದನೆ ಪಡೆಯಿರಿ",
+    steps_approved_desc: "ನಮ್ಮ ತಂಡವು ಪರಿಶೀಲಿಸಿ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.",
+    steps_leads: "ಕರೆಗಳನ್ನು ಸ್ವೀಕರಿಸಿ",
+    steps_leads_desc: "ಸಹಯೋಗದ ವಿನಂತಿಗಳು ನೇರವಾಗಿ ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ತಲುಪುತ್ತವೆ.",
+    
+    // Landing Page Additions
+    services: "ಸೇವೆಗಳು",
+    sign_in: "ಸೈನ್ ಇನ್",
+    serving_localities: "ಶಿವಮೊಗ್ಗದ ಸ್ಥಳೀಯ ಸೇವೆಗಳು",
+    hero_title_1: "ವಿಶ್ವಾಸಾರ್ಹ ಸ್ಥಳೀಯ ತಜ್ಞರು, ",
+    hero_title_2: "ಪರಿಶೀಲಿಸಿದವರಿಗೆ",
+    hero_title_3: " ಮೊದಲ ಆದ್ಯತೆ.",
+    hero_desc: "ಶಿವಮೊಗ್ಗದ ಆಯ್ದ ಸೇವಾ ವೃತ್ತಿಪರರು — ಹಿನ್ನೆಲೆ ಪರಿಶೀಲಿಸಲಾಗಿದೆ ಮತ್ತು ನಿಮ್ಮ ಮುಂದಿನ ವಿನಂತಿಗೆ ಸಿದ್ಧರಾಗಿದ್ದಾರೆ.",
+    see_how_it_works: "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ ನೋಡಿ",
+    what_we_cover: "ನಾವು ನೀಡುವ ಸೇವೆಗಳು",
+    id_verified: "ಪರಿಶೀಲಿಸಿದ ಐಡಿ",
+    zero_pre_payments: "ಮುಂಗಡ ಪಾವತಿ ಇಲ್ಲ",
+    local_100: "100% ಸ್ಥಳೀಯರು",
+    platform_match_flow: "ವೇದಿಕೆ ಹೊಂದಾಣಿಕೆಯ ಪ್ರಕ್ರಿಯೆ",
+    real_time_engine: "ರಿಯಲ್-ಟೈಮ್ ಎಂಜಿನ್",
+    user_request: "ಗ್ರಾಹಕರ ವಿನಂತಿ",
+    electrician_example: '"ಇಂದು ದುರ್ಗಿ ಗುಡಿಯಲ್ಲಿ ಎಲೆಕ್ತ್ರಿಷಿಯನ್ ಬೇಕಾಗಿದ್ದಾರೆ"',
+    auto_matching: "ಸ್ವಯಂಚಾಲಿತ ಹೊಂದಾಣಿಕೆ",
+    scanning_pros: "ಸ್ಥಳೀಯವಾಗಿ ಸಕ್ರಿಯರಿರುವ ತಜ್ಞರನ್ನು ಹುಡುಕಲಾಗುತ್ತಿದೆ...",
+    match_connected: "ಹೊಂದಾಣಿಕೆ ಯಶಸ್ವಿಯಾಗಿದೆ",
+    suresh_electricals: "ಸುರೇಶ್ ಎಲೆಕ್ಟ್ರಿಕಲ್ಸ್",
+    suresh_exp: "9 ವರ್ಷಗಳ ಅನುಭವ · ವಿದ್ಯಾನಗರ",
+    families_title_1: "ಐದು ಸೇವಾ ",
+    families_title_2: "ವಿಭಾಗಗಳು",
+    families_title_3: ", ಒಂದೇ ವಿಶ್ವಾಸಾರ್ಹ ಜಾಲ.",
+    families_desc: "ನಮ್ಮ ವೇದಿಕೆಯಲ್ಲಿ ಸಕ್ರಿಯರಾಗುವ ಮೊದಲು ಪ್ರತಿ ವೃತ್ತಿಪರರ ಹಿನ್ನೆಲೆಯನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ.",
+    more_coming_soon: "ಹೆಚ್ಚಿನ ಸೇವೆಗಳು ಶೀಘ್ರದಲ್ಲೇ ಬರಲಿವೆ",
+    provider_cta_title_1: "ಸ್ಥಳೀಯ ಸೇವೆ ನಡೆಸುತ್ತಿದ್ದೀರಾ? ",
+    provider_cta_title_2: "ನಿಮ್ಮವರಾಗಿ ಗುರುತಿಸಿಕೊಳ್ಳಿ",
+    provider_cta_title_3: " ನಿಮ್ಮ ಹತ್ತಿರ.",
+    provider_cta_desc: "ನೋಂದಾಯಿಸಿ, ಪರಿಶೀಲನೆ ಪೂರ್ಣಗೊಳಿಸಿ ಮತ್ತು ನೇರ ವಿನಂತಿಗಳನ್ನು ಸ್ವೀಕರಿಸಿ — ಮೊದಲ ಆವೃತ್ತಿಯಲ್ಲಿ ಸಂಪೂರ್ಣ ಉಚಿತ.",
+    coverage_title_1: "ಈಗ ಶಿವಮೊಗ್ಗದಾದ್ಯಂತ ",
+    coverage_title_2: "ಸೇವೆಯಲ್ಲಿದೆ",
+    coverage_desc: "ನಾವು ಸ್ಥಳೀಯವಾಗಿ ಗಮನ ಹರಿಸಿದ್ದೇವೆ. ಪ್ರಸ್ತುತ ಈ ಕೆಳಗಿನ ಬಡಾವಣೆಗಳಲ್ಲಿ ಸೇವೆ ನೀಡುತ್ತಿದ್ದೇವೆ.",
+    
+    // Category Additions
+    explore_categories: "ಸೇವಾ ವಿವರಣೆ ನೋಡಿ",
+    expanding_categories: "ನಾವು ಶಿವಮೊಗ್ಗದಾದ್ಯಂತ ಸೇವಾ ವಿಭಾಗಗಳನ್ನು ವಿಸ್ತರಿಸುತ್ತಿದ್ದೇವೆ.",
+    cat_home_repair_handyman: "ಮನೆ ದುರಸ್ತಿ ಮತ್ತು ಕೈಗೆಲಸ",
+    desc_home_repair_handyman: "ಎಲೆಕ್ಟ್ರಿಷಿಯನ್, ಪ್ಲಂಬರ್, ಕಾರ್ಪೆಂಟರ್ ಮತ್ತು ಇತರ ಕೆಲಸಗಳು.",
+    cat_cleaning_pest_control: "ಕ್ಲೀನಿಂಗ್ ಮತ್ತು ಕೀಟ ನಿಯಂತ್ರಣ",
+    desc_cleaning_pest_control: "ಡೀಪ್ ಕ್ಲೀನಿಂಗ್, ಸೋಫಾ ಕ್ಲೀನಿಂಗ್ ಮತ್ತು ಕೀಟ ನಿಯಂತ್ರಣ.",
+    cat_painting_home_improvement: "ಪೇಂಟಿಂಗ್ ಮತ್ತು ಮನೆ ಸುಧಾರಣೆ",
+    desc_painting_home_improvement: "ಪೇಂಟಿಂಗ್, ವಾಟರ್‌ಪ್ರೂಫಿಂಗ್ ಮತ್ತು ಸಣ್ಣ ನವೀಕರಣಗಳು.",
+    cat_salon_spa_beauty: "ಸಲೂನ್, ಸ್ಪา ಮತ್ತು ಸೌಂದರ್ಯ",
+    desc_salon_spa_beauty: "ಮನೆಯಲ್ಲೇ ಹೇರ್ ಸ್ಟೈಲಿಂಗ್, ಫೇಶಿಯಲ್, ಬ್ರೈಡಲ್ ಮೇಕಪ್ ಮತ್ತು ಸ್ಪಾ.",
+    cat_education_tutoring_coaching: "ಶಿಕ್ಷಣ ಮತ್ತು ಬೋಧನೆ",
+    desc_education_tutoring_coaching: "ಟ್ಯೂಷನ್, ಪರೀಕ್ಷಾ ತರಬೇತಿ, ಭಾಷೆಗಳು ಮತ್ತು ಕೌಶಲ್ಯಗಳು.",
+    
+    // Additional home page text
+    how_it_works_subtitle_1: "ನಾಲ್ಕು ಹಂತಗಳಲ್ಲಿ ",
+    how_it_works_subtitle_2: "ವಿನಂತಿ",
+    how_it_works_subtitle_3: " ಇತ್ಯರ್ಥಗೊಳ್ಳುತ್ತದೆ.",
+    step_1_title: "ನಿಮ್ಮ ಕೆಲಸವನ್ನು ತಿಳಿಸಿ",
+    step_1_desc: "ವಿಭಾಗವನ್ನು ಆರಿಸಿ ಮತ್ತು ನಿಮ್ಮ ಅವಶ್ಯಕತೆಯನ್ನು ವಿವರಿಸಿ.",
+    step_2_title: "ವೃತ್ತಿಪರರನ್ನು ಹೊಂದಿಸುತ್ತೇವೆ",
+    step_2_desc: "ನಿಮ್ಮ ಹತ್ತಿರದ ಪರಿಶೀಲಿಸಿದ ವೃತ್ತಿಪರರನ್ನು ನಿಯೋಜಿಸಲಾಗುತ್ತದೆ.",
+    step_3_title: "ಕೆಲಸ ಪೂರ್ಣಗೊಳಿಸಿ",
+    step_3_desc: "ಅವರು ಭೇಟಿ ನೀಡಿ ಕೆಲಸವನ್ನು ಪೂರ್ಣಗೊಳಿಸುತ್ತಾರೆ.",
+    step_4_title: "ರೇಟ್ ಮಾಡಿ ಮತ್ತು ವಿಮರ್ಶಿಸಿ",
+    step_4_desc: "ನೆಟ್‌ವರ್ಕ್ ಸುರಕ್ಷತೆಗಾಗಿ ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಹಂಚಿಕೊಳ್ಳಿ.",
+    trust_title: "ವಿಶ್ವಾಸಾರ್ಹತೆ, ಅಂತರ್ಗತವಾಗಿದೆ",
+    trust_subtitle_1: "ಪರಿಶೀಲಿಸಿದ ವೃತ್ತಿಪರರು ಮಾತ್ರ — ",
+    trust_subtitle_2: "ಯಾವುದೇ ವಿನಾಯಿತಿ ಇಲ್ಲ",
+    trust_subtitle_3: ".",
+    trust_item_1_title: "ಹಸ್ತಚಾಲಿತ ದಾಖಲೆ ಪರಿಶೀಲನೆ",
+    trust_item_1_desc: "ಅರ್ಹತೆಗಳು ಮತ್ತು ಪುರಾವೆಗಳನ್ನು ಕೈಯಾರೆ ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ.",
+    trust_item_2_title: "ಪೂರ್ಣಗೊಂಡ ಬುಕ್ಕಿಂಗ್‌ಗಳು ಮಾತ್ರ",
+    trust_item_2_desc: "ನಿಜವಾದ ಗ್ರಾಹಕರು ಮಾತ್ರ ಪ್ರತಿಕ್ರಿಯೆ ನೀಡಬಹುದು.",
+    trust_item_3_title: "ಖಾಸಗಿ ದಾಖಲೆಗಳು",
+    trust_item_3_desc: "ನಿಮ್ಮ ದಾಖಲೆಗಳನ್ನು ಸಾರ್ವಜನಿಕವಾಗಿ ಪ್ರದರ್ಶಿಸಲಾಗುವುದಿಲ್ಲ.",
+    stat_1_val: "100%",
+    stat_1_lbl: "ವೃತ್ತಿಪರರು ಪರಿಶೀಲಿಸಲ್ಪಟ್ಟಿದ್ದಾರೆ",
+    stat_2_val: "5",
+    stat_2_lbl: "ಸೇವಾ ವಿಭಾಗಗಳು",
+    stat_3_val: "12+",
+    stat_3_lbl: "ಸಕ್ರಿಯ ಸೇವಾ ಪ್ರದೇಶಗಳು",
+    stat_4_val: "4.8★",
+    stat_4_lbl: "ಸರಾಸರಿ ರೇಟಿಂಗ್",
+    coverage_eyebrow: "ಸೇವಾ ಪ್ರದೇಶಗಳು",
+  }
+};
+
+const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [language, setLanguageState] = useState<Language>("en");
+
+  useEffect(() => {
+    const saved = localStorage.getItem("cloud-aif-lang") as Language;
+    if (saved === "en" || saved === "kn") {
+      setLanguageState(saved);
+    }
+  }, []);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+    localStorage.setItem("cloud-aif-lang", lang);
+  };
+
+  const t = (key: string): string => {
+    const langDict = DICTIONARY[language];
+    if (key in langDict) return langDict[key];
+    return DICTIONARY["en"][key] || key; // Fallback to english, then key
+  };
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    return {
+      language: "en" as Language,
+      setLanguage: () => {},
+      t: (key: string) => key,
+    };
+  }
+  return context;
+}

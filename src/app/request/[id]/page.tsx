@@ -7,6 +7,7 @@ import { getSession } from "@/lib/session";
 import ReviewBox from "@/components/ReviewBox";
 import RequestStatusActions from "@/components/RequestStatusActions";
 import AdminAssignmentPanel from "@/components/AdminAssignmentPanel";
+import LiveTrackingMap from "@/components/LiveTrackingMap";
 
 export const dynamic = "force-dynamic";
 
@@ -122,18 +123,34 @@ export default async function RequestDetail({ params }: { params: { id: string }
           <p className="mt-1 text-[14px] md:text-[15px]" style={{ color: "var(--slate)" }}>
             {request.category.name}{request.subservice ? ` · ${request.subservice.name}` : ""} · {request.serviceArea?.name ?? request.locality}
           </p>
+          {request.groupDiscountApplied && (
+            <div className="mt-4 rounded-xl border p-4 bg-emerald-50/80 border-emerald-200 text-emerald-800 text-[13.5px] font-semibold flex items-center gap-2 max-w-4xl">
+              <span>👥</span>
+              <span>Street Group Booking applied! 15% discount has been applied to final visiting/travel charges.</span>
+            </div>
+          )}
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-          <div className="card">
+          <div className="space-y-6">
+            <div className="card">
             <h2 className="mb-3 text-[20px]">Details</h2>
             <p className="text-[15px] leading-relaxed" style={{ color: "var(--ink)" }}>{request.description}</p>
+            
+            {request.voiceNoteUrl && (
+              <div className="mt-4 rounded-xl border border-line p-3 bg-gray-50 max-w-md">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-slate mb-1.5">🎤 Voice Description</span>
+                <audio src={request.voiceNoteUrl} className="w-full h-8" controls />
+              </div>
+            )}
+
             <dl className="mt-5 space-y-2 text-[14px]">
               <Row k="Urgency" v={request.urgency.replace(/_/g, " ").toLowerCase()} />
               <Row k="Preferred contact" v={request.contactPreference.toLowerCase()} />
               {request.preferredDate && <Row k="Preferred date" v={request.preferredDate.toLocaleDateString()} />}
               {(request.budgetMin || request.budgetMax) && <Row k="Budget" v={`₹${request.budgetMin ?? "?"} – ₹${request.budgetMax ?? "?"}`} />}
               {request.addressLine && <Row k="Address" v={request.addressLine} />}
+              {request.landmark && <Row k="Landmark" v={request.landmark} />}
               {request.phone && <Row k="Contact Phone" v={request.phone} />}
               {request.alternatePhone && <Row k="Alternate Phone" v={request.alternatePhone} />}
             </dl>
@@ -181,23 +198,37 @@ export default async function RequestDetail({ params }: { params: { id: string }
             {accepted && isOwner && (
               <div className="mt-5 border-t pt-4" style={{ borderColor: "var(--line)" }}>
                 <p className="label mb-3">Your Assigned Provider</p>
-                <div className="rounded-xl border p-4" style={{ background: "#f0fdf4", borderColor: "#bbf7d0" }}>
+                <div className="rounded-xl border p-4" style={{ background: "var(--mist)", borderColor: "var(--sage)" }}>
                   <div className="flex items-center gap-3 mb-3">
                     {accepted.provider.user?.image ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={accepted.provider.user.image} alt="Provider" className="h-12 w-12 rounded-full object-cover border" style={{ borderColor: "#bbf7d0" }} />
+                      <img src={accepted.provider.user.image} alt="Provider" className="h-12 w-12 rounded-full object-cover border" style={{ borderColor: "var(--sage)" }} />
                     ) : (
                       <div className="grid h-12 w-12 place-items-center rounded-xl font-display text-[20px] font-bold text-white" style={{ background: "var(--brand)" }}>
                         {accepted.provider.displayName.charAt(0)}
                       </div>
                     )}
                     <div>
-                      <div className="text-[16px] font-semibold" style={{ color: "var(--forest)" }}>{accepted.provider.displayName}</div>
-                      <div className="text-[13px]" style={{ color: "#15803d" }}>★ {accepted.provider.ratingAverage.toFixed(1)} · {accepted.provider.jobsCompleted} jobs completed</div>
+                      <div className="text-[16px] font-semibold flex items-center gap-1.5" style={{ color: "var(--forest)" }}>
+                        {accepted.provider.displayName}
+                        {accepted.provider.verifiedBadge && (
+                          <span className="inline-flex items-center text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                            Verified Local ✓
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[13px]" style={{ color: "var(--brand)" }}>★ {accepted.provider.ratingAverage.toFixed(1)} · {accepted.provider.jobsCompleted} jobs completed</div>
                     </div>
-                    <span className="ml-auto text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: "#16a34a22", color: "#16a34a" }}>Confirmed ✓</span>
+                    <span className="ml-auto text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(0, 145, 255, 0.1)", color: "var(--brand)" }}>Confirmed ✓</span>
                   </div>
                   <div className="space-y-2 text-[13px]">
+                    {accepted.provider.inspectionFee != null && (
+                      <div className="flex items-center gap-2">
+                        <span>💰</span>
+                        <span style={{ color: "var(--slate)" }}>Inspection Fee:</span>
+                        <span className="font-semibold text-forest">₹{accepted.provider.inspectionFee}</span>
+                      </div>
+                    )}
                     {accepted.provider.user?.phone && (
                       <div className="flex items-center gap-2">
                         <span>📞</span>
@@ -275,6 +306,16 @@ export default async function RequestDetail({ params }: { params: { id: string }
                 {request.review.comment && <p className="text-[14px]" style={{ color: "var(--slate)" }}>{request.review.comment}</p>}
               </div>
             )}
+          </div>
+
+          {["ASSIGNED", "ACCEPTED", "IN_PROGRESS"].includes(request.status) && accepted && (
+            <LiveTrackingMap
+              latitude={request.latitude || 13.9299}
+              longitude={request.longitude || 75.5681}
+              providerName={accepted.provider.displayName}
+              landmark={request.landmark}
+            />
+          )}
           </div>
 
           <div className="space-y-6">

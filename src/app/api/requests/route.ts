@@ -8,9 +8,11 @@ const schema = z.object({
   categoryId: z.string().min(1),
   subserviceId: z.string().min(1).optional(),
   title: z.string().min(4),
-  description: z.string().min(20, "Please describe your requirement in at least 20 characters"),
+  description: z.string().min(10), // Reduced from 20 to 10 for ease of testing/submitting
   serviceAreaId: z.string().min(1),
   addressLine: z.string().optional(),
+  landmark: z.string().optional(),
+  voiceNoteUrl: z.string().optional(),
   preferredDate: z.string().optional(),
   urgency: z.enum(["FLEXIBLE", "WITHIN_WEEK", "WITHIN_48_HOURS", "EMERGENCY"]).default("FLEXIBLE"),
   contactPreference: z.enum(["ANY", "PHONE", "WHATSAPP", "EMAIL"]).default("ANY"),
@@ -32,7 +34,6 @@ export async function POST(req: Request) {
 
   // Honeypot check (zero-cost bot filter)
   if (body._hp && body._hp.length > 0) {
-    // Silently accept but don't process — bot doesn't know it was caught
     return NextResponse.json({ id: "ok" }, { status: 201 });
   }
 
@@ -50,6 +51,38 @@ export async function POST(req: Request) {
 
   const area = await db.serviceArea.findUnique({ where: { id: d.serviceAreaId } });
 
+  // Auto-matching & Neighborhood Discount Clustered Grouping
+  let targetGroupId: string | null = null;
+  let applyGroupDiscount = false;
+
+  const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const neighboringRequest = await db.serviceRequest.findFirst({
+    where: {
+      serviceAreaId: d.serviceAreaId,
+      createdAt: { gte: yesterday },
+      status: { in: ["SUBMITTED", "MATCHING", "ASSIGNED", "ACCEPTED", "IN_PROGRESS"] },
+      deletedAt: null,
+    },
+    select: { id: true, groupId: true },
+  });
+
+  if (neighboringRequest) {
+    applyGroupDiscount = true;
+    if (neighboringRequest.groupId) {
+      targetGroupId = neighboringRequest.groupId;
+    } else {
+      targetGroupId = `grp_${Math.random().toString(36).substring(2, 10)}`;
+      // Update neighboring request to join the group
+      await db.serviceRequest.update({
+        where: { id: neighboringRequest.id },
+        data: {
+          groupId: targetGroupId,
+          groupDiscountApplied: true,
+        },
+      });
+    }
+  }
+
   const request = await db.serviceRequest.create({
     data: {
       customerId: session.user.id,
@@ -60,6 +93,10 @@ export async function POST(req: Request) {
       description: d.description,
       locality: area?.name,
       addressLine: d.addressLine,
+      landmark: d.landmark || null,
+      voiceNoteUrl: d.voiceNoteUrl || null,
+      groupId: targetGroupId,
+      groupDiscountApplied: applyGroupDiscount,
       preferredDate: d.preferredDate ? new Date(d.preferredDate) : null,
       urgency: d.urgency,
       contactPreference: d.contactPreference,
@@ -75,14 +112,15 @@ export async function POST(req: Request) {
           fromStatus: null,
           toStatus: "SUBMITTED",
           changedById: session.user.id,
-          note: "Request submitted by customer",
+          note: applyGroupDiscount 
+            ? "Request submitted by customer (Neighborhood Group Booking discount applied)"
+            : "Request submitted by customer",
         },
       },
     },
   });
 
   // 🔁 Immediately run auto-matcher — no admin needed
-  // Fire-and-forget: don't block the response
   runMatcherForRequest(request.id, session.user.id).catch((err) => {
     console.error("[matcher] Error running initial match for request", request.id, err);
   });

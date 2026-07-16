@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/i18n";
 
 type Area = { id: string; name: string };
 
@@ -251,11 +252,13 @@ export default function RequestForm({
   areas: Area[];
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [form, setForm] = useState({
     title: `${subserviceName} needed`,
     description: "",
     serviceAreaId: "",
     addressLine: "",
+    landmark: "",
     preferredDate: "",
     urgency: "FLEXIBLE",
     contactPreference: "ANY",
@@ -265,13 +268,79 @@ export default function RequestForm({
     alternatePhone: "",
     latitude: 13.9299,
     longitude: 75.5681,
+    voiceNoteUrl: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ id: string } | null>(null);
 
+  // Audio recording state
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [uploadingVoice, setUploadingVoice] = useState(false);
+
   function set<K extends keyof typeof form>(k: K, v: any) {
     setForm((f) => ({ ...f, [k]: v }));
+  }
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunks.push(e.data);
+      };
+
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: "audio/webm" });
+        const localUrl = URL.createObjectURL(blob);
+        setAudioUrl(localUrl);
+
+        // Immediately upload to server
+        setUploadingVoice(true);
+        try {
+          const data = new FormData();
+          data.append("file", blob, "voice-note.webm");
+          const response = await fetch("/api/upload-voice", {
+            method: "POST",
+            body: data,
+          });
+          if (response.ok) {
+            const result = await response.json();
+            set("voiceNoteUrl", result.url);
+          } else {
+            alert("Failed to upload voice note. Please try again.");
+          }
+        } catch (err) {
+          console.error("Voice upload error:", err);
+        } finally {
+          setUploadingVoice(false);
+        }
+      };
+
+      recorder.start();
+      setMediaRecorder(recorder);
+      setRecording(true);
+    } catch (err) {
+      console.error("Microphone access denied:", err);
+      alert("Could not access microphone. Please check permissions.");
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && recording) {
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      setRecording(false);
+    }
+  }
+
+  function deleteVoiceNote() {
+    setAudioUrl(null);
+    set("voiceNoteUrl", "");
   }
 
   function validate() {
@@ -327,12 +396,55 @@ export default function RequestForm({
   }
 
   return (
-    <div className="card space-y-4 pb-24 md:pb-6 bg-white border border-line" style={{ borderRadius: "20px" }}>
-      <Field label="Title" error={errors.title}>
+    <div className="card p-4 sm:p-6 space-y-4 pb-24 md:pb-6 bg-white border border-line" style={{ borderRadius: "20px" }}>
+      <Field label={t("title")} error={errors.title}>
         <input className={`input text-[14px] ${errors.title ? "input-error" : ""}`} value={form.title} onChange={(e) => set("title", e.target.value)} />
       </Field>
-      <Field label="Describe what you need" error={errors.description}>
-        <textarea className={`input min-h-[110px] text-[14px] ${errors.description ? "input-error" : ""}`} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="e.g. Two ceiling fans to install and one switchboard that trips frequently." />
+
+      <Field label={t("description")} error={errors.description}>
+        <textarea className={`input min-h-[110px] text-[14px] ${errors.description ? "input-error" : ""}`} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder={t("description_placeholder")} />
+      </Field>
+
+      {/* Voice Note Recorder Widget */}
+      <Field label={t("voice_note")}>
+        <div className="flex flex-wrap items-center gap-3 mt-1">
+          {!audioUrl && !recording && (
+            <button
+              type="button"
+              onClick={startRecording}
+              className="btn btn-ghost !py-2 !px-4 text-[13px] font-bold border border-line flex items-center gap-1.5 active:scale-95 transition"
+            >
+              {t("record_voice")}
+            </button>
+          )}
+          {recording && (
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="btn bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 !py-2 !px-4 text-[13px] font-bold flex items-center gap-1.5 animate-pulse"
+            >
+              {t("stop_recording")}
+            </button>
+          )}
+          {audioUrl && (
+            <div className="flex flex-col gap-2 w-full max-w-sm rounded-xl border border-line p-3 bg-gray-50">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate">
+                {uploadingVoice ? "⏳ Uploading voice note..." : "🔊 Playback voice details"}
+              </span>
+              <div className="flex items-center gap-2">
+                <audio src={audioUrl} className="w-full h-8" controls />
+                <button
+                  type="button"
+                  onClick={deleteVoiceNote}
+                  className="btn btn-ghost !p-2 border border-line hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-95 transition"
+                  title={t("delete_voice")}
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </Field>
       
       <div className="grid gap-4 sm:grid-cols-2">
@@ -347,9 +459,14 @@ export default function RequestForm({
         </Field>
       </div>
 
-      <Field label="Address / landmark">
-        <input className="input text-[14px]" value={form.addressLine} onChange={(e) => set("addressLine", e.target.value)} placeholder="House number, Street name, Near Landmark" />
-      </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Address">
+          <input className="input text-[14px]" value={form.addressLine} onChange={(e) => set("addressLine", e.target.value)} placeholder="House number, Street name" />
+        </Field>
+        <Field label={t("landmark")} error={errors.landmark}>
+          <input className="input text-[14px]" value={form.landmark} onChange={(e) => set("landmark", e.target.value)} placeholder={t("landmark_placeholder")} />
+        </Field>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Primary Contact Number" error={errors.phone}>
@@ -371,28 +488,58 @@ export default function RequestForm({
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Urgency">
-          <select className="input text-[14px]" value={form.urgency} onChange={(e) => set("urgency", e.target.value)}>
-            <option value="FLEXIBLE">Flexible</option>
-            <option value="WITHIN_WEEK">Within a week</option>
-            <option value="WITHIN_48_HOURS">Within 48 hours</option>
-            <option value="EMERGENCY">Emergency</option>
-          </select>
+        <Field label={t("urgency")}>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { value: "FLEXIBLE", label: t("flexible") },
+              { value: "WITHIN_WEEK", label: t("within_week") },
+              { value: "WITHIN_48_HOURS", label: t("within_48_hours") },
+              { value: "EMERGENCY", label: t("emergency") }
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`py-2 px-3 text-[13px] font-bold rounded-xl border text-center transition active:scale-[0.97] min-h-[44px] flex items-center justify-center ${
+                  form.urgency === opt.value
+                    ? "bg-brand text-white border-brand shadow-sm"
+                    : "bg-[#f8fafc] text-slate border-line hover:bg-mist"
+                }`}
+                onClick={() => set("urgency", opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </Field>
-        <Field label="Preferred contact">
-          <select className="input text-[14px]" value={form.contactPreference} onChange={(e) => set("contactPreference", e.target.value)}>
-            <option value="ANY">Any</option>
-            <option value="PHONE">Phone</option>
-            <option value="WHATSAPP">WhatsApp</option>
-            <option value="EMAIL">Email</option>
-          </select>
+        <Field label={t("preferred_contact")}>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { value: "ANY", label: t("any") },
+              { value: "PHONE", label: t("phone") },
+              { value: "WHATSAPP", label: t("whatsapp") },
+              { value: "EMAIL", label: t("email") }
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                className={`py-2 px-3 text-[13px] font-bold rounded-xl border text-center transition active:scale-[0.97] min-h-[44px] flex items-center justify-center ${
+                  form.contactPreference === opt.value
+                    ? "bg-brand text-white border-brand shadow-sm"
+                    : "bg-[#f8fafc] text-slate border-line hover:bg-mist"
+                }`}
+                onClick={() => set("contactPreference", opt.value)}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
         </Field>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Budget min (₹, optional)">
+        <Field label={t("budget_min")}>
           <input type="number" inputMode="numeric" className="input text-[14px]" value={form.budgetMin} onChange={(e) => set("budgetMin", e.target.value)} />
         </Field>
-        <Field label="Budget max (₹, optional)">
+        <Field label={t("budget_max")}>
           <input type="number" inputMode="numeric" className="input text-[14px]" value={form.budgetMax} onChange={(e) => set("budgetMax", e.target.value)} />
         </Field>
       </div>
@@ -401,7 +548,7 @@ export default function RequestForm({
       
       <div className="sticky-bottom-bar md:static md:p-0 md:bg-transparent md:shadow-none md:border-t-0 md:mt-4">
         <button className="btn btn-primary w-full shadow-md md:shadow-none" disabled={submitting} onClick={submit}>
-          {submitting ? "Submitting…" : "Submit request"}
+          {submitting ? t("submitting") : t("submit_request")}
         </button>
       </div>
     </div>

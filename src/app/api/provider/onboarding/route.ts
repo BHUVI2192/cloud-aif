@@ -60,14 +60,17 @@ export async function POST(req: Request) {
     const primaryCategoryId = formData.get("primaryCategoryId") as string;
     const experienceYearsStr = formData.get("experienceYears") as string;
     const phone = formData.get("phone") as string;
+    const inspectionFeeStr = formData.get("inspectionFee") as string;
 
     const profilePic = formData.get("profilePic") as File | null;
     const idProof = formData.get("idProof") as File | null;
     const addressProof = formData.get("addressProof") as File | null;
 
-    if (!legalName || !displayName || !primaryCategoryId || !experienceYearsStr || !phone || !profilePic || !idProof || !addressProof) {
+    if (!legalName || !displayName || !primaryCategoryId || !experienceYearsStr || !phone || !profilePic || !idProof || !addressProof || !inspectionFeeStr) {
       return NextResponse.json({ error: "Missing required fields or files" }, { status: 400 });
     }
+
+    const inspectionFee = parseInt(inspectionFeeStr, 10) || 0;
 
     const trimmedPhone = phone.trim();
     // Validate phone number uniqueness before database transaction to prevent Unique Constraint crashes
@@ -175,6 +178,7 @@ export async function POST(req: Request) {
         experienceYears,
         primaryCategoryId,
         profileImage: profileImageUrl,
+        inspectionFee,
         status: "PENDING_VERIFICATION",
         verificationStatus: "PENDING",
         isActive: false,
@@ -189,6 +193,7 @@ export async function POST(req: Request) {
         experienceYears,
         primaryCategoryId,
         profileImage: profileImageUrl,
+        inspectionFee,
         status: "PENDING_VERIFICATION",
         verificationStatus: "PENDING",
         isActive: false,

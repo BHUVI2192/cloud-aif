@@ -18,17 +18,18 @@ export default async function Onboarding() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Focused Onboarding Header - No marketing links, only logo and sign out */}
-      <header className="border-b bg-white" style={{ borderColor: "var(--line)" }}>
-        <div className="mx-auto flex h-[64px] max-w-[1180px] items-center justify-between px-7">
-          <div className="flex items-center gap-2.5 font-display text-[18px] font-semibold" style={{ color: "var(--forest)" }}>
-            <span className="grid h-[28px] w-[28px] place-items-center rounded-[7px] text-[14px] text-white" style={{ background: "var(--brand)" }}>C</span>
+      <header className="border-b bg-white/95 backdrop-blur-md sticky top-0 z-30" style={{ borderColor: "var(--line)" }}>
+        <div className="mx-auto flex h-[64px] max-w-[1180px] items-center justify-between px-4 md:px-7">
+          <div className="flex items-center gap-2.5 font-display text-[18px] font-bold" style={{ color: "var(--forest)" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[28px] w-[28px] rounded-[7px] object-contain" />
             Cloud AIF
           </div>
-          <SignOutButton />
+          <SignOutButton className="!w-auto px-4" />
         </div>
       </header>
 
-      <div className="flex-1 mx-auto w-full max-w-[640px] px-7 py-12">
+      <div className="flex-1 mx-auto w-full max-w-[640px] px-4 py-8 md:px-7 md:py-12">
         <h1 className="my-3 text-[32px] font-bold" style={{ color: "var(--forest)" }}>Become a provider</h1>
         {existing && existing.status !== "DRAFT" ? (
           <div className="card bg-white" style={{ border: "1px solid var(--line)" }}>

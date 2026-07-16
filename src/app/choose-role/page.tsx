@@ -59,7 +59,8 @@ export default function ChooseRole() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-6 py-12">
       <div className="w-full max-w-[800px] text-center space-y-6">
         <div className="flex justify-center items-center gap-2 mb-4 font-display text-[26px] font-bold" style={{ color: "var(--forest)" }}>
-          <span className="grid h-[42px] w-[42px] place-items-center rounded-[12px] text-[20px] text-white" style={{ background: "var(--brand)" }}>C</span>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[42px] w-[42px] rounded-[12px] object-contain" />
           Cloud AIF
         </div>
         

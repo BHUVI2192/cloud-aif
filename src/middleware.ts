@@ -131,6 +131,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - uploads (uploaded files so they can be viewed)
      */
-    "/((?!api|_next/static|_next/image|\\.well-known|favicon\\.ico|uploads).*)",
+    "/((?!api|_next/static|_next/image|\\.well-known|favicon\\.ico|uploads|logo_192\\.png|logo_512\\.png|manifest\\.json).*)",
   ],
 };

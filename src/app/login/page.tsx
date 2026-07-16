@@ -78,7 +78,8 @@ function LoginInner() {
   return (
     <div className="mx-auto flex min-h-screen max-w-[440px] flex-col justify-center px-7 py-16">
       <Link href="/" className="mb-8 flex items-center gap-2.5 font-display text-[22px] font-semibold" style={{ color: "var(--forest)" }}>
-        <span className="grid h-[34px] w-[34px] place-items-center rounded-[9px] text-[17px] text-white" style={{ background: "var(--brand)" }}>C</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[34px] w-[34px] rounded-[9px] object-contain" />
         Cloud AIF
       </Link>
       <h1 className="text-[32px]">Welcome back</h1>

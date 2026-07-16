@@ -384,6 +384,7 @@ model ProviderProfile {
   emergencyContact  String?
   indicativePriceMin Int?
   indicativePriceMax Int?
+  inspectionFee     Int?
 
   // --- Lifecycle / trust ---
   status             ProviderStatus     @default(DRAFT)
@@ -715,6 +716,7 @@ model ServiceRequest {
   // Location (free-form snapshot kept alongside the normalized serviceArea link)
   locality    String?
   addressLine String?
+  landmark    String?
   pincode     String?
   phone       String?
   alternatePhone String?
@@ -744,6 +746,10 @@ model ServiceRequest {
   matchAttempts        Int       @default(0)
   lastMatchedAt        DateTime?
   needsAdminAttention  Boolean   @default(false)
+
+  voiceNoteUrl        String?
+  groupId             String?
+  groupDiscountApplied Boolean   @default(false)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

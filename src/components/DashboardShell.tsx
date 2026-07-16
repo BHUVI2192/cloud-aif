@@ -3,58 +3,48 @@ import Link from "next/link";
 import { useState } from "react";
 import SignOutButton from "./SignOutButton";
 import NotificationBell from "./NotificationBell";
+import {
+  Home,
+  FileText,
+  PlusCircle,
+  Users,
+  Layout,
+  User,
+  Calendar,
+  Image as ImageIcon,
+  Star,
+  Shield,
+  Settings,
+  Grid,
+  List,
+  AlertCircle,
+  Activity,
+  Menu,
+  ArrowLeft,
+  X
+} from "lucide-react";
 
-// Helper icons mapping for the bottom navigation bar
+// Helper icons mapping for the bottom navigation bar and drawer
 const NAV_ICONS: Record<string, React.ReactNode> = {
-  Overview: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <polyline points="9 22 9 12 15 12 15 22" />
-    </svg>
-  ),
-  Requests: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <polyline points="10 9 9 9 8 9" />
-    </svg>
-  ),
-  Providers: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  ),
-  Services: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-      <line x1="8" y1="21" x2="16" y2="21" />
-      <line x1="12" y1="17" x2="12" y2="21" />
-    </svg>
-  ),
-  "My Requests": (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-    </svg>
-  ),
-  "New Request": (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  ),
-  Menu: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
-  ),
+  Overview: <Home className="w-5 h-5" />,
+  Requests: <FileText className="w-5 h-5" />,
+  "My Requests": <FileText className="w-5 h-5" />,
+  "New Request": <PlusCircle className="w-5 h-5" />,
+  Providers: <Users className="w-5 h-5" />,
+  Services: <Layout className="w-5 h-5" />,
+  "Services & areas": <Layout className="w-5 h-5" />,
+  Profile: <User className="w-5 h-5" />,
+  Availability: <Calendar className="w-5 h-5" />,
+  Portfolio: <ImageIcon className="w-5 h-5" />,
+  Reviews: <Star className="w-5 h-5" />,
+  Verification: <Shield className="w-5 h-5" />,
+  Settings: <Settings className="w-5 h-5" />,
+  Categories: <Grid className="w-5 h-5" />,
+  Subservices: <List className="w-5 h-5" />,
+  Complaints: <AlertCircle className="w-5 h-5" />,
+  Users: <Users className="w-5 h-5" />,
+  "Audit logs": <Activity className="w-5 h-5" />,
+  Menu: <Menu className="w-5 h-5" />,
 };
 
 export default function DashboardShell({
@@ -159,13 +149,10 @@ export default function DashboardShell({
           {backHref ? (
             <Link
               href={backHref}
-              className="grid h-9 w-9 place-items-center rounded-full transition active:bg-mist"
+              className="grid h-9 w-9 place-items-center rounded-full transition active:bg-mist text-brand"
               style={{ color: "var(--brand)" }}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
+              <ArrowLeft className="w-5 h-5 stroke-[2.5]" />
             </Link>
           ) : null}
           <span className="text-[16px] font-bold tracking-tight" style={{ color: "var(--forest)" }}>
@@ -234,7 +221,9 @@ export default function DashboardShell({
           >
             <div className="flex items-center justify-between border-b pb-3 mb-2" style={{ borderColor: "var(--line)" }}>
               <span className="text-[15px] font-bold" style={{ color: "var(--forest)" }}>All Navigation</span>
-              <button onClick={() => setShowMobileDrawer(false)} className="text-[20px] font-bold" style={{ color: "var(--slate)" }}>×</button>
+              <button onClick={() => setShowMobileDrawer(false)} className="p-1.5 rounded-lg hover:bg-mist active:scale-95 text-slate transition">
+                <X className="w-5 h-5" />
+              </button>
             </div>
             <div className="grid grid-cols-2 gap-3 pb-6">
               {nav.map((n) => (
