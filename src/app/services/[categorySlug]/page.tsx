@@ -52,25 +52,29 @@ export default async function CategoryPage({ params }: { params: { categorySlug:
               Providers in this category are being onboarded. Submit a request and we&apos;ll match you as they go live.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               {providers.map((p) => (
-                <div key={p.id} className="card flex items-center gap-3 !p-4">
-                  <div className="grid h-[44px] w-[44px] place-items-center rounded-xl font-display font-semibold text-white" style={{ background: "var(--brand)" }}>
-                    {p.displayName.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="text-[15px] font-semibold" style={{ color: "var(--forest)" }}>{p.displayName}</div>
-                    <div className="text-[13px]" style={{ color: "var(--slate)" }}>{p.experienceYears} yrs · {p.jobsCompleted} jobs</div>
-                  </div>
-                  <div className="ml-auto flex flex-col items-end gap-1.5">
-                    <div className="flex items-center gap-2">
-                      {p.verifiedBadge && <span className="badge">✓</span>}
-                      <span className="text-[14px] font-semibold" style={{ color: "var(--emerald)" }}>★ {p.ratingAverage.toFixed(1)}</span>
+                <div key={p.id} className="card flex flex-col justify-between p-5 space-y-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className="grid h-[48px] w-[48px] place-items-center rounded-xl font-display font-bold text-white text-[18px]" style={{ background: "var(--brand)" }}>
+                      {p.displayName.charAt(0)}
                     </div>
-                    <Link href={`/services/${category.slug}/book/${p.id}`} className="btn btn-primary !py-1 !px-2.5 !text-[11px] font-bold">
-                      Book
-                    </Link>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[16px] font-bold truncate" style={{ color: "var(--forest)" }}>{p.displayName}</div>
+                      <div className="text-[13px] font-medium" style={{ color: "var(--slate)" }}>{p.experienceYears} yrs experience · {p.jobsCompleted} jobs done</div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {p.verifiedBadge && <span className="badge text-[11px] px-2 py-0.5">Verified</span>}
+                      <span className="text-[15px] font-bold" style={{ color: "var(--emerald)" }}>★ {p.ratingAverage.toFixed(1)}</span>
+                    </div>
                   </div>
+                  <Link 
+                    href={`/services/${category.slug}/book/${p.id}`} 
+                    className="btn btn-primary w-full text-center py-2.5 text-[13px] font-bold tracking-wide transition-all duration-150 active:scale-[0.98]"
+                    style={{ minHeight: "44px", display: "flex", alignItems: "center", justifyContent: "center" }}
+                  >
+                    Book Provider Personally
+                  </Link>
                 </div>
               ))}
             </div>

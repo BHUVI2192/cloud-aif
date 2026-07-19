@@ -235,34 +235,47 @@ export default function ProviderBookingClient({
           {isKn ? "೩. ಬುಕಿಂಗ್ ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ" : "3. Enter Booking Details"}
         </h3>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-4">
           <div>
-            <label className="label">{isKn ? "ಸೇವಾ ವಿಭಾಗ" : "Select Service/Task"}</label>
-            <select
-              className="input text-[14px]"
-              value={selectedSubserviceId}
-              onChange={(e) => setSelectedSubserviceId(e.target.value)}
-            >
-              <option value="">{isKn ? "ಆಯ್ಕೆ ಮಾಡಿ..." : "All services in this category"}</option>
-              {category.subservices.map((sub) => (
-                <option key={sub.id} value={sub.id}>{sub.name}</option>
-              ))}
-            </select>
+            <label className="label font-semibold text-slate-700">{isKn ? "ಸೇವಾ ವಿಭಾಗ" : "Service Category"}</label>
+            <input
+              type="text"
+              className="input text-[14px] bg-slate-50 border-slate-200 text-slate-500 cursor-not-allowed font-medium"
+              value={category.name}
+              disabled
+              readOnly
+            />
           </div>
 
-          <div>
-            <label className="label">{isKn ? "ಸ್ಥಳ (ವಾರ್ಡ್/ಬಡಾವಣೆ)" : "Locality"}</label>
-            <select
-              className="input text-[14px]"
-              value={serviceAreaId}
-              onChange={(e) => setServiceAreaId(e.target.value)}
-              required
-            >
-              <option value="">{isKn ? "ಸ್ಥಳ ಆಯ್ಕೆಮಾಡಿ..." : "Select locality..."}</option>
-              {areas.map((a) => (
-                <option key={a.id} value={a.id}>{a.name}</option>
-              ))}
-            </select>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label">{isKn ? "ವಿಶಿಷ್ಟ ಕೆಲಸ (ಐಚ್ಛಿಕ)" : "Specific Task (optional)"}</label>
+              <select
+                className="input text-[14px]"
+                value={selectedSubserviceId}
+                onChange={(e) => setSelectedSubserviceId(e.target.value)}
+              >
+                <option value="">{isKn ? "ಎಲ್ಲಾ ಸೇವೆಗಳು..." : "All services in this category"}</option>
+                {category.subservices.map((sub) => (
+                  <option key={sub.id} value={sub.id}>{sub.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="label">{isKn ? "ಸ್ಥಳ (ವಾರ್ಡ್/ಬಡಾವಣೆ)" : "Locality"}</label>
+              <select
+                className="input text-[14px]"
+                value={serviceAreaId}
+                onChange={(e) => setServiceAreaId(e.target.value)}
+                required
+              >
+                <option value="">{isKn ? "ಸ್ಥಳ ಆಯ್ಕೆಮಾಡಿ..." : "Select locality..."}</option>
+                {areas.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
