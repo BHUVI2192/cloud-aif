@@ -17,6 +17,7 @@ export default function SiteHeader() {
     setActiveLoader(key);
     router.push(path);
   };
+
   const role = session?.user?.role;
   const dash =
     role === "ADMIN" || role === "SUPER_ADMIN"
@@ -43,23 +44,23 @@ export default function SiteHeader() {
               <>
                 {role === "CUSTOMER" && (
                   <>
-                    <Link href="/services" prefetch={true} className="hover:text-forest transition duration-150">Request Service</Link>
-                    <Link href="/customer" prefetch={true} className="hover:text-forest transition duration-150">My Requests</Link>
-                    <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">Support</Link>
+                    <Link href="/services" prefetch={true} className="hover:text-forest transition duration-150">{t("request_service")}</Link>
+                    <Link href="/customer" prefetch={true} className="hover:text-forest transition duration-150">{t("my_requests")}</Link>
+                    <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">{t("support")}</Link>
                   </>
                 )}
                 {role === "PROVIDER" && (
                   <>
-                    <Link href="/provider" prefetch={true} className="hover:text-forest transition duration-150">My Jobs</Link>
-                    <Link href="/provider/availability" prefetch={true} className="hover:text-forest transition duration-150">My Schedule</Link>
-                    <Link href="/provider/profile" prefetch={true} className="hover:text-forest transition duration-150">My Profile</Link>
-                    <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">Support</Link>
+                    <Link href="/provider" prefetch={true} className="hover:text-forest transition duration-150">{t("my_jobs")}</Link>
+                    <Link href="/provider/availability" prefetch={true} className="hover:text-forest transition duration-150">{t("my_schedule")}</Link>
+                    <Link href="/provider/profile" prefetch={true} className="hover:text-forest transition duration-150">{t("my_profile")}</Link>
+                    <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">{t("support")}</Link>
                   </>
                 )}
                 {(role === "ADMIN" || role === "SUPER_ADMIN") && (
                   <>
-                    <Link href="/admin" prefetch={true} className="hover:text-forest transition duration-150">Admin Dashboard</Link>
-                    <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">Support</Link>
+                    <Link href="/admin" prefetch={true} className="hover:text-forest transition duration-150">{t("admin_dashboard")}</Link>
+                    <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">{t("support")}</Link>
                   </>
                 )}
               </>
@@ -165,24 +166,24 @@ export default function SiteHeader() {
                 <>
                   {role === "CUSTOMER" && (
                     <>
-                      <Link href="/services" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">Request Service</Link>
-                      <Link href="/customer" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">My Requests</Link>
+                      <Link href="/services" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("request_service")}</Link>
+                      <Link href="/customer" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("my_requests")}</Link>
                       <Link href="/support" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("support")}</Link>
                       <Link href="/customer" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("dashboard")}</Link>
                     </>
                   )}
                   {role === "PROVIDER" && (
                     <>
-                      <Link href="/provider" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">My Jobs</Link>
-                      <Link href="/provider/availability" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">My Schedule</Link>
-                      <Link href="/provider/profile" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">My Profile</Link>
+                      <Link href="/provider" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("my_jobs")}</Link>
+                      <Link href="/provider/availability" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("my_schedule")}</Link>
+                      <Link href="/provider/profile" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("my_profile")}</Link>
                       <Link href="/support" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("support")}</Link>
                       <Link href="/provider" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("dashboard")}</Link>
                     </>
                   )}
                   {(role === "ADMIN" || role === "SUPER_ADMIN") && (
                     <>
-                      <Link href="/admin" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("dashboard")}</Link>
+                      <Link href="/admin" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("admin_dashboard")}</Link>
                       <Link href="/support" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("support")}</Link>
                     </>
                   )}
@@ -195,7 +196,7 @@ export default function SiteHeader() {
                 </>
               ) : (
                 <>
-                  <Link href="/services" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">Services</Link>
+                  <Link href="/services" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("services")}</Link>
                   <Link href="/how-it-works" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("how_it_works")}</Link>
                   <Link href="/become-a-provider" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3 border-b border-line/50">{t("become_a_provider")}</Link>
                   <Link href="/support" onClick={() => setShowMobileMenu(false)} className="hover:text-forest transition duration-150 py-3">{t("support")}</Link>

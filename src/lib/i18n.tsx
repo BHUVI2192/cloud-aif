@@ -167,6 +167,11 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     stat_4_val: "4.8★",
     stat_4_lbl: "Avg. review rating",
     coverage_eyebrow: "Coverage",
+    my_requests: "My Requests",
+    my_jobs: "My Jobs",
+    my_schedule: "My Schedule",
+    my_profile: "My Profile",
+    admin_dashboard: "Admin Dashboard",
   },
   kn: {
     become_a_provider: "ಸೇವೆ ಒದಗಿಸುವವರಿಗಾಗಿ",
@@ -325,6 +330,11 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     stat_4_val: "4.8★",
     stat_4_lbl: "ಸರಾಸರಿ ರೇಟಿಂಗ್",
     coverage_eyebrow: "ಸೇವಾ ಪ್ರದೇಶಗಳು",
+    my_requests: "ನನ್ನ ವಿನಂತಿಗಳು",
+    my_jobs: "ನನ್ನ ಕೆಲಸಗಳು",
+    my_schedule: "ನನ್ನ ವೇಳಾಪಟ್ಟಿ",
+    my_profile: "ನನ್ನ ಪ್ರೊಫೈಲ್",
+    admin_dashboard: "ಅಡ್ಮಿನ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
   }
 };
 
