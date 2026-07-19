@@ -1,5 +1,6 @@
 export const PROVIDER_NAV = [
   { label: "Overview", href: "/provider" },
+  { label: "Schedule", href: "/provider/schedule" },
   { label: "Requests", href: "/provider/requests" },
   { label: "Profile", href: "/provider/profile" },
   { label: "Services", href: "/provider/services" },

@@ -62,9 +62,14 @@ export default async function CategoryPage({ params }: { params: { categorySlug:
                     <div className="text-[15px] font-semibold" style={{ color: "var(--forest)" }}>{p.displayName}</div>
                     <div className="text-[13px]" style={{ color: "var(--slate)" }}>{p.experienceYears} yrs · {p.jobsCompleted} jobs</div>
                   </div>
-                  <div className="ml-auto flex items-center gap-2">
-                    {p.verifiedBadge && <span className="badge">✓</span>}
-                    <span className="text-[14px] font-semibold" style={{ color: "var(--emerald)" }}>★ {p.ratingAverage.toFixed(1)}</span>
+                  <div className="ml-auto flex flex-col items-end gap-1.5">
+                    <div className="flex items-center gap-2">
+                      {p.verifiedBadge && <span className="badge">✓</span>}
+                      <span className="text-[14px] font-semibold" style={{ color: "var(--emerald)" }}>★ {p.ratingAverage.toFixed(1)}</span>
+                    </div>
+                    <Link href={`/services/${category.slug}/book/${p.id}`} className="btn btn-primary !py-1 !px-2.5 !text-[11px] font-bold">
+                      Book
+                    </Link>
                   </div>
                 </div>
               ))}

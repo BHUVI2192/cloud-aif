@@ -14,6 +14,8 @@ const schema = z.object({
   landmark: z.string().optional(),
   voiceNoteUrl: z.string().optional(),
   preferredDate: z.string().optional(),
+  preferredTime: z.string().optional(),
+  providerId: z.string().optional(),
   urgency: z.enum(["FLEXIBLE", "WITHIN_WEEK", "WITHIN_48_HOURS", "EMERGENCY"]).default("FLEXIBLE"),
   contactPreference: z.enum(["ANY", "PHONE", "WHATSAPP", "EMAIL"]).default("ANY"),
   budgetMin: z.string().optional(),
@@ -98,6 +100,7 @@ export async function POST(req: Request) {
       groupId: targetGroupId,
       groupDiscountApplied: applyGroupDiscount,
       preferredDate: d.preferredDate ? new Date(d.preferredDate) : null,
+      preferredTime: d.preferredTime || null,
       urgency: d.urgency,
       contactPreference: d.contactPreference,
       budgetMin: d.budgetMin ? parseInt(d.budgetMin, 10) : null,
@@ -106,13 +109,24 @@ export async function POST(req: Request) {
       alternatePhone: d.alternatePhone || null,
       latitude: d.latitude || null,
       longitude: d.longitude || null,
-      status: "SUBMITTED",
+      status: d.providerId ? "ASSIGNED" : "SUBMITTED",
+      assignments: d.providerId
+        ? {
+            create: {
+              providerId: d.providerId,
+              status: "PENDING",
+              source: "CUSTOMER",
+            },
+          }
+        : undefined,
       statusHistory: {
         create: {
           fromStatus: null,
-          toStatus: "SUBMITTED",
+          toStatus: d.providerId ? "ASSIGNED" : "SUBMITTED",
           changedById: session.user.id,
-          note: applyGroupDiscount 
+          note: d.providerId
+            ? "Direct booking request submitted by customer for provider"
+            : applyGroupDiscount
             ? "Request submitted by customer (Neighborhood Group Booking discount applied)"
             : "Request submitted by customer",
         },
@@ -120,10 +134,12 @@ export async function POST(req: Request) {
     },
   });
 
-  // 🔁 Immediately run auto-matcher — no admin needed
-  runMatcherForRequest(request.id, session.user.id).catch((err) => {
-    console.error("[matcher] Error running initial match for request", request.id, err);
-  });
+  // 🔁 Immediately run auto-matcher ONLY if it's not a direct booking
+  if (!d.providerId) {
+    runMatcherForRequest(request.id, session.user.id).catch((err) => {
+      console.error("[matcher] Error running initial match for request", request.id, err);
+    });
+  }
 
   return NextResponse.json({ id: request.id }, { status: 201 });
 }
