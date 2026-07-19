@@ -172,6 +172,18 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     my_schedule: "My Schedule",
     my_profile: "My Profile",
     admin_dashboard: "Admin Dashboard",
+    
+    // Cancellation and Decline Reasons
+    cancel_found_another: "Found another provider",
+    cancel_price_high: "Price was too high",
+    cancel_no_response: "Provider did not respond",
+    cancel_change_plans: "Change of plans",
+    cancel_other: "Other",
+    decline_too_far: "Too far / out of area",
+    decline_schedule_conflict: "Schedule conflict",
+    decline_price_low: "Price is too low",
+    decline_wrong_category: "Incorrect category",
+    decline_other: "Other",
   },
   kn: {
     become_a_provider: "ಸೇವೆ ಒದಗಿಸುವವರಿಗಾಗಿ",
@@ -335,6 +347,18 @@ const DICTIONARY: Record<Language, Record<string, string>> = {
     my_schedule: "ನನ್ನ ವೇಳಾಪಟ್ಟಿ",
     my_profile: "ನನ್ನ ಪ್ರೊಫೈಲ್",
     admin_dashboard: "ಅಡ್ಮಿನ್ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್",
+    
+    // Cancellation and Decline Reasons
+    cancel_found_another: "ಬೇರೆ ವೃತ್ತಿಪರರು ಸಿಕ್ಕಿದ್ದಾರೆ",
+    cancel_price_high: "ದರ ತುಂಬಾ ಹೆಚ್ಚಾಗಿದೆ",
+    cancel_no_response: "ವೃತ್ತಿಪರರಿಂದ ಯಾವುದೇ ಪ್ರತಿಕ್ರಿಯೆ ಇಲ್ಲ",
+    cancel_change_plans: "ಯೋಜನೆ ಬದಲಾಗಿದೆ",
+    cancel_other: "ಇತರ ಕಾರಣ",
+    decline_too_far: "ಬಹಳ ದೂರವಿದೆ / ಸೇವಾ ವ್ಯಾಪ್ತಿಯಿಂದ ಹೊರಗಿದೆ",
+    decline_schedule_conflict: "ವೇಳಾಪಟ್ಟಿ ಹೊಂದಾಣಿಕೆಯಾಗುತ್ತಿಲ್ಲ",
+    decline_price_low: "ಶುಲ್ಕ ತುಂಬಾ ಕಡಿಮೆಯಿದೆ",
+    decline_wrong_category: "ತಪ್ಪು ಸೇವಾ ವಿಭಾಗ",
+    decline_other: "ಇತರ ಕಾರಣ",
   }
 };
 

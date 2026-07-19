@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/i18n";
 
 export default function AssignmentActions({
   assignmentId,
@@ -12,11 +13,21 @@ export default function AssignmentActions({
   requestId?: string;
 }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState("");
   const [showDeclineForm, setShowDeclineForm] = useState(false);
   const [declineNote, setDeclineNote] = useState("");
+  const [selectedDeclineKey, setSelectedDeclineKey] = useState<string | null>(null);
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const declineReasons = [
+    { key: "decline_too_far", value: "Too far / out of area" },
+    { key: "decline_schedule_conflict", value: "Schedule conflict" },
+    { key: "decline_price_low", value: "Price is too low" },
+    { key: "decline_wrong_category", value: "Incorrect category" },
+    { key: "decline_other", value: "Other" }
+  ];
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -36,6 +47,7 @@ export default function AssignmentActions({
     setLoading("");
     if (res.ok) {
       setShowDeclineForm(false);
+      setSelectedDeclineKey(null);
       setDeclineNote("");
       router.refresh();
     } else {
@@ -125,20 +137,53 @@ export default function AssignmentActions({
       <div className="sticky-bottom-bar md:static md:p-0 md:bg-transparent md:shadow-none md:border-t-0">
         <div className="rounded-xl p-4 space-y-3" style={{ background: "#fdf2f2", border: "1px solid #fbd5d5" }}>
           <p className="text-[13px] font-semibold" style={{ color: "#a32d2d" }}>
-            Please provide a reason for declining (optional):
+            Please select a reason for declining:
           </p>
-          <textarea
-            className="input w-full min-h-[70px] text-[13px]"
-            placeholder="e.g. Not available on the preferred date, out of service area…"
-            value={declineNote}
-            onChange={(e) => setDeclineNote(e.target.value)}
-            disabled={!!loading}
-          />
+          
+          <div className="flex flex-wrap gap-2 py-1">
+            {declineReasons.map((r) => {
+              const isSelected = selectedDeclineKey === r.key;
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  onClick={() => {
+                    setSelectedDeclineKey(r.key);
+                    if (r.key !== "decline_other") {
+                      setDeclineNote(r.value);
+                    } else {
+                      setDeclineNote("");
+                    }
+                  }}
+                  className={`px-3 py-1.5 text-[12px] font-semibold rounded-full border transition-all duration-150 ${
+                    isSelected
+                      ? "bg-red-50 border-red-500 text-red-700"
+                      : "bg-white border-line text-slate hover:border-slate/30"
+                  }`}
+                  style={{ minHeight: "36px" }}
+                >
+                  {t(r.key)}
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedDeclineKey === "decline_other" && (
+            <textarea
+              className="input w-full min-h-[70px] text-[13px]"
+              placeholder="e.g. out of service area, schedule mismatch..."
+              value={declineNote}
+              onChange={(e) => setDeclineNote(e.target.value)}
+              disabled={!!loading}
+              style={{ fontSize: "16px" }}
+            />
+          )}
+
           <div className="flex gap-2">
             <button
               className="btn btn-primary !py-2 !text-[13px]"
               style={{ background: "#a32d2d" }}
-              disabled={!!loading}
+              disabled={loading === "DECLINE" || !selectedDeclineKey || (selectedDeclineKey === "decline_other" && !declineNote.trim())}
               onClick={() => respond("DECLINE")}
             >
               {loading === "DECLINE" ? "Declining…" : "Confirm Decline"}
@@ -146,7 +191,11 @@ export default function AssignmentActions({
             <button
               className="btn btn-ghost !py-2 !text-[13px]"
               disabled={!!loading}
-              onClick={() => { setShowDeclineForm(false); setDeclineNote(""); }}
+              onClick={() => {
+                setShowDeclineForm(false);
+                setSelectedDeclineKey(null);
+                setDeclineNote("");
+              }}
             >
               Back
             </button>

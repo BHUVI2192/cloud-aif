@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/i18n";
 
 interface RequestStatusActionsProps {
   requestId: string;
@@ -18,10 +19,20 @@ export default function RequestStatusActions({
   isProvider,
 }: RequestStatusActionsProps) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [note, setNote] = useState("");
+  const [selectedReasonKey, setSelectedReasonKey] = useState<string | null>(null);
   const [showCancelForm, setShowCancelForm] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const cancellationReasons = [
+    { key: "cancel_found_another", value: "Found another provider" },
+    { key: "cancel_price_high", value: "Price was too high" },
+    { key: "cancel_no_response", value: "Provider did not respond" },
+    { key: "cancel_change_plans", value: "Change of plans" },
+    { key: "cancel_other", value: "Other" }
+  ];
 
   // Auto-dismiss toast
   useEffect(() => {
@@ -41,6 +52,7 @@ export default function RequestStatusActions({
       });
       if (res.ok) {
         setNote("");
+        setSelectedReasonKey(null);
         setShowCancelForm(false);
         router.refresh();
       } else {
@@ -65,20 +77,53 @@ export default function RequestStatusActions({
       <h3 className="text-[14px] md:text-[16px] font-bold mb-3 hidden md:block" style={{ color: "var(--forest)" }}>Manage Request Status</h3>
       
       {showCancelForm ? (
-        <div className="space-y-3">
-          <label className="label">Reason for cancellation</label>
-          <textarea
-            className="input min-h-[80px]"
-            placeholder="Please enter a reason..."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            disabled={loading}
-          />
-          <div className="flex gap-2">
+        <div className="space-y-4">
+          <label className="label text-[13px] font-bold text-forest">Reason for cancellation</label>
+          
+          <div className="flex flex-wrap gap-2">
+            {cancellationReasons.map((r) => {
+              const isSelected = selectedReasonKey === r.key;
+              return (
+                <button
+                  key={r.key}
+                  type="button"
+                  onClick={() => {
+                    setSelectedReasonKey(r.key);
+                    if (r.key !== "cancel_other") {
+                      setNote(r.value);
+                    } else {
+                      setNote("");
+                    }
+                  }}
+                  className={`px-4 py-2 text-[12.5px] font-semibold rounded-full border transition-all duration-150 ${
+                    isSelected
+                      ? "bg-mist border-brand text-brand"
+                      : "bg-white border-line text-slate hover:border-slate/30"
+                  }`}
+                  style={{ minHeight: "40px" }}
+                >
+                  {t(r.key)}
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedReasonKey === "cancel_other" && (
+            <textarea
+              className="input min-h-[80px]"
+              placeholder="Please enter a reason..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              disabled={loading}
+              style={{ fontSize: "16px" }}
+            />
+          )}
+
+          <div className="flex gap-2 pt-1">
             <button
               className="btn btn-primary !py-2 !text-[13px]"
               style={{ background: "#a32d2d" }}
-              disabled={loading || !note.trim()}
+              disabled={loading || !selectedReasonKey || (selectedReasonKey === "cancel_other" && !note.trim())}
               onClick={() => updateStatus("CANCELLED")}
             >
               Confirm Cancel
@@ -86,7 +131,11 @@ export default function RequestStatusActions({
             <button
               className="btn btn-ghost !py-2 !text-[13px]"
               disabled={loading}
-              onClick={() => setShowCancelForm(false)}
+              onClick={() => {
+                setShowCancelForm(false);
+                setSelectedReasonKey(null);
+                setNote("");
+              }}
             >
               Back
             </button>
