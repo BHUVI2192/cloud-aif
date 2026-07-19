@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { db } from "@/lib/db";
+import { getCachedCategories } from "@/lib/cache";
 import { getSession } from "@/lib/session";
 import DashboardShell from "@/components/DashboardShell";
 import { CUSTOMER_NAV } from "@/lib/nav";
@@ -17,11 +17,7 @@ const ICONS: Record<string, string> = {
 };
 
 export default async function ServicesPage() {
-  const categories = await db.category.findMany({
-    where: { isActive: true, deletedAt: null },
-    orderBy: { sortOrder: "asc" },
-    include: { subservices: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
-  });
+  const categories = await getCachedCategories();
 
   const session = await getSession();
   const isCustomer = session?.user?.role === "CUSTOMER";

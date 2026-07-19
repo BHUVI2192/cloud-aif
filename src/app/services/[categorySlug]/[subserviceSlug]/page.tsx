@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { db } from "@/lib/db";
+import { getCachedCategory, getCachedSubservice, getCachedAllServiceAreas } from "@/lib/cache";
 import { getSession } from "@/lib/session";
 import RequestForm from "@/components/RequestForm";
 import DashboardShell from "@/components/DashboardShell";
@@ -15,18 +15,12 @@ export default async function SubservicePage({
 }: {
   params: { categorySlug: string; subserviceSlug: string };
 }) {
-  const category = await db.category.findUnique({ where: { slug: params.categorySlug } });
+  const category = await getCachedCategory(params.categorySlug);
   if (!category) notFound();
-  const subservice = await db.subservice.findFirst({
-    where: { categoryId: category.id, slug: params.subserviceSlug },
-  });
+  const subservice = await getCachedSubservice(params.categorySlug, params.subserviceSlug);
   if (!subservice) notFound();
 
-  const areas = await db.serviceArea.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: "asc" },
-    select: { id: true, name: true },
-  });
+  const areas = await getCachedAllServiceAreas();
 
   const session = await getSession();
   const isCustomer = session?.user?.role === "CUSTOMER";

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { db } from "@/lib/db";
+import { getCachedCategory, getCachedProvidersForCategory } from "@/lib/cache";
 import { getSession } from "@/lib/session";
 import DashboardShell from "@/components/DashboardShell";
 import { CUSTOMER_NAV } from "@/lib/nav";
@@ -10,17 +10,10 @@ import { CUSTOMER_NAV } from "@/lib/nav";
 export const dynamic = "force-dynamic";
 
 export default async function CategoryPage({ params }: { params: { categorySlug: string } }) {
-  const category = await db.category.findUnique({
-    where: { slug: params.categorySlug },
-    include: { subservices: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
-  });
+  const category = await getCachedCategory(params.categorySlug);
   if (!category) notFound();
 
-  const providers = await db.providerProfile.findMany({
-    where: { status: "APPROVED", isActive: true, deletedAt: null, primaryCategoryId: category.id },
-    orderBy: { ratingAverage: "desc" },
-    take: 6,
-  });
+  const providers = await getCachedProvidersForCategory(category.id);
 
   const session = await getSession();
   const isCustomer = session?.user?.role === "CUSTOMER";

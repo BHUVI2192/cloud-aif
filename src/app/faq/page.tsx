@@ -1,11 +1,11 @@
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { db } from "@/lib/db";
+import { getCachedFaqs } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
 export default async function FaqPage() {
-  const faqs = await db.fAQ.findMany({ where: { isPublished: true }, orderBy: { sortOrder: "asc" } });
+  const faqs = await getCachedFaqs();
   return (
     <>
       <SiteHeader />
