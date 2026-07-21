@@ -43,9 +43,16 @@ export default async function CustomerDashboard() {
           status: true,
           createdAt: true,
           preferredDate: true,
-          category: { select: { name: true } },
+          category: { select: { name: true, slug: true } },
           subservice: { select: { name: true } },
           serviceArea: { select: { name: true } },
+          assignments: {
+            where: { status: "ACCEPTED" },
+            select: {
+              providerId: true,
+              provider: { select: { displayName: true, primaryCategory: { select: { slug: true } } } },
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -141,12 +148,22 @@ export default async function CustomerDashboard() {
                       })}
                     </td>
                     <td className="px-5 text-right">
-                      <Link
-                        className="btn btn-ghost !py-1.5 !px-3.5 !text-[13px]"
-                        href={`/request/${r.id}`}
-                      >
-                        Track Progress
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          className="btn btn-ghost !py-1.5 !px-3.5 !text-[13px]"
+                          href={`/request/${r.id}`}
+                        >
+                          Track Progress
+                        </Link>
+                        {r.status === "COMPLETED" && r.assignments[0]?.providerId && (
+                          <Link
+                            href={`/services/${r.assignments[0].provider?.primaryCategory?.slug || r.category.slug}/book/${r.assignments[0].providerId}`}
+                            className="btn btn-secondary !py-1.5 !px-3 !text-[12px] bg-emerald-50 text-emerald-900 border-emerald-300 font-bold"
+                          >
+                            🔄 Re-Book
+                          </Link>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

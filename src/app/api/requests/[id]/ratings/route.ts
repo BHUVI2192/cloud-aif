@@ -33,6 +33,10 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden. Only request owner can submit review" }, { status: 403 });
     }
 
+    if (request.status !== "COMPLETED") {
+      return NextResponse.json({ error: "Forbidden. Only completed bookings can be reviewed" }, { status: 400 });
+    }
+
     const assignedProvider = request.assignments[0]?.provider;
     if (!assignedProvider) {
       return NextResponse.json({ error: "No assigned provider found for this request" }, { status: 400 });

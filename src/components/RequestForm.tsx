@@ -273,6 +273,7 @@ export default function RequestForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState<{ id: string } | null>(null);
+  const [aiTriaging, setAiTriaging] = useState(false);
 
   // Audio recording state
   const [recording, setRecording] = useState(false);
@@ -408,6 +409,31 @@ export default function RequestForm({
       {/* Voice Note Recorder Widget */}
       <Field label={t("voice_note")}>
         <div className="flex flex-wrap items-center gap-3 mt-1">
+          <button
+            type="button"
+            onClick={async () => {
+              if (!form.description) return alert("Write a description first for AI Triage.");
+              setAiTriaging(true);
+              try {
+                const res = await fetch("/api/ai/triage", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ text: form.description }),
+                });
+                if (res.ok) {
+                  const data = await res.json();
+                  if (data.triage?.urgency) set("urgency", data.triage.urgency);
+                }
+              } catch {
+                // Ignore
+              } finally {
+                setAiTriaging(false);
+              }
+            }}
+            className="btn btn-secondary !py-2 !px-4 text-[13px] font-bold border border-indigo-200 bg-indigo-50 text-indigo-900 flex items-center gap-1.5 active:scale-95 transition"
+          >
+            {aiTriaging ? "✨ Analyzing..." : "✨ AI Smart Triage"}
+          </button>
           {!audioUrl && !recording && (
             <button
               type="button"

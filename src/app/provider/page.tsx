@@ -5,6 +5,10 @@ import { PROVIDER_NAV } from "@/lib/nav";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { withTiming } from "@/lib/timing";
+import { getProviderRoiMetrics } from "@/lib/attribution";
+import ProviderRoiCard from "@/components/ProviderRoiCard";
+import ProfileCompletenessCard from "@/components/ProfileCompletenessCard";
+import ProviderScorecardCard from "@/components/ProviderScorecardCard";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +20,9 @@ export default async function ProviderHome() {
       db.providerProfile.findUnique({
         where: { userId: session.user.id },
         include: {
+          documents: { select: { status: true } },
+          portfolio: { select: { id: true } },
+          availability: { select: { id: true } },
           _count: {
             select: {
               assignments: true,
@@ -56,6 +63,8 @@ export default async function ProviderHome() {
     ["Rating", provider ? `★ ${provider.ratingAverage.toFixed(1)} (${reviews})` : "—"],
   ];
 
+  const roiMetrics = provider ? await getProviderRoiMetrics(provider.id) : null;
+
   return (
     <DashboardShell title="Overview" nav={PROVIDER_NAV} active="/provider" user={session.user}>
       <div className="card mb-6 flex flex-col sm:flex-row items-center gap-5 bg-white" style={{ border: "1px solid var(--line)" }}>
@@ -74,6 +83,24 @@ export default async function ProviderHome() {
         </div>
       </div>
 
+      {provider && (
+        <div className="mb-6 grid gap-6 md:grid-cols-2">
+          <ProfileCompletenessCard profile={provider as any} />
+          <ProviderScorecardCard
+            ratingAverage={provider.ratingAverage}
+            ratingCount={reviews}
+            leadResponseRate={provider.leadResponseRate}
+            jobsCompleted={provider.jobsCompleted}
+          />
+        </div>
+      )}
+
+      {roiMetrics && (
+        <div className="mb-6">
+          <ProviderRoiCard metrics={roiMetrics} />
+        </div>
+      )}
+
       {!provider?.verifiedBadge && (
         <div className="card mb-6" style={{ background: "var(--mist)", borderColor: "var(--sage)" }}>
           <p className="text-[15px] font-semibold" style={{ color: "var(--forest)" }}>Your profile is {provider?.status.replace(/_/g, " ").toLowerCase()}.</p>
@@ -89,9 +116,16 @@ export default async function ProviderHome() {
           </div>
         ))}
       </div>
-      <div className="mt-6 flex gap-3">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <Link className="btn btn-primary" href="/provider/requests">View requests</Link>
         <Link className="btn btn-ghost" href="/provider/profile">Edit profile</Link>
+        <a
+          href="/api/provider/export-statement"
+          download
+          className="btn btn-secondary text-xs !py-2.5 !px-4 bg-emerald-50 text-emerald-900 border-emerald-300 font-bold"
+        >
+          📄 Download Bank & Tax Statement (CSV)
+        </a>
       </div>
     </DashboardShell>
   );

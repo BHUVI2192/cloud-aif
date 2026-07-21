@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import DashboardShell from "@/components/DashboardShell";
 import { PROVIDER_NAV } from "@/lib/nav";
 import AssignmentActions from "@/components/AssignmentActions";
+import LeadNotificationCard from "@/components/LeadNotificationCard";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -243,13 +244,15 @@ export default async function ProviderRequests() {
         <div className="space-y-8">
           {/* Pending */}
           {pending.length > 0 && (
-            <section>
+            <section className="space-y-4">
               <h2 className="mb-4 text-[18px] font-semibold flex items-center gap-2" style={{ color: "var(--forest)" }}>
                 <span className="inline-block h-2.5 w-2.5 rounded-full bg-orange-500 animate-pulse" />
-                New Requests ({pending.length})
+                New Incoming Lead Offers ({pending.length})
               </h2>
-              <div className="space-y-5">
-                {pending.map((a) => <RequestCard key={a.id} a={a} showActions={true} />)}
+              <div className="grid gap-4">
+                {pending.map((a) => (
+                  <LeadNotificationCard key={a.id} assignment={a} />
+                ))}
               </div>
             </section>
           )}

@@ -18,6 +18,12 @@ import RequestChecklistForm from "@/components/RequestChecklistForm";
 import RatingBreakdownModal from "@/components/RatingBreakdownModal";
 import RescheduleModal from "@/components/RescheduleModal";
 import CancelModal from "@/components/CancelModal";
+import ProviderContactActionGroup from "@/components/ProviderContactActionGroup";
+import JobOutcomePromptModal from "@/components/JobOutcomePromptModal";
+import TieredVerificationBadges from "@/components/TieredVerificationBadges";
+import ServiceGuaranteeCard from "@/components/ServiceGuaranteeCard";
+import BookingStatusTimeline from "@/components/BookingStatusTimeline";
+import InAppIssueReportModal from "@/components/InAppIssueReportModal";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +62,7 @@ export default async function RequestDetail({ params }: { params: { id: string }
               provider: {
                 include: {
                   user: { select: { name: true, email: true, phone: true, image: true } },
+                  documents: { select: { type: true, status: true, reviewedAt: true, notes: true } },
                 },
               },
             },
@@ -152,6 +159,10 @@ export default async function RequestDetail({ params }: { params: { id: string }
           <p className="mt-1 text-[14px] md:text-[15px]" style={{ color: "var(--slate)" }}>
             {request.category.name}{request.subservice ? ` · ${request.subservice.name}` : ""} · {request.serviceArea?.name ?? request.locality}
           </p>
+
+          {/* Live Booking Status Progress Timeline with Timestamps */}
+          <BookingStatusTimeline currentStatus={request.status} history={request.statusHistory as any} />
+
           {request.groupDiscountApplied && (
             <div className="mt-4 rounded-xl border p-4 bg-emerald-50/80 border-emerald-200 text-emerald-800 text-[13.5px] font-semibold flex items-center gap-2 max-w-4xl">
               <span>👥</span>
@@ -238,15 +249,16 @@ export default async function RequestDetail({ params }: { params: { id: string }
                       </div>
                     )}
                     <div>
-                      <div className="text-[16px] font-semibold flex items-center gap-1.5" style={{ color: "var(--forest)" }}>
+                      <div className="text-[16px] font-semibold flex flex-wrap items-center gap-1.5" style={{ color: "var(--forest)" }}>
                         {accepted.provider.displayName}
-                        {accepted.provider.verifiedBadge && (
-                          <span className="inline-flex items-center text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                            Verified Local ✓
-                          </span>
-                        )}
                       </div>
-                      <div className="text-[13px]" style={{ color: "var(--brand)" }}>★ {accepted.provider.ratingAverage.toFixed(1)} · {accepted.provider.jobsCompleted} jobs completed</div>
+                      <div className="mt-1">
+                        <TieredVerificationBadges
+                          documents={accepted.provider.documents as any}
+                          verifiedBadge={accepted.provider.verifiedBadge}
+                        />
+                      </div>
+                      <div className="text-[13px] mt-1" style={{ color: "var(--brand)" }}>★ {accepted.provider.ratingAverage.toFixed(1)} · {accepted.provider.jobsCompleted} jobs completed</div>
                     </div>
                     <span className="ml-auto text-[12px] font-semibold px-3 py-1 rounded-full" style={{ background: "rgba(0, 145, 255, 0.1)", color: "var(--brand)" }}>Confirmed ✓</span>
                   </div>
@@ -283,30 +295,13 @@ export default async function RequestDetail({ params }: { params: { id: string }
                     )}
                   </div>
                   {accepted.provider.user?.phone && (
-                    <div className="mt-4 space-y-2">
-                      <a
-                        href={`tel:${accepted.provider.user.phone}`}
-                        className="btn btn-primary text-[14px] w-full text-center"
-                        style={{ display: "block", background: "#16a34a" }}
-                      >
-                        📞 Call Your Provider
-                      </a>
-                      <a
-                        href={`https://wa.me/91${accepted.provider.user.phone.replace(/\D/g, "").slice(-10)}?text=Hi%20${encodeURIComponent(accepted.provider.displayName)},%20I'm%20contacting%20you%20from%20Cloud%20AIF%20regarding%20my%20service%20request%20"${encodeURIComponent(request.title)}".`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-secondary text-[14px] w-full text-center transition"
-                        style={{
-                          display: "block",
-                          color: "#25D366",
-                          borderColor: "#25D366",
-                          background: "transparent",
-                          fontWeight: 600,
-                        }}
-                      >
-                        💬 Message on WhatsApp
-                      </a>
-                    </div>
+                    <ProviderContactActionGroup
+                      providerId={accepted.provider.id}
+                      phone={accepted.provider.user.phone}
+                      displayName={accepted.provider.displayName}
+                      requestTitle={request.title}
+                      requestId={request.id}
+                    />
                   )}
                 </div>
               </div>
@@ -362,6 +357,16 @@ export default async function RequestDetail({ params }: { params: { id: string }
 
             <RequestChecklistForm requestId={request.id} isProvider={isAssignedProvider} />
 
+            {isAssignedProvider && ["IN_PROGRESS", "COMPLETION_REVIEW", "COMPLETED"].includes(request.status) && (
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-emerald-950">Post-Job Outcome Capture</span>
+                  <p className="text-[11px] text-emerald-700">Confirm completion & fee collected to track your subscription ROI.</p>
+                </div>
+                <JobOutcomePromptModal requestId={request.id} />
+              </div>
+            )}
+
             <div className="flex flex-wrap items-center gap-3 pt-2">
               {["SUBMITTED", "MATCHING", "ASSIGNED", "ACCEPTED"].includes(request.status) && (
                 <RescheduleModal requestId={request.id} />
@@ -372,10 +377,15 @@ export default async function RequestDetail({ params }: { params: { id: string }
               {isOwner && request.status === "COMPLETED" && !request.review && (
                 <RatingBreakdownModal requestId={request.id} />
               )}
+              {isOwner && (
+                <InAppIssueReportModal requestId={request.id} providerId={accepted?.providerId} />
+              )}
             </div>
           </div>
 
           <div className="space-y-6">
+            <ServiceGuaranteeCard />
+
             <RequestStatusActions
               requestId={request.id}
               currentStatus={request.status}

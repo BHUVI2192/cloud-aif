@@ -61,12 +61,13 @@ const FAIRNESS_LOOKBACK_DAYS   = 7;           // balance window for job-share
 
 // Scoring weights (must sum to 1.0)
 const W = {
-  rating:           0.25,
-  availability:     0.20,
+  subscriptionTier: 0.20, // Primary priority lever for subscription plans!
   proximityProxy:   0.20,
-  workloadBalance:  0.15,
+  rating:           0.20,
+  availability:     0.15,
+  workloadBalance:  0.10,
   responseSpeed:    0.10,
-  subserviceMatch:  0.10,
+  subserviceMatch:  0.05,
 };
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -148,6 +149,8 @@ async function getEligibleProviders(
         : {}),
     },
     include: {
+      subscription: { select: { plan: true, status: true } },
+
       // For subservice-match scoring
       subservices: request.subserviceId
         ? { where: { subserviceId: request.subserviceId } }
@@ -191,7 +194,16 @@ function scoreCandidate(
 ): MatchResult {
   const breakdown: Record<string, number> = {};
 
-  // ── 1. Rating (0.25) ──
+  // ── 0. Subscription Tier Priority (0.25) ──
+  let subTierNorm = 0.25; // default for TRIAL
+  const plan = provider.subscription?.plan;
+  if (plan === "UNLIMITED") subTierNorm = 1.0;
+  else if (plan === "PRO") subTierNorm = 0.75;
+  else if (plan === "STARTER") subTierNorm = 0.50;
+  else if (plan === "TRIAL") subTierNorm = 0.25;
+  breakdown.subscriptionTier = W.subscriptionTier * subTierNorm;
+
+  // ── 1. Rating (0.20) ──
   // Normalise 0–5 → 0–1. New providers (0 rating) get 0.6 to avoid cold-start penalty.
   const ratingNorm = provider.ratingCount === 0
     ? 0.6

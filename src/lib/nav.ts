@@ -14,6 +14,8 @@ export const PROVIDER_NAV = [
 export const ADMIN_NAV = [
   { label: "Overview", href: "/admin" },
   { label: "Providers", href: "/admin/providers" },
+  { label: "Subscriptions", href: "/admin/subscriptions" },
+  { label: "Coverage Gaps", href: "/admin/coverage" },
   { label: "Requests", href: "/admin/requests" },
   { label: "Categories", href: "/admin/categories" },
   { label: "Subservices", href: "/admin/subservices" },

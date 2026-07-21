@@ -452,6 +452,8 @@ model ProviderProfile {
   trackingSessions RequestTrackingSession[]
   addresses     Address[]
   metricSnapshots ProviderMetricSnapshot[]
+  subscription  ProviderSubscription?
+  jobOutcomes   JobOutcome[]
 
   @@index([status, isActive])
   @@index([primaryCategoryId])
@@ -804,6 +806,7 @@ model ServiceRequest {
   rescheduleEvents     RescheduleEvent[]
   cancellationEvent    CancellationEvent?
   dispatchEvents       DispatchAuditEvent[]
+  jobOutcome           JobOutcome?
 
   @@index([status])
   @@index([customerId])
@@ -1330,3 +1333,132 @@ model DispatchAuditEvent {
   @@index([requestId])
   @@map("dispatch_audit_events")
 }
+
+// =============================================================================
+// SCHEDULER & PLATFORM ATTRIBUTION EVENTS
+// =============================================================================
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum PlatformEventType {
+  LEAD_IMPRESSION
+  LEAD_PROFILE_VIEW
+  LEAD_CONTACT_REVEAL
+  REQUEST_CREATED
+  REQUEST_MATCHED
+  REQUEST_ACCEPTED
+  OTP_VERIFIED
+  JOB_COMPLETED
+  REVIEW_SUBMITTED
+}
+
+model ScheduledJob {
+  id           String    @id @default(cuid())
+  type         String
+  payload      Json?
+  status       JobStatus @default(PENDING)
+  attempts     Int       @default(0)
+  maxAttempts  Int       @default(3)
+  scheduledFor DateTime
+  processedAt  DateTime?
+  failedAt     DateTime?
+  lastError    String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([status, scheduledFor])
+  @@map("scheduled_jobs")
+}
+
+model PlatformEvent {
+  id            String            @id @default(cuid())
+  eventType     PlatformEventType
+  actorId       String?
+  actorRole     UserRole?
+  requestId     String?
+  providerId    String?
+  customerId    String?
+  subserviceId  String?
+  serviceAreaId String?
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+
+  @@index([providerId, eventType, createdAt])
+  @@index([customerId, eventType, createdAt])
+  @@index([requestId])
+  @@index([createdAt])
+  @@map("platform_events")
+}
+
+// =============================================================================
+// PROVIDER SUBSCRIPTIONS & JOB OUTCOMES (EPIC 1)
+// =============================================================================
+
+enum SubscriptionStatus {
+  FREE_TRIAL
+  ACTIVE
+  GRACE_PERIOD
+  EXPIRED
+  SUSPENDED
+}
+
+enum SubscriptionPlan {
+  TRIAL
+  STARTER
+  PRO
+  UNLIMITED
+}
+
+enum BillingInterval {
+  MONTHLY
+  ANNUAL
+}
+
+model ProviderSubscription {
+  id                  String             @id @default(cuid())
+  providerId          String             @unique
+  provider            ProviderProfile    @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  status              SubscriptionStatus @default(FREE_TRIAL)
+  plan                SubscriptionPlan   @default(TRIAL)
+  billingInterval     BillingInterval    @default(MONTHLY)
+  trialStartedAt      DateTime           @default(now())
+  trialEndsAt         DateTime
+  currentPeriodStart  DateTime           @default(now())
+  currentPeriodEnd    DateTime
+  gracePeriodEndsAt   DateTime?
+  monthlyLeadLimit    Int?               @default(30)
+  leadsUsedThisPeriod Int                @default(0)
+  rolloverLeads       Int                @default(0)
+  referralCode        String?            @unique
+  referredByCode      String?
+
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@map("provider_subscriptions")
+}
+
+model JobOutcome {
+  id                String          @id @default(cuid())
+  requestId         String          @unique
+  request           ServiceRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerId        String
+  provider          ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  wasCompleted      Boolean         @default(true)
+  selfReportedValue Float           // e.g. ₹500
+  customerFeedback  String?         @db.Text
+  capturedAt        DateTime        @default(now())
+
+  @@index([providerId, capturedAt])
+  @@map("job_outcomes")
+}
+
+

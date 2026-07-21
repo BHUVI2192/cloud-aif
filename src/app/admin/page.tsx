@@ -14,6 +14,7 @@ import {
   Building,
   AlertCircle
 } from "lucide-react";
+import AdminBroadcastModal from "@/components/AdminBroadcastModal";
 
 export const dynamic = "force-dynamic";
 
@@ -92,14 +93,17 @@ export default async function AdminHome() {
   return (
     <DashboardShell title="" nav={ADMIN_NAV} active="/admin" user={session.user}>
       {/* Welcome Banner */}
-      <div className="mb-6 rounded-2xl p-5 md:p-7" style={{ background: "linear-gradient(120deg, var(--forest) 0%, #0c234a 100%)" }}>
-        <p className="text-[12px] font-semibold uppercase tracking-widest mb-1 text-sage" style={{ color: "var(--sage)" }}>Cloud AIF Admin</p>
-        <h1 className="text-[24px] md:text-[28px] font-display font-bold text-white mb-1">Welcome back, {firstName} 👋</h1>
-        <p className="text-[13px] md:text-[14px]" style={{ color: "#cbd5e1" }}>
-          {pendingProviders > 0
-            ? `You have ${pendingProviders} provider application${pendingProviders > 1 ? "s" : ""} awaiting review.`
-            : "All provider applications are up to date."}
-        </p>
+      <div className="mb-6 rounded-2xl p-5 md:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ background: "linear-gradient(120deg, var(--forest) 0%, #0c234a 100%)" }}>
+        <div>
+          <p className="text-[12px] font-semibold uppercase tracking-widest mb-1 text-sage" style={{ color: "var(--sage)" }}>Cloud AIF Admin</p>
+          <h1 className="text-[24px] md:text-[28px] font-display font-bold text-white mb-1">Welcome back, {firstName} 👋</h1>
+          <p className="text-[13px] md:text-[14px]" style={{ color: "#cbd5e1" }}>
+            {pendingProviders > 0
+              ? `You have ${pendingProviders} provider application${pendingProviders > 1 ? "s" : ""} awaiting review.`
+              : "All provider applications are up to date."}
+          </p>
+        </div>
+        <AdminBroadcastModal />
       </div>
 
       {/* Stat Cards */}
