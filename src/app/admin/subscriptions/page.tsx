@@ -60,8 +60,8 @@ export default async function AdminSubscriptionsPage() {
         </div>
 
         {/* Console Table */}
-        <div className="card !p-0 overflow-hidden">
-          <table className="w-full text-xs">
+        <div className="card !p-0 overflow-x-auto min-w-0">
+          <table className="w-full text-xs min-w-[700px]">
             <thead>
               <tr className="bg-slate-50 text-slate-600 border-b">
                 <th className="px-4 py-3 text-left">Provider</th>

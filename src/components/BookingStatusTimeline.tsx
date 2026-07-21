@@ -58,7 +58,8 @@ export default function BookingStatusTimeline({ currentStatus, history = [] }: B
         </span>
       </div>
 
-      <div className="relative flex items-center justify-between px-2">
+      <div className="overflow-x-auto min-w-0 pb-2">
+        <div className="relative flex items-center justify-between px-2 min-w-[360px]">
         {/* Progress Bar background */}
         <div className="absolute left-6 right-6 top-4 h-0.5 bg-slate-200 -z-0" />
         <div
@@ -99,5 +100,6 @@ export default function BookingStatusTimeline({ currentStatus, history = [] }: B
         })}
       </div>
     </div>
+  </div>
   );
 }

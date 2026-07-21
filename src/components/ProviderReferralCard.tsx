@@ -46,7 +46,7 @@ export function ProviderReferralCard({
         <button
           type="button"
           onClick={copyToClipboard}
-          className="btn btn-primary bg-amber-600 hover:bg-amber-700 text-white border-none text-[13px] font-bold py-2.5 px-4 rounded-xl shadow active:scale-95 transition"
+          className="btn btn-primary bg-amber-600 hover:bg-amber-700 text-white border-none text-[13px] font-bold py-2.5 px-4 min-h-[44px] rounded-xl shadow active:scale-95 transition"
         >
           {copied ? "✓ Link Copied!" : "📋 Copy Share Link"}
         </button>

@@ -29,8 +29,8 @@ export default async function AdminProviders() {
       </p>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block card !p-0 overflow-hidden">
-        <table className="w-full text-[14px]">
+      <div className="hidden md:block card !p-0 overflow-x-auto min-w-0">
+        <table className="w-full text-[14px] min-w-[650px]">
           <thead>
             <tr style={{ color: "var(--slate)", background: "var(--mist)" }}>
               <th className="px-5 py-3.5 text-left font-bold uppercase tracking-wider text-[11px]">Provider</th>
