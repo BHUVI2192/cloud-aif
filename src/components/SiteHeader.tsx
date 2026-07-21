@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
+import ProviderAvailabilityHeaderToggle from "./ProviderAvailabilityHeaderToggle";
+
 export default function SiteHeader() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -52,7 +54,7 @@ export default function SiteHeader() {
                 {role === "PROVIDER" && (
                   <>
                     <Link href="/provider" prefetch={true} className="hover:text-forest transition duration-150">{t("my_jobs")}</Link>
-                    <Link href="/provider/availability" prefetch={true} className="hover:text-forest transition duration-150">{t("my_schedule")}</Link>
+                    <Link href="/provider/schedule" prefetch={true} className="hover:text-forest transition duration-150">{t("my_schedule")}</Link>
                     <Link href="/provider/profile" prefetch={true} className="hover:text-forest transition duration-150">{t("my_profile")}</Link>
                     <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">{t("support")}</Link>
                   </>
@@ -60,6 +62,7 @@ export default function SiteHeader() {
                 {(role === "ADMIN" || role === "SUPER_ADMIN") && (
                   <>
                     <Link href="/admin" prefetch={true} className="hover:text-forest transition duration-150">{t("admin_dashboard")}</Link>
+                    <Link href="/admin/dispatch" prefetch={true} className="hover:text-forest transition duration-150">Dispatch Board</Link>
                     <Link href="/support" prefetch={true} className="hover:text-forest transition duration-150">{t("support")}</Link>
                   </>
                 )}
@@ -76,6 +79,7 @@ export default function SiteHeader() {
 
           {/* Right Buttons - Premium Layout for Logged In/Out */}
           <div className="flex items-center gap-3">
+            {role === "PROVIDER" && <ProviderAvailabilityHeaderToggle />}
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === "en" ? "kn" : "en")}

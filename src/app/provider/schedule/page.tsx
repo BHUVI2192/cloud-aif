@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import DashboardShell from "@/components/DashboardShell";
 import { PROVIDER_NAV } from "@/lib/nav";
 import ProviderCalendarClient from "@/components/ProviderCalendarClient";
+import { withTiming } from "@/lib/timing";
 
 export const dynamic = "force-dynamic";
 
@@ -12,51 +13,61 @@ export default async function ProviderSchedulePage() {
 
   const provider = await db.providerProfile.findUnique({
     where: { userId: session.user.id },
+    select: { id: true },
   });
 
   if (!provider) {
     redirect("/become-a-provider");
   }
 
-  // Fetch all assignments that are pending, accepted, or completed
-  const assignments = await db.providerAssignment.findMany({
-    where: {
-      providerId: provider.id,
-      status: { in: ["ACCEPTED", "PENDING", "COMPLETED"] },
-      request: { deletedAt: null },
-    },
-    include: {
-      request: {
-        include: {
-          customer: {
-            select: {
-              name: true,
-            },
-          },
-          category: {
-            select: {
-              name: true,
-            },
-          },
-          subservice: {
-            select: {
-              name: true,
-            },
-          },
-          serviceArea: {
-            select: {
-              name: true,
-            },
+  // Fetch assignments starting from 30 days ago into the future
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  const { result: assignments, durationMs } = await withTiming(() =>
+    db.providerAssignment.findMany({
+      where: {
+        providerId: provider.id,
+        status: { in: ["ACCEPTED", "PENDING", "COMPLETED"] },
+        request: {
+          deletedAt: null,
+          preferredDate: { gte: thirtyDaysAgo },
+        },
+      },
+      select: {
+        id: true,
+        status: true,
+        requestId: true,
+        assignedAt: true,
+        request: {
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            preferredDate: true,
+            preferredTime: true,
+            locality: true,
+            addressLine: true,
+            landmark: true,
+            phone: true,
+            status: true,
+            customer: { select: { name: true } },
+            category: { select: { name: true } },
+            subservice: { select: { name: true } },
+            serviceArea: { select: { name: true } },
           },
         },
       },
-    },
-    orderBy: {
-      request: {
-        preferredDate: "asc",
+      orderBy: {
+        request: {
+          preferredDate: "asc",
+        },
       },
-    },
-  });
+    })
+  );
+
+  if (process.env.NODE_ENV !== "production" && durationMs > 150) {
+    console.warn(`[RSC SLOW FETCH ${durationMs}ms]: /provider/schedule`);
+  }
 
   // Clean data structure to serialize correctly
   const formattedAssignments = assignments.map((a) => ({

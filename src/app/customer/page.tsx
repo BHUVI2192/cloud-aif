@@ -4,6 +4,7 @@ import DashboardShell from "@/components/DashboardShell";
 import { CUSTOMER_NAV } from "@/lib/nav";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { withTiming } from "@/lib/timing";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +26,37 @@ export default async function CustomerDashboard() {
   const session = await requireRoleOrRedirect(["CUSTOMER"], "/customer");
 
   // Check if user has customer or provider profile. If neither, redirect to role selection
-  const [customerProfile, providerProfile] = await Promise.all([
-    db.customerProfile.findUnique({ where: { userId: session.user.id } }),
-    db.providerProfile.findUnique({ where: { userId: session.user.id } }),
-  ]);
+  const { result: [customerProfile, providerProfile, requests], durationMs } = await withTiming(() =>
+    Promise.all([
+      db.customerProfile.findUnique({ where: { userId: session.user.id } }),
+      db.providerProfile.findUnique({ where: { userId: session.user.id } }),
+      db.serviceRequest.findMany({
+        where: {
+          customerId: session.user.id,
+          deletedAt: null,
+        },
+        take: 20,
+        select: {
+          id: true,
+          title: true,
+          locality: true,
+          status: true,
+          createdAt: true,
+          preferredDate: true,
+          category: { select: { name: true } },
+          subservice: { select: { name: true } },
+          serviceArea: { select: { name: true } },
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+    ])
+  );
+
+  if (process.env.NODE_ENV !== "production" && durationMs > 150) {
+    console.warn(`[RSC SLOW FETCH ${durationMs}ms]: /customer`);
+  }
 
   if (!customerProfile && !providerProfile) {
     redirect("/choose-role");
@@ -37,22 +65,6 @@ export default async function CustomerDashboard() {
   if (!customerProfile && providerProfile) {
     redirect("/provider");
   }
-
-  // Fetch customer's requests
-  const requests = await db.serviceRequest.findMany({
-    where: {
-      customerId: session.user.id,
-      deletedAt: null,
-    },
-    include: {
-      category: true,
-      subservice: true,
-      serviceArea: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
 
   return (
     <DashboardShell

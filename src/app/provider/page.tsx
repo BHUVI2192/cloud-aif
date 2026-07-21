@@ -4,16 +4,33 @@ import DashboardShell from "@/components/DashboardShell";
 import { PROVIDER_NAV } from "@/lib/nav";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { withTiming } from "@/lib/timing";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProviderHome() {
   const session = await requireRoleOrRedirect(["PROVIDER"], "/provider");
   
-  const [provider, customer] = await Promise.all([
-    db.providerProfile.findUnique({ where: { userId: session.user.id } }),
-    db.customerProfile.findUnique({ where: { userId: session.user.id } }),
-  ]);
+  const { result: [provider, customer], durationMs } = await withTiming(() =>
+    Promise.all([
+      db.providerProfile.findUnique({
+        where: { userId: session.user.id },
+        include: {
+          _count: {
+            select: {
+              assignments: true,
+              reviewsRecv: true,
+            },
+          },
+        },
+      }),
+      db.customerProfile.findUnique({ where: { userId: session.user.id } }),
+    ])
+  );
+
+  if (process.env.NODE_ENV !== "production" && durationMs > 150) {
+    console.warn(`[RSC SLOW FETCH ${durationMs}ms]: /provider`);
+  }
 
   if (!provider && !customer) {
     redirect("/choose-role");
@@ -23,13 +40,14 @@ export default async function ProviderHome() {
     redirect("/customer");
   }
 
-  const [pending, accepted, reviews] = provider
+  const [pending, accepted] = provider
     ? await Promise.all([
         db.providerAssignment.count({ where: { providerId: provider.id, status: "PENDING" } }),
         db.providerAssignment.count({ where: { providerId: provider.id, status: "ACCEPTED" } }),
-        db.review.count({ where: { providerId: provider.id, status: "PUBLISHED" } }),
       ])
-    : [0, 0, 0];
+    : [0, 0];
+
+  const reviews = provider?._count.reviewsRecv ?? 0;
 
   const stats = [
     ["Verification", provider?.status.replace(/_/g, " ").toLowerCase() ?? "—"],

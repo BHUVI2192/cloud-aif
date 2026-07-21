@@ -1,57 +1,29 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { processExpiredAssignments, runMatcherForRequest } from "@/lib/matcher";
+import { runMatcherForRequest } from "@/lib/matcher";
 
-/**
- * Auto-assign cron endpoint.
- * Call this every 30 minutes via Vercel Cron, a GitHub Action, or cron-job.org (free).
- *
- * Example Vercel cron config in vercel.json:
- *   { "crons": [{ "path": "/api/system/auto-assign", "schedule": "0/30 * * * *" }] }
- *
- * Protected by a shared secret to prevent abuse.
- * Pass as: GET /api/system/auto-assign  with header  x-cron-secret: <CRON_SECRET>
- */
+export async function POST(req: Request) {
+  try {
+    const authHeader = req.headers.get("authorization");
+    const secret = process.env.INTERNAL_SYSTEM_SECRET || "dev_secret";
 
-export const dynamic = "force-dynamic";
+    // Validate internal system authorization token
+    if (authHeader !== `Bearer ${secret}`) {
+      return NextResponse.json({ error: "Unauthorized worker access" }, { status: 401 });
+    }
 
-export async function GET(req: Request) {
-  // Verify cron secret
-  const secret = req.headers.get("x-cron-secret");
-  if (secret !== process.env.CRON_SECRET) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await req.json();
+    const { requestId, userId } = body;
+
+    if (!requestId) {
+      return NextResponse.json({ error: "Missing required requestId parameter" }, { status: 400 });
+    }
+
+    console.log(`[WORKER]: Executing background auto-matcher for Request ${requestId}`);
+    const result = await runMatcherForRequest(requestId, userId);
+
+    return NextResponse.json({ success: true, requestId, result });
+  } catch (error) {
+    console.error("[WORKER ERROR]: Failed executing auto-assign worker", error);
+    return NextResponse.json({ error: "Internal worker failure" }, { status: 500 });
   }
-
-  const results: Record<string, unknown> = {};
-
-  // 1. Expire stale PENDING assignments and retry matching
-  const expiry = await processExpiredAssignments();
-  results.expiry = expiry;
-
-  // 2. Pick up any SUBMITTED requests that were never matched
-  //    (edge case: matcher failed silently on submit)
-  const unmatchedRequests = await db.serviceRequest.findMany({
-    where: {
-      status: "SUBMITTED",
-      matchAttempts: 0,
-      createdAt: { lt: new Date(Date.now() - 5 * 60 * 1000) }, // older than 5 min
-    },
-    select: { id: true },
-    take: 20,
-  });
-
-  let bootstrapped = 0;
-  for (const r of unmatchedRequests) {
-    await runMatcherForRequest(r.id);
-    bootstrapped++;
-  }
-  results.bootstrapped = bootstrapped;
-
-  // 3. Return count of requests still needing admin attention
-  const pendingAttention = await db.serviceRequest.count({
-    where: { needsAdminAttention: true, status: { in: ["SUBMITTED", "MATCHING"] } },
-  });
-  results.pendingAdminAttention = pendingAttention;
-
-  return NextResponse.json({ ok: true, ...results });
 }

@@ -90,3 +90,78 @@ export const getCachedFaqs = unstable_cache(
   ["faq-list"],
   { revalidate: 600, tags: ["faq"] }
 );
+
+// Cache provider slot availability calculation for 60 seconds per provider per date
+export async function getCachedProviderSlots(providerId: string, dateStr: string, dayOfWeekName: any) {
+  return unstable_cache(
+    async () => {
+      const [provider, availability] = await Promise.all([
+        db.providerProfile.findUnique({
+          where: { id: providerId },
+          select: { id: true },
+        }),
+        db.providerAvailability.findFirst({
+          where: {
+            providerId,
+            type: "WEEKLY_RECURRING",
+            dayOfWeek: dayOfWeekName,
+          },
+          select: { startTime: true, endTime: true, isAvailable: true },
+        }),
+      ]);
+
+      if (!provider) return { error: "NOT_FOUND" as const };
+      if (availability && !availability.isAvailable) return { data: { isAvailable: false, slots: [] } };
+
+      let startTime = "09:00";
+      let endTime = "17:00";
+      if (availability) {
+        startTime = availability.startTime;
+        endTime = availability.endTime;
+      }
+
+      const startOfDay = new Date(dateStr);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(dateStr);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const existingAssignments = await db.providerAssignment.findMany({
+        where: {
+          providerId,
+          status: { in: ["ACCEPTED", "PENDING", "COMPLETED"] },
+          request: {
+            preferredDate: { gte: startOfDay, lte: endOfDay },
+            deletedAt: null,
+          },
+        },
+        select: { request: { select: { preferredTime: true } } },
+      });
+
+      const [startH] = startTime.split(":").map(Number);
+      const [endH] = endTime.split(":").map(Number);
+
+      const slots: { slot: string; isBooked: boolean }[] = [];
+      let currentHour = startH;
+
+      while (currentHour + 2 <= endH) {
+        const nextHour = currentHour + 2;
+        const formatTime = (h: number) => `${h.toString().padStart(2, "0")}:00`;
+        const slotStr = `${formatTime(currentHour)} - ${formatTime(nextHour)}`;
+
+        const isBooked = existingAssignments.some((assign) => {
+          const timeVal = assign.request.preferredTime;
+          if (!timeVal) return false;
+          return timeVal.includes(slotStr) || slotStr.includes(timeVal);
+        });
+
+        slots.push({ slot: slotStr, isBooked });
+        currentHour = nextHour;
+      }
+
+      return { data: { isAvailable: true, slots } };
+    },
+    [`provider-slots-${providerId}-${dateStr}`],
+    { revalidate: 60, tags: [`slots-${providerId}`] }
+  )();
+}

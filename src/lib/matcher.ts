@@ -135,6 +135,7 @@ async function getEligibleProviders(
       // Core hard filters
       status: "APPROVED",
       isActive: true,
+      availabilityMode: "ONLINE",
       deletedAt: null,
       id: { notIn: alreadyTriedIds },
 

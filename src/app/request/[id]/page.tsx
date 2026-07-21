@@ -8,59 +8,79 @@ import ReviewBox from "@/components/ReviewBox";
 import RequestStatusActions from "@/components/RequestStatusActions";
 import AdminAssignmentPanel from "@/components/AdminAssignmentPanel";
 import LiveTrackingMap from "@/components/LiveTrackingMap";
+import { withTiming } from "@/lib/timing";
+import CustomerOtpCard from "@/components/CustomerOtpCard";
+import ProviderOtpVerifyModal from "@/components/ProviderOtpVerifyModal";
+import CustomerLiveTrackingMap from "@/components/CustomerLiveTrackingMap";
+import ProviderLiveGpsPingToggle from "@/components/ProviderLiveGpsPingToggle";
+import BeforeAfterProofGallery from "@/components/BeforeAfterProofGallery";
+import RequestChecklistForm from "@/components/RequestChecklistForm";
+import RatingBreakdownModal from "@/components/RatingBreakdownModal";
+import RescheduleModal from "@/components/RescheduleModal";
+import CancelModal from "@/components/CancelModal";
 
 export const dynamic = "force-dynamic";
 
 const STATUS_LABEL: Record<string, string> = {
-  DRAFT: "Draft", SUBMITTED: "Submitted", MATCHING: "Finding a provider", ASSIGNED: "Provider assigned",
-  ACCEPTED: "Accepted", IN_PROGRESS: "In progress", COMPLETED: "Completed", CANCELLED: "Cancelled",
-  EXPIRED: "Expired", DISPUTED: "Disputed",
+  DRAFT: "Draft",
+  SUBMITTED: "Submitted",
+  MATCHING: "Finding a provider",
+  ASSIGNED: "Provider assigned",
+  ACCEPTED: "Accepted & Confirmed",
+  EN_ROUTE: "Technician En Route",
+  ARRIVED_NEARBY: "Technician Arrived Nearby",
+  ARRIVED: "Technician Arrived at Site",
+  IN_PROGRESS: "Job In Progress",
+  COMPLETION_REVIEW: "Reviewing Service Completion",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+  EXPIRED: "Expired",
+  DISPUTED: "Disputed",
 };
 
 export default async function RequestDetail({ params }: { params: { id: string } }) {
   const session = await getSession();
   if (!session?.user) redirect(`/login?callbackUrl=/request/${params.id}`);
 
-  const request = await db.serviceRequest.findUnique({
-    where: { id: params.id },
-    include: {
-      category: true,
-      subservice: true,
-      serviceArea: true,
-      statusHistory: { orderBy: { createdAt: "asc" } },
-      assignments: {
+  const { result: [request, dbUser], durationMs } = await withTiming(() =>
+    Promise.all([
+      db.serviceRequest.findUnique({
+        where: { id: params.id },
         include: {
-          provider: {
+          category: true,
+          subservice: true,
+          serviceArea: true,
+          statusHistory: { orderBy: { createdAt: "asc" } },
+          assignments: {
             include: {
-              user: { select: { name: true, email: true, phone: true, image: true } },
+              provider: {
+                include: {
+                  user: { select: { name: true, email: true, phone: true, image: true } },
+                },
+              },
             },
           },
+          review: true,
         },
-      },
-      review: true,
-    },
-  });
+      }),
+      db.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true },
+      }),
+    ])
+  );
+
+  if (process.env.NODE_ENV !== "production" && durationMs > 150) {
+    console.warn(`[RSC SLOW FETCH ${durationMs}ms]: /request/${params.id}`);
+  }
+
   if (!request) notFound();
-  
-  const dbUser = await db.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
   const userRole = dbUser?.role ?? session.user.role;
 
   const isOwner = request.customerId === session.user.id;
   const isAdmin = userRole === "ADMIN" || userRole === "SUPER_ADMIN";
   const isAssignedProvider = request.assignments.some((a) => a.provider?.userId === session.user.id);
   
-  console.log("DEBUG REQUEST_DETAIL:", {
-    userId: session?.user?.id,
-    userRole,
-    isOwner,
-    isAdmin,
-    isAssignedProvider,
-    customerId: request.customerId,
-  });
-
   if (!isOwner && !isAdmin && !isAssignedProvider) redirect("/");
 
   const matchingProviders = isAdmin
@@ -74,9 +94,18 @@ export default async function RequestDetail({ params }: { params: { id: string }
             : { primaryCategoryId: request.categoryId }),
           serviceAreas: { some: { serviceAreaId: request.serviceAreaId || undefined } },
         },
-        include: {
-          user: true,
-          assignments: { where: { requestId: request.id } },
+        select: {
+          id: true,
+          displayName: true,
+          legalName: true,
+          ratingAverage: true,
+          experienceYears: true,
+          jobsCompleted: true,
+          user: { select: { name: true, email: true, phone: true } },
+          assignments: {
+            where: { requestId: request.id },
+            select: { id: true, status: true },
+          },
         },
       })
     : [];
@@ -308,14 +337,42 @@ export default async function RequestDetail({ params }: { params: { id: string }
             )}
           </div>
 
-          {["ASSIGNED", "ACCEPTED", "IN_PROGRESS"].includes(request.status) && accepted && (
-            <LiveTrackingMap
-              latitude={request.latitude || 13.9299}
-              longitude={request.longitude || 75.5681}
-              providerName={accepted.provider.displayName}
-              landmark={request.landmark}
-            />
-          )}
+            {isOwner && ["ACCEPTED", "EN_ROUTE", "ARRIVED_NEARBY", "ARRIVED"].includes(request.status) && (
+              <CustomerLiveTrackingMap requestId={request.id} destinationLat={request.latitude} destinationLng={request.longitude} />
+            )}
+
+            {isOwner && ["ARRIVED_NEARBY", "ARRIVED", "IN_PROGRESS"].includes(request.status) && (
+              <CustomerOtpCard requestId={request.id} />
+            )}
+
+            {isAssignedProvider && ["EN_ROUTE", "ARRIVED_NEARBY", "ARRIVED", "IN_PROGRESS"].includes(request.status) && (
+              <ProviderLiveGpsPingToggle requestId={request.id} status={request.status} />
+            )}
+
+            {isAssignedProvider && ["ARRIVED_NEARBY", "ARRIVED"].includes(request.status) && (
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 flex items-center justify-between">
+                <span className="text-xs font-bold text-blue-900">Arrived at site? Verify Customer OTP to start job.</span>
+                <ProviderOtpVerifyModal requestId={request.id} />
+              </div>
+            )}
+
+            {["EN_ROUTE", "ARRIVED_NEARBY", "ARRIVED", "IN_PROGRESS", "COMPLETION_REVIEW", "COMPLETED"].includes(request.status) && (
+              <BeforeAfterProofGallery requestId={request.id} isProvider={isAssignedProvider} />
+            )}
+
+            <RequestChecklistForm requestId={request.id} isProvider={isAssignedProvider} />
+
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              {["SUBMITTED", "MATCHING", "ASSIGNED", "ACCEPTED"].includes(request.status) && (
+                <RescheduleModal requestId={request.id} />
+              )}
+              {["SUBMITTED", "MATCHING", "ASSIGNED", "ACCEPTED", "EN_ROUTE"].includes(request.status) && (
+                <CancelModal requestId={request.id} />
+              )}
+              {isOwner && request.status === "COMPLETED" && !request.review && (
+                <RatingBreakdownModal requestId={request.id} />
+              )}
+            </div>
           </div>
 
           <div className="space-y-6">

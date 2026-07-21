@@ -91,11 +91,33 @@ enum RequestStatus {
   MATCHING
   ASSIGNED
   ACCEPTED
+  EN_ROUTE
+  ARRIVED_NEARBY
+  ARRIVED
   IN_PROGRESS
+  COMPLETION_REVIEW
   COMPLETED
   CANCELLED
   EXPIRED
   DISPUTED
+}
+
+enum ProviderAvailabilityMode {
+  ONLINE
+  OFFLINE
+  ON_BREAK
+}
+
+enum ProofType {
+  BEFORE
+  AFTER
+}
+
+enum ChecklistItemType {
+  BOOLEAN
+  TEXT
+  NUMERIC
+  PHOTO_REQUIRED
 }
 
 enum AssignmentStatus {
@@ -289,6 +311,11 @@ model User {
   verificationsMade ProviderVerificationReview[] @relation("VerificationReviewer")
   assignmentsMade   ProviderAssignment[]         @relation("AssignmentCreatedBy")
 
+  uploadedProofs       RequestProofPhoto[]
+  requestedReschedules RescheduleEvent[]
+  cancelledRequests    CancellationEvent[]
+  dispatchAuditEvents  DispatchAuditEvent[]
+
   @@index([role, status])
   @@index([deletedAt])
   @@map("users")
@@ -387,6 +414,7 @@ model ProviderProfile {
   inspectionFee     Int?
 
   // --- Lifecycle / trust ---
+  availabilityMode   ProviderAvailabilityMode @default(ONLINE)
   status             ProviderStatus     @default(DRAFT)
   verificationStatus VerificationStatus @default(PENDING)
   verifiedBadge      Boolean            @default(false)
@@ -418,6 +446,10 @@ model ProviderProfile {
   assignments   ProviderAssignment[]
   verifications ProviderVerificationReview[]
   complaints    Complaint[]             @relation("ComplaintProvider")
+
+  liveLocation     ProviderLiveLocation?
+  locationPings    ProviderLocationPing[]
+  trackingSessions RequestTrackingSession[]
   addresses     Address[]
   metricSnapshots ProviderMetricSnapshot[]
 
@@ -613,6 +645,7 @@ model Category {
   providerLinks     ProviderCategory[]
   serviceRequests   ServiceRequest[]
   primaryForProviders ProviderProfile[] @relation("ProviderPrimaryCategory")
+  checklistTemplates ChecklistTemplate[]
 
   @@index([isActive, sortOrder])
   @@map("categories")
@@ -637,6 +670,7 @@ model Subservice {
   serviceRequests   ServiceRequest[]
   pricing           ProviderPricing[]
   requirementTemplate RequestRequirementTemplate?
+  checklistTemplates ChecklistTemplate[]
 
   @@unique([categoryId, slug])
   @@index([isActive])
@@ -762,10 +796,22 @@ model ServiceRequest {
   review          Review?
   complaints      Complaint[]
 
+  otp                  RequestOtp?
+  proofPhotos          RequestProofPhoto[]
+  locationPings        ProviderLocationPing[]
+  trackingSession      RequestTrackingSession?
+  checklistResponses   RequestChecklistResponse[]
+  rescheduleEvents     RescheduleEvent[]
+  cancellationEvent    CancellationEvent?
+  dispatchEvents       DispatchAuditEvent[]
+
   @@index([status])
   @@index([customerId])
+  @@index([customerId, deletedAt, createdAt])
   @@index([categoryId, subserviceId])
   @@index([serviceAreaId])
+  @@index([serviceAreaId, createdAt])
+  @@index([status, deletedAt])
   @@index([createdAt])
   @@index([needsAdminAttention, status])
   @@index([lastMatchedAt, status])
@@ -811,6 +857,7 @@ model ProviderAssignment {
   // A provider can only be assigned to a given request once.
   @@unique([requestId, providerId])
   @@index([providerId, status])
+  @@index([providerId, status, requestId])
   @@index([status])
   @@map("provider_assignments")
 }
@@ -861,6 +908,7 @@ model Review {
   updatedAt DateTime @updatedAt
 
   reply ReviewReply?
+  ratingBreakdown RequestRatingBreakdown?
 
   @@index([providerId, status])
   @@index([status])
@@ -1072,4 +1120,213 @@ model SupportTicket {
 
   @@index([status])
   @@map("support_tickets")
+}
+
+// =============================================================================
+// PHASE 2 FIELD OPERATIONS & QUALITY CONTROL MODELS
+// =============================================================================
+
+model RequestOtp {
+  id          String   @id @default(cuid())
+  requestId   String   @unique
+  request     ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  otpHash     String   // Hashed 6-digit OTP
+  attempts    Int      @default(0)
+  maxAttempts Int      @default(3)
+  expiresAt   DateTime
+  resendAfter DateTime
+  isVerified  Boolean  @default(false)
+  verifiedAt  DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("request_otps")
+}
+
+model RequestProofPhoto {
+  id          String    @id @default(cuid())
+  requestId   String
+  request     ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  uploaderId  String
+  uploader    User      @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
+  
+  type        ProofType
+  photoUrl    String
+  caption     String?
+  latitude    Float?
+  longitude   Float?
+
+  createdAt   DateTime  @default(now())
+
+  @@index([requestId, type])
+  @@map("request_proof_photos")
+}
+
+model ProviderLiveLocation {
+  id          String   @id @default(cuid())
+  providerId  String   @unique
+  provider    ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  latitude    Float
+  longitude   Float
+  heading     Float?
+  speed       Float?
+  accuracy    Float?
+  source      String?  @default("GPS")
+  staleAt     DateTime
+
+  updatedAt   DateTime @updatedAt
+
+  @@map("provider_live_locations")
+}
+
+model ProviderLocationPing {
+  id          String   @id @default(cuid())
+  providerId  String
+  provider    ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  requestId   String?
+  request     ServiceRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+
+  latitude    Float
+  longitude   Float
+  heading     Float?
+  speed       Float?
+  accuracy    Float?
+  capturedAt  DateTime @default(now())
+
+  @@index([providerId, capturedAt])
+  @@index([requestId])
+  @@map("provider_location_pings")
+}
+
+model RequestTrackingSession {
+  id          String   @id @default(cuid())
+  requestId   String   @unique
+  request     ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  providerId  String
+  provider    ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  isActive    Boolean  @default(true)
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+
+  @@map("request_tracking_sessions")
+}
+
+model ChecklistTemplate {
+  id            String   @id @default(cuid())
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subserviceId  String?
+  subservice    Subservice? @relation(fields: [subserviceId], references: [id], onDelete: Cascade)
+  
+  title         String
+  description   String?
+  isMandatory   Boolean  @default(true)
+
+  items         ChecklistItemTemplate[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("checklist_templates")
+}
+
+model ChecklistItemTemplate {
+  id            String   @id @default(cuid())
+  templateId    String
+  template      ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  label         String
+  type          ChecklistItemType @default(BOOLEAN)
+  isRequired    Boolean  @default(true)
+  sortOrder     Int      @default(0)
+
+  responses     RequestChecklistResponse[]
+
+  @@map("checklist_item_templates")
+}
+
+model RequestChecklistResponse {
+  id            String   @id @default(cuid())
+  requestId     String
+  request       ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  itemId        String
+  item          ChecklistItemTemplate @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  boolValue     Boolean?
+  textValue     String?
+  numberValue   Float?
+  photoUrl      String?
+
+  submittedAt   DateTime @default(now())
+
+  @@unique([requestId, itemId])
+  @@map("request_checklist_responses")
+}
+
+model RequestRatingBreakdown {
+  id            String   @id @default(cuid())
+  reviewId      String   @unique
+  review        Review   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  punctuality   Int      @default(5)
+  behavior      Int      @default(5)
+  serviceQuality Int     @default(5)
+  valueForMoney Int      @default(5)
+
+  createdAt     DateTime @default(now())
+
+  @@map("request_rating_breakdowns")
+}
+
+model RescheduleEvent {
+  id            String   @id @default(cuid())
+  requestId     String
+  request       ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  requestedById String
+  requestedBy   User     @relation(fields: [requestedById], references: [id], onDelete: Cascade)
+
+  oldDate       DateTime?
+  oldTime       String?
+  newDate       DateTime
+  newTime       String?
+  reason        String   @db.Text
+  status        String   @default("PENDING")
+
+  createdAt     DateTime @default(now())
+
+  @@map("reschedule_events")
+}
+
+model CancellationEvent {
+  id            String   @id @default(cuid())
+  requestId     String   @unique
+  request       ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  cancelledById String
+  cancelledBy   User     @relation(fields: [cancelledById], references: [id], onDelete: Cascade)
+
+  reason        String   @db.Text
+  category      String?  @default("USER_CANCELLED")
+
+  createdAt     DateTime @default(now())
+
+  @@map("cancellation_events")
+}
+
+model DispatchAuditEvent {
+  id            String   @id @default(cuid())
+  requestId     String?
+  request       ServiceRequest? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  actorId       String
+  actor         User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+
+  action        String
+  details       String   @db.Text
+
+  createdAt     DateTime @default(now())
+
+  @@index([requestId])
+  @@map("dispatch_audit_events")
 }

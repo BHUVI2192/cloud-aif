@@ -124,13 +124,12 @@ export default withAuth(
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except for:
      * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - uploads (uploaded files so they can be viewed)
+     * - _next/static & _next/image (Next.js static assets)
+     * - favicon.ico, manifest.json, .well-known
+     * - uploads & static media files (.svg, .png, .jpg, .jpeg, .gif, .webp)
      */
-    "/((?!api|_next/static|_next/image|\\.well-known|favicon\\.ico|uploads|logo_192\\.png|logo_512\\.png|manifest\\.json).*)",
+    "/((?!api|_next/static|_next/image|\\.well-known|favicon\\.ico|uploads|manifest\\.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

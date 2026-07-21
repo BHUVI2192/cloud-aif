@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import WebVitals from "@/components/WebVitals";
 
 export const metadata: Metadata = {
   title: "Cloud AIF — Verified local services in Shivamogga",
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/logo_192.png" />
       </head>
       <body>
+        <WebVitals />
         <Providers>{children}</Providers>
       </body>
     </html>
