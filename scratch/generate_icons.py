@@ -14,7 +14,7 @@ def generate_round_icon(src_img, size):
 
 def main():
     workspace_dir = "/home/bhuvan/Downloads/cloud-aif-shivamogga/cloud-aif"
-    src_path = os.path.join(workspace_dir, "public", "logo_512.png")
+    src_path = os.path.join(workspace_dir, "public", "uploads", "LOGO.png")
     
     if not os.path.exists(src_path):
         print(f"Source logo not found at {src_path}")
@@ -66,6 +66,21 @@ def main():
             print(f"Generated Android icons ({size}x{size}) in {folder}")
     else:
         print("Android resource directory not found, skipping Android icons.")
+
+    # 3. Web favicon / PWA Icons Generation
+    web_sizes = {
+        "logo_192.png": 192,
+        "logo_512.png": 512
+    }
+    for filename, size in web_sizes.items():
+        web_dest = os.path.join(workspace_dir, "public", filename)
+        wordmark_img = Image.open(src_path)
+        wordmark_img.thumbnail((size, size), Image.Resampling.LANCZOS)
+        square_web_img = Image.new('RGBA', (size, size), (255, 255, 255, 0))
+        offset = ((size - wordmark_img.width) // 2, (size - wordmark_img.height) // 2)
+        square_web_img.paste(wordmark_img, offset)
+        square_web_img.save(web_dest, "PNG")
+        print(f"Generated Web PWA icon at {web_dest}")
 
 if __name__ == "__main__":
     main()

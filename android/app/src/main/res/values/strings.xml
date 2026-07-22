@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Cloud AIF</string>
-    <string name="title_activity_main">Cloud AIF</string>
-    <string name="package_name">in.cloudaif.app</string>
-    <string name="custom_url_scheme">in.cloudaif.app</string>
+    <string name="app_name">Ogenzo</string>
+    <string name="title_activity_main">Ogenzo</string>
+    <string name="package_name">in.ogenzo.app</string>
+    <string name="custom_url_scheme">in.ogenzo.app</string>
 </resources>

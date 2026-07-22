@@ -22,8 +22,8 @@ export default async function Onboarding() {
         <div className="mx-auto flex h-[64px] max-w-[1180px] items-center justify-between px-4 md:px-7">
           <div className="flex items-center gap-2.5 font-display text-[18px] font-bold" style={{ color: "var(--forest)" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[28px] w-[28px] rounded-[7px] object-contain" />
-            Cloud AIF
+            <img src="/logo_192.png?v=2" alt="Ogenzo Logo" className="h-[28px] w-[28px] rounded-[7px] object-contain" />
+            Ogenzo
           </div>
           <SignOutButton className="!w-auto px-4" />
         </div>

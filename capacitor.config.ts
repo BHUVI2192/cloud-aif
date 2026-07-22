@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'in.cloudaif.app',
-  appName: 'Cloud AIF',
+  appId: 'in.ogenzo.app',
+  appName: 'Ogenzo',
   webDir: 'public',
   server: {
     url: 'https://cloud-aif.vercel.app',

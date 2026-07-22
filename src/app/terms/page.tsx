@@ -3,7 +3,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { getSession } from "@/lib/session";
 
 export const metadata = {
-  title: "Terms of Service | Cloud AIF Shivamogga",
+  title: "Terms of Service | Ogenzo Shivamogga",
   description: "Read our Terms of Service to understand platform rules, intermediary liability, and payment structures.",
 };
 
@@ -13,18 +13,18 @@ export default async function TermsPage() {
       <SiteHeader />
       
       <main className="flex-1 py-12 px-6">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 md:p-12 shadow-sm border" style={{ borderColor: "var(--line)" }}>
+        <div className="mx-auto max-w-3xl rounded bg-white p-8 md:p-12 shadow-sm border" style={{ borderColor: "var(--line)" }}>
           <h1 className="font-display text-[32px] font-bold mb-2" style={{ color: "var(--forest)" }}>Terms of Service</h1>
           <p className="text-[13px] mb-8" style={{ color: "var(--slate)" }}>Last Updated: June 27, 2026</p>
 
           <section className="space-y-6 text-[15px] leading-relaxed" style={{ color: "var(--ink)" }}>
             <p>
-              Welcome to <strong>Cloud AIF</strong>. By registering an account, submitting a service request, or registering as a service provider on our platform, you agree to be bound by these Terms of Service.
+              Welcome to <strong>Ogenzo</strong>. By registering an account, submitting a service request, or registering as a service provider on our platform, you agree to be bound by these Terms of Service.
             </p>
 
             <h2 className="text-[20px] font-semibold pt-4" style={{ color: "var(--forest)" }}>1. Scope of Services</h2>
             <p>
-              Cloud AIF acts as an <strong>intermediary marketplace technology platform</strong>. We connect customers who need local home services (e.g. electrical work, repairs, plumbing) with independent service providers in Shivamogga. 
+              Ogenzo acts as an <strong>intermediary marketplace technology platform</strong>. We connect customers who need local home services (e.g. electrical work, repairs, plumbing) with independent service providers in Shivamogga. 
               We do not directly employ service providers, nor do we perform the actual services ourselves.
             </p>
 
@@ -43,12 +43,12 @@ export default async function TermsPage() {
             <h2 className="text-[20px] font-semibold pt-4" style={{ color: "var(--forest)" }}>4. Offline Payments and Financial Disclaimers</h2>
             <p>
               Payments for services are settled directly between the customer and the provider (via cash, local UPI, or bank transfer). 
-              Cloud AIF does not handle financial transactions in the current version. We are not responsible for pricing disputes, non-payment, or unsatisfactory quality of work. All service pricing must be negotiated between parties directly.
+              Ogenzo does not handle financial transactions in the current version. We are not responsible for pricing disputes, non-payment, or unsatisfactory quality of work. All service pricing must be negotiated between parties directly.
             </p>
 
             <h2 className="text-[20px] font-semibold pt-4" style={{ color: "var(--forest)" }}>5. Limitation of Liability</h2>
             <p>
-              To the maximum extent permitted by applicable laws in India, Cloud AIF, its officers, and directors will not be liable for any direct, indirect, incidental, or consequential damages resulting from service quality issues, property damage, bodily injury, or delays in matching requests.
+              To the maximum extent permitted by applicable laws in India, Ogenzo, its officers, and directors will not be liable for any direct, indirect, incidental, or consequential damages resulting from service quality issues, property damage, bodily injury, or delays in matching requests.
             </p>
 
             <h2 className="text-[20px] font-semibold pt-4" style={{ color: "var(--forest)" }}>6. Governing Law and Jurisdiction</h2>

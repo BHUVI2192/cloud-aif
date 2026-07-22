@@ -6,9 +6,8 @@ export default function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-9 border-b pb-10 md:grid-cols-4 border-white/10">
           <div>
-            <div className="mb-3 flex items-center gap-2.5 font-inter text-[20px] font-bold text-white">
-              <span className="grid h-8 w-8 place-items-center rounded bg-primary text-white text-[14px]">C</span>
-              Cloud AIF
+            <div className="mb-3 block">
+              <img src="/uploads/LOGO.png" alt="Ogenzo Logo" className="h-[32px] w-auto object-contain brightness-0 invert" />
             </div>
             <p className="max-w-[24em] text-[14px] leading-relaxed text-[#e6f3fb]/80 font-medium">
               A trusted local services marketplace connecting Shivamogga homes with verified professionals.
@@ -19,7 +18,7 @@ export default function SiteFooter() {
           <FooterCol title="Legal" links={[["Privacy", "/privacy"], ["Terms", "/terms"]]} />
         </div>
         <div className="flex flex-wrap justify-between gap-2 pt-6 text-[13px] text-[#e6f3fb]/70 font-semibold">
-          <span>© {new Date().getFullYear()} Cloud AIF · Shivamogga, Karnataka</span>
+          <span>© {new Date().getFullYear()} Ogenzo · Shivamogga, Karnataka</span>
           <span>Made for local trust.</span>
         </div>
       </div>

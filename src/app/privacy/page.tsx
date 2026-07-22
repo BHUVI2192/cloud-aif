@@ -3,7 +3,7 @@ import SiteFooter from "@/components/SiteFooter";
 import { getSession } from "@/lib/session";
 
 export const metadata = {
-  title: "Privacy Policy | Cloud AIF Shivamogga",
+  title: "Privacy Policy | Ogenzo Shivamogga",
   description: "Read our Privacy Policy to understand how we collect, store, and secure your personal data under the DPDP Act 2023.",
 };
 
@@ -13,13 +13,13 @@ export default async function PrivacyPage() {
       <SiteHeader />
       
       <main className="flex-1 py-12 px-6">
-        <div className="mx-auto max-w-3xl rounded-2xl bg-white p-8 md:p-12 shadow-sm border" style={{ borderColor: "var(--line)" }}>
+        <div className="mx-auto max-w-3xl rounded bg-white p-8 md:p-12 shadow-sm border" style={{ borderColor: "var(--line)" }}>
           <h1 className="font-display text-[32px] font-bold mb-2" style={{ color: "var(--forest)" }}>Privacy Policy</h1>
           <p className="text-[13px] mb-8" style={{ color: "var(--slate)" }}>Last Updated: June 27, 2026</p>
 
           <section className="space-y-6 text-[15px] leading-relaxed" style={{ color: "var(--ink)" }}>
             <p>
-              Welcome to <strong>Cloud AIF</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). We operate a local services marketplace matching customers with service providers in Shivamogga, Karnataka. 
+              Welcome to <strong>Ogenzo</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;). We operate a local services marketplace matching customers with service providers in Shivamogga, Karnataka. 
               We are committed to protecting your personal data and respecting your privacy in accordance with the <strong>Digital Personal Data Protection (DPDP) Act, 2023 (India)</strong> and other applicable laws.
             </p>
 

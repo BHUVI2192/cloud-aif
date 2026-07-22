@@ -72,11 +72,11 @@ function SignupInner() {
     <div className="mx-auto flex min-h-screen max-w-[440px] flex-col justify-center px-7 py-16">
       <Link href="/" className="mb-8 flex items-center gap-2.5 font-display text-[22px] font-semibold" style={{ color: "var(--forest)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[34px] w-[34px] rounded-[9px] object-contain" />
-        Cloud AIF
+        <img src="/logo_192.png?v=2" alt="Ogenzo Logo" className="h-[34px] w-[34px] rounded-[9px] object-contain" />
+        Ogenzo
       </Link>
       <h1 className="text-[32px]">Create an account</h1>
-      <p className="mb-7 mt-2 text-[15px]" style={{ color: "var(--slate)" }}>Join Cloud AIF to request or offer verified local services in Shivamogga.</p>
+      <p className="mb-7 mt-2 text-[15px]" style={{ color: "var(--slate)" }}>Join Ogenzo to request or offer verified local services in Shivamogga.</p>
 
       {error && (
         <div className="card mb-4 !bg-[#fdf2f2] !border-[#fbd5d5] !p-4.5 text-[14px]" style={{ color: "#a32d2d" }}>

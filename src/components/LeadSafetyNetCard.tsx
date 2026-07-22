@@ -27,7 +27,7 @@ export function LeadSafetyNetCard({
           "Zero Waste" Rollover Guarantee
         </h3>
         <p className="text-[13px] text-gray-600 mt-0.5">
-          Unused lead allowances never expire—they automatically roll over into your safety net buffer. If you receive under 5 leads in a billing month, Cloud AIF grants +10 bonus lead credits on renewal.
+          Unused lead allowances never expire—they automatically roll over into your safety net buffer. If you receive under 5 leads in a billing month, Ogenzo grants +10 bonus lead credits on renewal.
         </p>
       </div>
 

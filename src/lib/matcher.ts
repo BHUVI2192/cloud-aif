@@ -1,6 +1,6 @@
 /**
  * ============================================================
- * Cloud AIF — Auto-Matching Engine  v2
+ * Ogenzo — Auto-Matching Engine  v2
  * ============================================================
  *
  * Architecture:
@@ -451,7 +451,7 @@ export async function runMatcherForRequest(
         if (providerProfile.user?.email) {
           emailsToDispatch.push({
             to: providerProfile.user.email,
-            subject: `${urgencyEmoji} Cloud AIF: New Job Lead - ${request.title}`,
+            subject: `${urgencyEmoji} Ogenzo: New Job Lead - ${request.title}`,
             text: `Hello ${providerProfile.user.name || providerProfile.displayName},\n\nA new service request has been assigned to you:\n\n`
               + `Title: ${request.title}\n`
               + `Description: ${request.description}\n`
@@ -460,7 +460,7 @@ export async function runMatcherForRequest(
               + `${bodyText}\n\n`
               + `Please log into your dashboard to accept or decline the job:\n`
               + `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/provider/requests\n\n`
-              + `Best regards,\nCloud AIF Team`,
+              + `Best regards,\nOgenzo Team`,
           });
         }
       }

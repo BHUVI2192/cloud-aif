@@ -61,8 +61,8 @@ function AdminLoginInner() {
     <div className="mx-auto flex min-h-screen max-w-[440px] flex-col justify-center px-7 py-16">
       <Link href="/" className="mb-8 flex items-center gap-2.5 font-display text-[22px] font-semibold" style={{ color: "var(--forest)" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[34px] w-[34px] rounded-[9px] object-contain" />
-        Cloud AIF Admin
+        <img src="/logo_192.png?v=2" alt="Ogenzo Logo" className="h-[34px] w-[34px] rounded-[9px] object-contain" />
+        Ogenzo Admin
       </Link>
       <h1 className="text-[32px]">Admin Portal</h1>
       <p className="mb-7 mt-2 text-[15px]" style={{ color: "var(--slate)" }}>Sign in to manage service providers, requests, and platform settings.</p>

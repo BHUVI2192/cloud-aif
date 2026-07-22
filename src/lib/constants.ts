@@ -1,7 +1,7 @@
 /** Single source of truth shared by seed, UI, and validators. */
 
 export const BRAND = {
-  name: "Cloud AIF",
+  name: "Ogenzo",
   city: "Shivamogga",
   state: "Karnataka",
   tagline: "Verified local pros for your home, beauty, and learning needs.",

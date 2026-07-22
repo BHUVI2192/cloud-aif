@@ -1,4 +1,4 @@
-# Cloud AIF — Shivamogga Local Services Marketplace
+# Ogenzo — Shivamogga Local Services Marketplace
 
 A web-first, request-first marketplace connecting Shivamogga homeowners with **verified** local service providers across five categories. Built with Next.js (App Router), TypeScript, Tailwind, Prisma, and Supabase Postgres.
 

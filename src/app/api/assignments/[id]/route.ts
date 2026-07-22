@@ -76,14 +76,14 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   if (accept && serviceReq?.customer?.email) {
     sendEmail({
       to: serviceReq.customer.email,
-      subject: `Cloud AIF: Provider Confirmed for "${serviceReq.title}"`,
+      subject: `Ogenzo: Provider Confirmed for "${serviceReq.title}"`,
       text: `Hello ${serviceReq.customer.name || "Customer"},\n\n`
         + `Good news! A verified provider (${provider.displayName}) has accepted your service request:\n\n`
         + `Request: "${serviceReq.title}"\n`
         + `Status: Provider Confirmed\n\n`
         + `You can view provider details, ratings, and phone number in your dashboard to coordinate:\n`
         + `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/request/${serviceReq.id}\n\n`
-        + `Best regards,\nCloud AIF Team`,
+        + `Best regards,\nOgenzo Team`,
     }).catch((err) => {
       console.error("[assignments] Error sending customer notification email", err);
     });

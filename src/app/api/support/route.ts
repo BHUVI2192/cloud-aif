@@ -15,12 +15,12 @@ export async function POST(req: Request) {
     // Send email to cnbhuvan011@gmail.com via Google SMTP
     await sendEmail({
       to: "cnbhuvan011@gmail.com",
-      subject: `[Cloud AIF Support Inquiry] ${subject}`,
-      text: `You have received a new support message from Cloud AIF:\n\n` +
+      subject: `[Ogenzo Support Inquiry] ${subject}`,
+      text: `You have received a new support message from Ogenzo:\n\n` +
             `Sender Email: ${email}\n` +
             `Subject: ${subject}\n\n` +
             `Message:\n${message}\n\n` +
-            `--- \nThis email was sent automatically from the Cloud AIF Support Contact form.`,
+            `--- \nThis email was sent automatically from the Ogenzo Support Contact form.`,
       html: `
         <div style="font-family: sans-serif; padding: 20px; color: #1e293b; max-width: 600px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
           <h2 style="color: #14331f; border-bottom: 2px solid #14331f; padding-bottom: 8px; margin-top: 0;">New Support Inquiry</h2>
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
             ${message}
           </div>
           <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
-          <p style="font-size: 11px; color: #64748b; margin-bottom: 0;">Sent automatically from the Cloud AIF Support contact form.</p>
+          <p style="font-size: 11px; color: #64748b; margin-bottom: 0;">Sent automatically from the Ogenzo Support contact form.</p>
         </div>
       `
     });

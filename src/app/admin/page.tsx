@@ -95,7 +95,7 @@ export default async function AdminHome() {
       {/* Welcome Banner */}
       <div className="mb-6 rounded-2xl p-5 md:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ background: "linear-gradient(120deg, var(--forest) 0%, #0c234a 100%)" }}>
         <div>
-          <p className="text-[12px] font-semibold uppercase tracking-widest mb-1 text-sage" style={{ color: "var(--sage)" }}>Cloud AIF Admin</p>
+          <p className="text-[12px] font-semibold uppercase tracking-widest mb-1 text-sage" style={{ color: "var(--sage)" }}>Ogenzo Admin</p>
           <h1 className="text-[24px] md:text-[28px] font-display font-bold text-white mb-1">Welcome back, {firstName} 👋</h1>
           <p className="text-[13px] md:text-[14px]" style={{ color: "#cbd5e1" }}>
             {pendingProviders > 0

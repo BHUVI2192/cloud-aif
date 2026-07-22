@@ -72,7 +72,7 @@ export default function InAppIssueReportModal({ requestId, providerId }: InAppIs
                 <span className="text-4xl">✅</span>
                 <h4 className="font-display text-base font-bold text-slate-900">Issue Ticket Raised</h4>
                 <p className="text-xs text-slate-600">
-                  Cloud AIF Support has received your ticket and will contact you within 2 hours.
+                  Ogenzo Support has received your ticket and will contact you within 2 hours.
                 </p>
                 <button onClick={() => setIsOpen(false)} className="btn btn-primary text-xs">
                   Done

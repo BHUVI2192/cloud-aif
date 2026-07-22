@@ -39,7 +39,7 @@ export async function sendEmail({ to, subject, text, html }: SendEmailOptions) {
 
   try {
     const info = await transporter.sendMail({
-      from: `"Cloud AIF" <${fromEmail}>`,
+      from: `"Ogenzo" <${fromEmail}>`,
       to,
       subject,
       text,

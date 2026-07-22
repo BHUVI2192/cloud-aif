@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: { params: { providerId: strin
   if (!provider) return { title: "Provider Not Found" };
   return {
     title: `${provider.displayName} — Verified Home Service Pro in Shivamogga`,
-    description: provider.bio || `Hire ${provider.displayName} directly in Shivamogga, Karnataka with Cloud AIF 7-day service guarantee.`,
+    description: provider.bio || `Hire ${provider.displayName} directly in Shivamogga, Karnataka with Ogenzo 7-day service guarantee.`,
   };
 }
 

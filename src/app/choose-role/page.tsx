@@ -60,8 +60,8 @@ export default function ChooseRole() {
       <div className="w-full max-w-[800px] text-center space-y-6">
         <div className="flex justify-center items-center gap-2 mb-4 font-display text-[26px] font-bold" style={{ color: "var(--forest)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[42px] w-[42px] rounded-[12px] object-contain" />
-          Cloud AIF
+          <img src="/logo_192.png?v=2" alt="Ogenzo Logo" className="h-[42px] w-[42px] rounded-[12px] object-contain" />
+          Ogenzo
         </div>
         
         <div className="space-y-2">
@@ -69,7 +69,7 @@ export default function ChooseRole() {
             Welcome, {name}!
           </h1>
           <p className="text-[17px] max-w-[32em] mx-auto" style={{ color: "var(--slate)" }}>
-            To get started, tell us how you would like to use the Cloud AIF platform in Shivamogga.
+            To get started, tell us how you would like to use the Ogenzo platform in Shivamogga.
           </p>
         </div>
 

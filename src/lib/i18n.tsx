@@ -368,7 +368,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("cloud-aif-lang") as Language;
+    const saved = localStorage.getItem("ogenzo-lang") as Language;
     if (saved === "en" || saved === "kn") {
       setLanguageState(saved);
     }
@@ -376,7 +376,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("cloud-aif-lang", lang);
+    localStorage.setItem("ogenzo-lang", lang);
   };
 
   const t = (key: string): string => {

@@ -336,7 +336,7 @@ export default function HomePage() {
             What Shivamogga says
           </h2>
           <p className="mb-10 text-[15px] text-on-surface-variant font-medium max-w-xl mx-auto">
-            Read experience reports from local residents and service professionals using Cloud AIF.
+            Read experience reports from local residents and service professionals using Ogenzo.
           </p>
 
           <div className="grid gap-6 md:grid-cols-3 text-left">
@@ -345,7 +345,7 @@ export default function HomePage() {
                 {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-secondary" />)}
               </div>
               <p className="text-[13px] text-on-surface-variant font-medium leading-relaxed italic">
-                "Finding a plumber in Gopi Circle used to take hours of calling. Through Cloud AIF, I request once, and a verified plumber arrives within the requested window."
+                "Finding a plumber in Gopi Circle used to take hours of calling. Through Ogenzo, I request once, and a verified plumber arrives within the requested window."
               </p>
               <div className="font-bold text-[13px] text-primary">
                 — Rekha S., Homeowner

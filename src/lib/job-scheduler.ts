@@ -69,7 +69,7 @@ export async function processNextJobs(batchSize: number = 10) {
               userId: s.provider.userId,
               type: "SYSTEM_ANNOUNCEMENT",
               title: "Subscription Renewal Reminder",
-              body: `Hi ${s.provider.displayName}, your Cloud AIF subscription plan ends soon. Review your lead earnings and renew to stay active.`,
+              body: `Hi ${s.provider.displayName}, your Ogenzo subscription plan ends soon. Review your lead earnings and renew to stay active.`,
             },
           });
         }

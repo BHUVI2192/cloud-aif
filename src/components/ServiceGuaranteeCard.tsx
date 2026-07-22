@@ -10,7 +10,7 @@ export default function ServiceGuaranteeCard({ compact }: ServiceGuaranteeCardPr
       <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 p-2.5 text-xs text-emerald-900 font-semibold">
         <span className="text-base">🛡️</span>
         <div>
-          <span className="font-bold text-emerald-950 block">Cloud AIF 7-Day Service Promise</span>
+          <span className="font-bold text-emerald-950 block">Ogenzo 7-Day Service Promise</span>
           <span className="text-[11px] text-emerald-700">Free site revisit guaranteed within 7 days if issue recurs.</span>
         </div>
       </div>
@@ -32,7 +32,7 @@ export default function ServiceGuaranteeCard({ compact }: ServiceGuaranteeCardPr
       </div>
 
       <p className="text-xs text-slate-600 leading-relaxed font-medium">
-        Your booking is protected by Cloud AIF&apos;s Shivamogga Service Guarantee. If the work performed fails or shows defects within 7 days, we arrange a <strong>free site revisit</strong> at zero extra charge.
+        Your booking is protected by Ogenzo&apos;s Shivamogga Service Guarantee. If the work performed fails or shows defects within 7 days, we arrange a <strong>free site revisit</strong> at zero extra charge.
       </p>
 
       <div className="flex items-center justify-between text-[11px] text-emerald-800 font-bold border-t border-emerald-100 pt-2">

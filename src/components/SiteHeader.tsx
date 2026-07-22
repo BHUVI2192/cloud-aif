@@ -34,10 +34,9 @@ export default function SiteHeader() {
     <>
       <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur border-outline-variant shadow-sm">
         <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href={dash || "/"} className="flex items-center gap-2.5 font-inter text-[18px] font-bold tracking-tight text-primary">
+          <Link href={dash || "/"} className="block shrink-0 min-h-[44px] flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo_192.png?v=2" alt="Cloud AIF Logo" className="h-[32px] w-[32px] rounded object-contain" />
-            Cloud AIF
+            <img src="/uploads/LOGO.png" alt="Ogenzo Logo" className="h-[32px] w-auto object-contain" />
           </Link>
           
           {/* Center Links - Conditional on Authentication (Desktop) */}

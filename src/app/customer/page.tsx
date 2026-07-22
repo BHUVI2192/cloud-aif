@@ -89,7 +89,7 @@ export default async function CustomerDashboard() {
             👋
           </div>
           <h2 className="text-[22px] font-semibold" style={{ color: "var(--forest)" }}>
-            Welcome to Cloud AIF!
+            Welcome to Ogenzo!
           </h2>
           <p className="mx-auto mb-6 mt-2 max-w-[28em] text-[15px]" style={{ color: "var(--slate)" }}>
             You haven&apos;t created any service requests yet. Tell us what you need and we will match you with a verified provider in Shivamogga.

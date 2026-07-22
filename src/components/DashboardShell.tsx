@@ -168,9 +168,8 @@ export default function DashboardShell({
     <div className="min-h-screen md:grid md:grid-cols-[240px_minmax(0,1fr)] bg-surface text-on-surface">
       {/* 🖥 Persistent Desktop Sidebar */}
       <aside className="hidden md:flex flex-col border-r p-5 sticky top-0 h-screen overflow-y-auto bg-white border-outline-variant">
-        <Link href={homeHref} className="mb-6 flex items-center gap-2.5 font-inter text-[18px] font-bold text-primary">
-          <span className="grid h-8 w-8 place-items-center rounded bg-primary text-white text-[15px] font-extrabold">C</span>
-          Cloud AIF
+        <Link href={homeHref} className="mb-6 block shrink-0">
+          <img src="/uploads/LOGO.png" alt="Ogenzo Logo" className="h-[32px] w-auto object-contain" />
         </Link>
 
         <nav className="space-y-1 flex-1">

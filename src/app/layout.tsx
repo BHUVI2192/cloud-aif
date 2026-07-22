@@ -4,7 +4,7 @@ import Providers from "@/components/Providers";
 import WebVitals from "@/components/WebVitals";
 
 export const metadata: Metadata = {
-  title: "Cloud AIF — Verified local services in Shivamogga",
+  title: "Ogenzo — Verified local services in Shivamogga",
   description:
     "A trusted local services marketplace connecting Shivamogga homes with verified professionals.",
   manifest: "/manifest.json",

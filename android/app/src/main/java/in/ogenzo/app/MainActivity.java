@@ -1,4 +1,4 @@
-package in.cloudaif.app;
+package in.ogenzo.app;
 
 import com.getcapacitor.BridgeActivity;
 

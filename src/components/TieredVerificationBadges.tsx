@@ -27,7 +27,7 @@ export default function TieredVerificationBadges({ documents = [], verifiedBadge
       icon: "🪪",
       isVerified: !!idDoc || !!verifiedBadge,
       title: "Government Identity Verification",
-      description: "Aadhaar Card or PAN Card verified against government records by Cloud AIF Admin.",
+      description: "Aadhaar Card or PAN Card verified against government records by Ogenzo Admin.",
       docInfo: idDoc,
     },
     {
@@ -87,7 +87,7 @@ export default function TieredVerificationBadges({ documents = [], verifiedBadge
 
             <div className="rounded-xl bg-slate-50 p-3 text-[11px] space-y-1 border text-slate-700">
               <p>Status: <strong className="text-emerald-700">Verified & Approved ✓</strong></p>
-              <p>Verified By: <strong>Cloud AIF Trust & Compliance Team</strong></p>
+              <p>Verified By: <strong>Ogenzo Trust & Compliance Team</strong></p>
               {(selectedDoc as any).docInfo?.verifiedAt && (
                 <p>Verified Date: {new Date((selectedDoc as any).docInfo.verifiedAt).toLocaleDateString()}</p>
               )}
