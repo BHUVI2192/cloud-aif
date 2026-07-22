@@ -37,7 +37,7 @@ export default function SiteHeader() {
           <Link href={dash || "/"} className="flex items-center gap-2.5 shrink-0 min-h-[44px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="/logo_192.png" 
+              src="/logo.svg" 
               alt="Ogenzo logo icon" 
               className="h-[24px] sm:h-[30px] md:h-[32px] w-auto rounded-sm object-contain" 
             />

@@ -7,7 +7,7 @@ export default function SiteFooter() {
         <div className="grid grid-cols-2 gap-9 border-b pb-10 md:grid-cols-4 border-white/10">
           <div>
             <div className="mb-3 flex items-center gap-2">
-              <img src="/logo_192.png" alt="Ogenzo logo icon" className="h-[28px] w-auto rounded-sm object-contain brightness-0 invert" />
+              <img src="/logo.svg" alt="Ogenzo logo icon" className="h-[28px] w-auto rounded-sm object-contain brightness-0 invert" />
               <img src="/wordmark.svg" alt="Ogenzo logo wordmark" className="h-[20px] w-auto object-contain brightness-0 invert" />
             </div>
             <p className="max-w-[24em] text-[14px] leading-relaxed text-[#e6f3fb]/80 font-medium">
