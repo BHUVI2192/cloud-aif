@@ -2,15 +2,15 @@ import Link from "next/link";
 
 export default function SiteFooter() {
   return (
-    <footer className="mt-12 py-16 text-[#c6d6cb]" style={{ background: "var(--forest)" }}>
-      <div className="mx-auto max-w-[1180px] px-7">
-        <div className="grid grid-cols-2 gap-9 border-b pb-10 md:grid-cols-4" style={{ borderColor: "rgba(255,255,255,.1)" }}>
+    <footer className="mt-12 py-16 bg-[#263238] text-[#e6f3fb] border-t border-outline-variant/10">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-2 gap-9 border-b pb-10 md:grid-cols-4 border-white/10">
           <div>
-            <div className="mb-3 flex items-center gap-2.5 font-display text-[21px] font-semibold text-white">
-              <span className="grid h-[34px] w-[34px] place-items-center rounded-[9px] text-[17px]" style={{ background: "var(--brand)" }}>C</span>
+            <div className="mb-3 flex items-center gap-2.5 font-inter text-[20px] font-bold text-white">
+              <span className="grid h-8 w-8 place-items-center rounded bg-primary text-white text-[14px]">C</span>
               Cloud AIF
             </div>
-            <p className="max-w-[24em] text-[14px] leading-relaxed">
+            <p className="max-w-[24em] text-[14px] leading-relaxed text-[#e6f3fb]/80 font-medium">
               A trusted local services marketplace connecting Shivamogga homes with verified professionals.
             </p>
           </div>
@@ -18,7 +18,7 @@ export default function SiteFooter() {
           <FooterCol title="Company" links={[["How it works", "/how-it-works"], ["Become a provider", "/become-a-provider"], ["Support", "/support"], ["FAQ", "/faq"]]} />
           <FooterCol title="Legal" links={[["Privacy", "/privacy"], ["Terms", "/terms"]]} />
         </div>
-        <div className="flex flex-wrap justify-between gap-2 pt-6 text-[13px]">
+        <div className="flex flex-wrap justify-between gap-2 pt-6 text-[13px] text-[#e6f3fb]/70 font-semibold">
           <span>© {new Date().getFullYear()} Cloud AIF · Shivamogga, Karnataka</span>
           <span>Made for local trust.</span>
         </div>
@@ -30,10 +30,14 @@ export default function SiteFooter() {
 function FooterCol({ title, links }: { title: string; links: [string, string][] }) {
   return (
     <div>
-      <h4 className="mb-4 font-sans text-[14px] font-semibold text-white">{title}</h4>
-      <ul className="space-y-2.5 text-[14px]">
+      <h4 className="mb-4 font-inter text-[14px] font-bold text-white uppercase tracking-wider">{title}</h4>
+      <ul className="space-y-2.5 text-[14px] font-medium">
         {links.map(([label, href]) => (
-          <li key={href}><Link href={href} className="hover:text-white">{label}</Link></li>
+          <li key={href}>
+            <Link href={href} className="hover:text-white transition duration-150 min-h-[44px] inline-flex items-center">
+              {label}
+            </Link>
+          </li>
         ))}
       </ul>
     </div>

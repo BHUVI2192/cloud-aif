@@ -153,7 +153,8 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .badge {
-    @apply inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider;
+    border-radius: 2px; /* 2px shape language for verification badges */
     background-color: var(--primary-container);
     color: var(--on-primary);
   }
