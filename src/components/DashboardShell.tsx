@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import SignOutButton from "./SignOutButton";
 import NotificationBell from "./NotificationBell";
+import ProviderAvailabilityHeaderToggle from "./ProviderAvailabilityHeaderToggle";
 import {
   Home,
   FileText,
@@ -194,6 +195,12 @@ export default function DashboardShell({
         </nav>
 
         <div className="border-t border-outline-variant pt-4 space-y-3">
+          {user.role === "PROVIDER" && (
+            <div className="mb-2">
+              <span className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1.5">Availability</span>
+              <ProviderAvailabilityHeaderToggle />
+            </div>
+          )}
           <div className="flex items-center gap-3">
             {user.image && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -213,21 +220,28 @@ export default function DashboardShell({
       </aside>
 
       {/* 📱 Mobile Top Header Bar */}
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b px-4 md:hidden bg-white/95 backdrop-blur border-outline-variant shadow-sm">
-        <div className="flex items-center gap-2 min-w-0">
-          {backHref ? (
-            <Link
-              href={backHref}
-              className="grid h-11 w-11 place-items-center rounded hover:bg-surface-container active:scale-95 text-primary"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-          ) : null}
-          <span className="text-[16px] font-bold truncate text-on-surface">
-            {title}
-          </span>
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-outline-variant shadow-sm md:hidden">
+        <div className="flex h-14 items-center justify-between px-4">
+          <div className="flex items-center gap-2 min-w-0">
+            {backHref ? (
+              <Link
+                href={backHref}
+                className="grid h-11 w-11 place-items-center rounded hover:bg-surface-container active:scale-95 text-primary"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+            ) : null}
+            <span className="text-[16px] font-bold truncate text-on-surface">
+              {title}
+            </span>
+          </div>
+          <NotificationBell />
         </div>
-        <NotificationBell />
+        {user.role === "PROVIDER" && (
+          <div className="flex items-center justify-center bg-surface-container-low border-t border-outline-variant px-4 py-2">
+            <ProviderAvailabilityHeaderToggle />
+          </div>
+        )}
       </header>
 
       {/* 📱 Mobile Fixed Bottom Tab Bar */}

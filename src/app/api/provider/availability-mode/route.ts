@@ -3,6 +3,29 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { ProviderAvailabilityMode } from "@prisma/client";
 
+export async function GET() {
+  try {
+    const session = await getSession();
+    if (!session?.user || session.user.role !== "PROVIDER") {
+      return NextResponse.json({ error: "Unauthorized provider access" }, { status: 401 });
+    }
+
+    const provider = await db.providerProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { availabilityMode: true },
+    });
+
+    if (!provider) {
+      return NextResponse.json({ error: "Provider profile not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ availabilityMode: provider.availabilityMode });
+  } catch (error) {
+    console.error("[availability-mode-api] Error fetching mode:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const session = await getSession();

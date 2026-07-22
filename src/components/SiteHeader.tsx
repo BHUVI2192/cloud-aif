@@ -79,7 +79,11 @@ export default function SiteHeader() {
 
           {/* Right Buttons */}
           <div className="flex items-center gap-3">
-            {role === "PROVIDER" && <ProviderAvailabilityHeaderToggle />}
+            {role === "PROVIDER" && (
+              <div className="hidden md:block">
+                <ProviderAvailabilityHeaderToggle />
+              </div>
+            )}
             
             {/* Language Toggle */}
             <button
@@ -148,6 +152,11 @@ export default function SiteHeader() {
             </button>
           </div>
         </nav>
+        {role === "PROVIDER" && (
+          <div className="md:hidden flex items-center justify-center bg-surface-container-low border-t border-outline-variant px-4 py-2">
+            <ProviderAvailabilityHeaderToggle />
+          </div>
+        )}
       </header>
 
       {/* 📱 Mobile Menu Drawer Overlay */}
