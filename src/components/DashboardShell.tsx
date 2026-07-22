@@ -168,8 +168,9 @@ export default function DashboardShell({
     <div className="min-h-screen md:grid md:grid-cols-[240px_minmax(0,1fr)] bg-surface text-on-surface">
       {/* 🖥 Persistent Desktop Sidebar */}
       <aside className="hidden md:flex flex-col border-r p-5 sticky top-0 h-screen overflow-y-auto bg-white border-outline-variant">
-        <Link href={homeHref} className="mb-6 block shrink-0">
-          <img src="/logo.svg" alt="Ogenzo logo" className="h-[32px] w-auto object-contain" />
+        <Link href={homeHref} className="mb-6 flex items-center gap-2.5 shrink-0">
+          <img src="/logo_192.png" alt="Ogenzo logo icon" className="h-[28px] w-auto rounded-sm object-contain" />
+          <img src="/wordmark.svg" alt="Ogenzo logo wordmark" className="h-[20px] w-auto object-contain" />
         </Link>
 
         <nav className="space-y-1 flex-1">

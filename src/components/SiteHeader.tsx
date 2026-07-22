@@ -34,12 +34,18 @@ export default function SiteHeader() {
     <>
       <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur border-outline-variant shadow-sm h-[56px] sm:h-[64px] md:h-[72px] flex flex-col justify-center">
         <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href={dash || "/"} className="block shrink-0 min-h-[44px] flex items-center">
+          <Link href={dash || "/"} className="flex items-center gap-2.5 shrink-0 min-h-[44px]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="/logo.svg" 
-              alt="Ogenzo logo" 
-              className="h-[24px] sm:h-[30px] md:h-[34px] w-auto max-w-[120px] sm:max-w-[140px] md:max-w-[160px] object-contain transition-all" 
+              src="/logo_192.png" 
+              alt="Ogenzo logo icon" 
+              className="h-[24px] sm:h-[30px] md:h-[32px] w-auto rounded-sm object-contain" 
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/wordmark.svg" 
+              alt="Ogenzo logo wordmark" 
+              className="h-[18px] sm:h-[22px] md:h-[24px] w-auto max-w-[100px] sm:max-w-[120px] md:max-w-[140px] object-contain transition-all" 
             />
           </Link>
           
