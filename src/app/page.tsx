@@ -51,7 +51,7 @@ export default function HomePage() {
                 </span>
               ) : (
                 <>
-                  Trusted local pros, <span className="underline decoration-secondary decoration-wavy underline-offset-4 text-white">verified</span> first.
+                  Trusted local pros, <span className="text-white">verified</span> first.
                 </>
               )}
             </h1>
