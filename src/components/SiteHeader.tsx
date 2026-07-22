@@ -32,11 +32,15 @@ export default function SiteHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur border-outline-variant shadow-sm">
-        <nav className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur border-outline-variant shadow-sm h-[56px] sm:h-[64px] md:h-[72px] flex flex-col justify-center">
+        <nav className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href={dash || "/"} className="block shrink-0 min-h-[44px] flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/uploads/LOGO.png" alt="Ogenzo Logo" className="h-[32px] w-auto object-contain" />
+            <img 
+              src="/logo.svg" 
+              alt="Ogenzo logo" 
+              className="h-[24px] sm:h-[30px] md:h-[34px] w-auto max-w-[120px] sm:max-w-[140px] md:max-w-[160px] object-contain transition-all" 
+            />
           </Link>
           
           {/* Center Links - Conditional on Authentication (Desktop) */}
@@ -161,7 +165,7 @@ export default function SiteHeader() {
       {/* 📱 Mobile Menu Drawer Overlay */}
       {showMobileMenu && (
         <div 
-          className="fixed inset-0 top-[72px] z-40 bg-black/50 backdrop-blur-xs md:hidden animate-fade-in"
+          className="fixed inset-0 top-[56px] sm:top-[64px] md:top-[72px] z-40 bg-black/50 backdrop-blur-xs md:hidden animate-fade-in"
           onClick={() => setShowMobileMenu(false)}
         >
           <div 
