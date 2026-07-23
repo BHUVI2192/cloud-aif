@@ -3,6 +3,8 @@ import { DayOfWeek } from "@prisma/client";
 import { withTiming, createTimedResponse } from "@/lib/timing";
 import { getCachedProviderSlots } from "@/lib/cache";
 
+export const dynamic = "force-dynamic";
+
 const DAYS_OF_WEEK = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
 export async function GET(

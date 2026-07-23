@@ -160,9 +160,9 @@ export default function BookProviderDirectory({
                   )}
 
                   {p.localities.length > 0 && (
-                    <div className="flex items-center gap-1 text-[11px] text-slate pt-1">
+                    <div className="flex items-center gap-1 text-[11px] text-slate pt-1 min-w-0 w-full">
                       <MapPin className="h-3 w-3 text-forest shrink-0" />
-                      <span className="truncate">Covers: {p.localities.slice(0, 4).join(", ")}</span>
+                      <span className="truncate flex-1">Covers: {p.localities.slice(0, 4).join(", ")}</span>
                     </div>
                   )}
                 </div>

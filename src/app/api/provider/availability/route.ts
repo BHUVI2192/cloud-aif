@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { DayOfWeek, AvailabilityType } from "@prisma/client";
 
+export const dynamic = "force-dynamic";
+
 const slotSchema = z.object({
   dayOfWeek: z.nativeEnum(DayOfWeek),
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
