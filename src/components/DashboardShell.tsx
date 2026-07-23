@@ -347,8 +347,18 @@ export default function DashboardShell({
 
       {/* 🖥 Main Content Area */}
       <main className="p-4 sm:p-6 md:p-8 pb-24 md:pb-8 min-w-0 max-w-7xl w-full mx-auto">
-        <div className="mb-6 hidden md:flex items-center justify-between">
-          <h1 className="text-[26px] font-bold tracking-tight text-on-surface">{title}</h1>
+        <div className="mb-6 hidden md:flex items-center gap-4 justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            {backHref && (
+              <Link
+                href={backHref}
+                className="grid h-10 w-10 place-items-center rounded-full border border-outline-variant bg-white text-primary hover:bg-surface-container active:scale-95 shadow-sm transition"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+            )}
+            <h1 className="text-[26px] font-bold tracking-tight text-on-surface truncate">{title}</h1>
+          </div>
           <NotificationBell />
         </div>
         {children}

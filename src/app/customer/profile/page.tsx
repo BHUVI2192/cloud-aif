@@ -40,6 +40,7 @@ export default async function CustomerProfilePage() {
       nav={CUSTOMER_NAV}
       active="/customer/profile"
       user={session.user}
+      backHref="/customer"
     >
       <div className="max-w-[640px] mx-auto py-4">
         <CustomerProfileForm

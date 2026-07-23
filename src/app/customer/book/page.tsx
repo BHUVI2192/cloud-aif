@@ -43,6 +43,7 @@ export default async function CustomerBookPage() {
       nav={CUSTOMER_NAV}
       active="/customer/book"
       user={session.user}
+      backHref="/customer"
     >
       <BookProviderDirectory
         providers={providers.map((p) => ({

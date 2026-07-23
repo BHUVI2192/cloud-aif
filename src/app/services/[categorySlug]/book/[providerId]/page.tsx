@@ -42,6 +42,7 @@ export default async function BookProviderPage({
       nav={CUSTOMER_NAV}
       active="/services"
       user={session.user}
+      backHref="/customer/book"
     >
       <div className="max-w-[760px] mx-auto py-4">
         <ProviderBookingClient

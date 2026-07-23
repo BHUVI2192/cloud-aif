@@ -15,7 +15,7 @@ export default async function ProviderProfilePage() {
 
   if (!provider) {
     return (
-      <DashboardShell title="Profile" nav={PROVIDER_NAV} active="/provider/profile" user={session.user}>
+      <DashboardShell title="Profile" nav={PROVIDER_NAV} active="/provider/profile" user={session.user} backHref="/provider">
         <div className="card">No profile found.</div>
       </DashboardShell>
     );
@@ -28,7 +28,7 @@ export default async function ProviderProfilePage() {
   });
 
   return (
-    <DashboardShell title="Profile" nav={PROVIDER_NAV} active="/provider/profile" user={session.user}>
+    <DashboardShell title="Profile" nav={PROVIDER_NAV} active="/provider/profile" user={session.user} backHref="/provider">
       <ProviderProfileForm 
         profile={provider} 
         categories={categories} 
