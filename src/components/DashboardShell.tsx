@@ -173,6 +173,12 @@ export default function DashboardShell({
   const bottomShortcuts = getBottomShortcuts();
   const hasMoreMenu = true; // Always show the "More" button on mobile so users can sign out & access profile options
 
+  const notificationsHref = user?.role === "PROVIDER"
+    ? "/provider/notifications"
+    : user?.role === "ADMIN" || user?.role === "SUPER_ADMIN"
+      ? "/admin/notifications"
+      : "/customer/notifications";
+
   return (
     <div className="min-h-screen md:grid md:grid-cols-[240px_minmax(0,1fr)] bg-surface text-on-surface">
       {/* 🖥 Persistent Desktop Sidebar */}
@@ -244,7 +250,7 @@ export default function DashboardShell({
               {title}
             </span>
           </div>
-          <NotificationBell />
+          <NotificationBell href={notificationsHref} />
         </div>
         {user.role === "PROVIDER" && (
           <div className="flex items-center justify-center bg-surface-container-low border-t border-outline-variant px-4 py-2">
@@ -359,7 +365,7 @@ export default function DashboardShell({
             )}
             <h1 className="text-[26px] font-bold tracking-tight text-on-surface truncate">{title}</h1>
           </div>
-          <NotificationBell />
+          <NotificationBell href={notificationsHref} />
         </div>
         {children}
       </main>
