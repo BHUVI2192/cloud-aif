@@ -53,7 +53,7 @@ export default async function PublicProviderProfilePage({ params }: { params: { 
   return (
     <div className="min-h-screen bg-slate-50 text-gray-900 pb-20">
       {/* Top Banner & Profile Header */}
-      <div className="bg-gradient-to-br from-emerald-900 via-forest to-emerald-950 text-white pt-8 pb-16 px-4">
+      <div className="bg-gradient-to-br from-teal-950 via-teal-900 to-green-950 text-white pt-8 pb-16 px-4">
         <div className="max-w-md mx-auto space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-[12px] font-bold uppercase tracking-wider bg-white/10 text-emerald-300 px-3 py-1 rounded-full border border-white/20 backdrop-blur-sm">
@@ -74,9 +74,9 @@ export default async function PublicProviderProfilePage({ params }: { params: { 
                 provider.displayName.charAt(0)
               )}
             </div>
-            <div className="space-y-1">
-              <h1 className="text-2xl font-black tracking-tight leading-tight">{provider.displayName}</h1>
-              <p className="text-[14px] text-emerald-200/90 font-medium">{categories.join(" • ")}</p>
+            <div className="space-y-1 min-w-0 flex-1">
+              <h1 className="text-2xl font-black tracking-tight leading-tight break-words">{provider.displayName}</h1>
+              <p className="text-[14px] text-emerald-200/90 font-medium break-words">{categories.join(" • ")}</p>
               {provider.experienceYears && (
                 <span className="inline-block text-[12px] bg-white/15 px-2.5 py-0.5 rounded text-white/90">
                   {provider.experienceYears}+ Years Verified Experience
