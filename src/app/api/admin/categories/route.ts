@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { revalidateTag } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
       },
     });
 
+    revalidateTag("categories");
     return NextResponse.json({ ok: true, category });
   } catch (err: any) {
     console.error("[admin-category-create]", err);
@@ -58,6 +60,7 @@ export async function PUT(req: Request) {
       },
     });
 
+    revalidateTag("categories");
     return NextResponse.json({ ok: true, category });
   } catch (err: any) {
     console.error("[admin-category-update]", err);
@@ -86,6 +89,7 @@ export async function DELETE(req: Request) {
       },
     });
 
+    revalidateTag("categories");
     return NextResponse.json({ ok: true, category });
   } catch (err: any) {
     console.error("[admin-category-delete]", err);
