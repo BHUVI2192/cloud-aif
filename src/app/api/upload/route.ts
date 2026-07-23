@@ -13,14 +13,16 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
+    const bucket = (formData.get("bucket") as string) || "general";
+
     if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    const publicUrl = await uploadFile(file, "voice-notes");
-    return NextResponse.json({ url: publicUrl }, { status: 201 });
+    const url = await uploadFile(file, bucket);
+    return NextResponse.json({ url }, { status: 201 });
   } catch (error: any) {
-    console.error("[upload-voice] Error uploading voice note:", error);
-    return NextResponse.json({ error: "Failed to upload voice note" }, { status: 500 });
+    console.error("[upload-api] Upload error:", error);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

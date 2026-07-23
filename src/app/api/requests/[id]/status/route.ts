@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
+import { canTransition } from "@/lib/status-machine";
 
 const schema = z.object({
-  status: z.enum(["IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+  status: z.enum(["EN_ROUTE", "ARRIVED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
   note: z.string().optional(),
 });
 
@@ -29,6 +30,20 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const next = parsed.data.status;
+
+  // 1. Enforce state machine transitions
+  if (!canTransition(request.status, next)) {
+    return NextResponse.json({ error: `Cannot transition from ${request.status} to ${next}` }, { status: 400 });
+  }
+
+  // 2. Prevent provider from bypassing OTP
+  if (next === "IN_PROGRESS" && isAssignedProvider && !isAdmin) {
+    return NextResponse.json(
+      { error: "OTP verification is required to start the job. Please verify the OTP to start." },
+      { status: 400 }
+    );
+  }
+
   await db.$transaction(async (tx) => {
     await tx.serviceRequest.update({
       where: { id: request.id },
@@ -60,3 +75,4 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   return NextResponse.json({ ok: true });
 }
+

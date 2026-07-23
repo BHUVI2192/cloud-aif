@@ -103,7 +103,7 @@ export default function NotificationBell() {
       {/* Dropdown */}
       {open && (
         <div
-          className="absolute right-0 z-50 mt-2 w-80 rounded-2xl shadow-2xl border overflow-hidden"
+          className="absolute -right-2 md:right-0 z-50 mt-2 w-80 max-w-[calc(100vw-24px)] rounded-2xl shadow-2xl border overflow-hidden"
           style={{ background: "var(--card)", borderColor: "var(--line)", top: "100%" }}
         >
           {/* Header */}

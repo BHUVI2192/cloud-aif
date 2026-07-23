@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/session";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { uploadFile } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -45,25 +44,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "Profile not found" }, { status: 404 });
       }
 
-      // Save portfolio image
-      const publicDir = path.join(process.cwd(), "public");
-      const portfolioDir = path.join(publicDir, "uploads", "portfolio");
-
-      let imageUrl = "";
-      try {
-        await mkdir(portfolioDir, { recursive: true });
-        const ext = path.extname(imageFile.name) || ".jpg";
-        const filename = `${session.user.id}_portfolio_${Date.now()}${ext}`;
-        const filepath = path.join(portfolioDir, filename);
-        const buffer = Buffer.from(await imageFile.arrayBuffer());
-        await writeFile(filepath, buffer);
-        imageUrl = `/uploads/portfolio/${filename}`;
-      } catch (fsError) {
-        console.warn("Filesystem is read-only. Saving portfolio image as Base64 Data URL...", fsError);
-        const buffer = Buffer.from(await imageFile.arrayBuffer());
-        const mime = imageFile.type || "image/jpeg";
-        imageUrl = `data:${mime};base64,${buffer.toString("base64")}`;
-      }
+      // Save portfolio image using uploadFile storage helper (bucket: "portfolio")
+      const imageUrl = await uploadFile(imageFile, "portfolio");
 
       const maxSort = await db.providerPortfolioItem.aggregate({
         where: { providerId: provider.id },

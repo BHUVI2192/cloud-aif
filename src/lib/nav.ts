@@ -29,4 +29,7 @@ export const ADMIN_NAV = [
 export const CUSTOMER_NAV = [
   { label: "My Requests", href: "/customer" },
   { label: "New Request", href: "/services" },
+  { label: "Book Provider", href: "/customer/book" },
+  { label: "Profile", href: "/customer/profile" },
 ];
+

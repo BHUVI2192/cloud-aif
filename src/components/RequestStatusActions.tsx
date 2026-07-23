@@ -42,7 +42,7 @@ export default function RequestStatusActions({
     }
   }, [toastMsg]);
 
-  async function updateStatus(nextStatus: "IN_PROGRESS" | "COMPLETED" | "CANCELLED") {
+  async function updateStatus(nextStatus: "EN_ROUTE" | "ARRIVED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED") {
     setLoading(true);
     try {
       const res = await fetch(`/api/requests/${requestId}/status`, {
@@ -56,7 +56,8 @@ export default function RequestStatusActions({
         setShowCancelForm(false);
         router.refresh();
       } else {
-        setToastMsg("Failed to update status.");
+        const data = await res.json();
+        setToastMsg(data.error || "Failed to update status.");
       }
     } catch {
       setToastMsg("An error occurred.");
@@ -66,11 +67,13 @@ export default function RequestStatusActions({
   }
 
   // Determine which actions are available
-  const canCancel = (isOwner || isAdmin) && ["DRAFT", "SUBMITTED", "MATCHING", "ASSIGNED", "ACCEPTED", "IN_PROGRESS"].includes(currentStatus);
-  const canStart = (isProvider || isAdmin) && currentStatus === "ACCEPTED";
+  const canCancel = (isOwner || isAdmin) && ["DRAFT", "SUBMITTED", "MATCHING", "ASSIGNED", "ACCEPTED", "EN_ROUTE", "ARRIVED_NEARBY", "ARRIVED", "IN_PROGRESS"].includes(currentStatus);
+  const canStartTravel = (isProvider || isAdmin) && currentStatus === "ACCEPTED";
+  const canMarkArrived = (isProvider || isAdmin) && ["EN_ROUTE", "ARRIVED_NEARBY"].includes(currentStatus);
+  const canStartAdmin = isAdmin && ["ARRIVED_NEARBY", "ARRIVED"].includes(currentStatus);
   const canComplete = (isOwner || isProvider || isAdmin) && ["ACCEPTED", "IN_PROGRESS"].includes(currentStatus);
 
-  if (!canCancel && !canStart && !canComplete) return null;
+  if (!canCancel && !canStartTravel && !canMarkArrived && !canStartAdmin && !canComplete) return null;
 
   return (
     <div className="sticky-bottom-bar md:static md:mt-6 md:card md:bg-white md:border md:border-line md:p-6" style={{ borderRadius: "20px" }}>
@@ -143,16 +146,34 @@ export default function RequestStatusActions({
         </div>
       ) : (
         <div className="flex flex-wrap gap-2.5">
-          {canStart && (
+          {canStartTravel && (
+            <button
+              className="btn btn-primary !py-2 !text-[13px]"
+              disabled={loading}
+              onClick={() => updateStatus("EN_ROUTE")}
+            >
+              🚗 Start Travel
+            </button>
+          )}
+          {canMarkArrived && (
+            <button
+              className="btn btn-primary !py-2 !text-[13px]"
+              disabled={loading}
+              onClick={() => updateStatus("ARRIVED")}
+            >
+              📍 Arrived at Site
+            </button>
+          )}
+          {canStartAdmin && (
             <button
               className="btn btn-primary !py-2 !text-[13px]"
               disabled={loading}
               onClick={() => updateStatus("IN_PROGRESS")}
             >
-              Start Service/Job
+              Start Service (Admin Bypass)
             </button>
           )}
-          {canComplete && (
+          {canComplete && currentStatus === "IN_PROGRESS" && (
             <button
               className="btn btn-primary !py-2 !text-[13px]"
               disabled={loading}

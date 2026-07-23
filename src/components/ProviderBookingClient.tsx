@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n";
+import MapPicker from "@/components/MapPicker";
 
 interface Subservice {
   id: string;
@@ -56,6 +57,8 @@ export default function ProviderBookingClient({
   const [addressLine, setAddressLine] = useState("");
   const [landmark, setLandmark] = useState("");
   const [phone, setPhone] = useState("");
+  const [latitude, setLatitude] = useState(13.9299);
+  const [longitude, setLongitude] = useState(75.5681);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -71,6 +74,24 @@ export default function ProviderBookingClient({
   useEffect(() => {
     const todayISO = new Date().toISOString().split("T")[0];
     setSelectedDateISO(todayISO);
+  }, []);
+
+  // Load default address & phone on initialization
+  useEffect(() => {
+    fetch("/api/customer/default-address")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          if (data.phone) setPhone(data.phone);
+          if (data.address) {
+            setAddressLine(data.address.line1 || "");
+            if (data.address.line2) setLandmark(data.address.line2);
+            if (data.address.latitude) setLatitude(data.address.latitude);
+            if (data.address.longitude) setLongitude(data.address.longitude);
+          }
+        }
+      })
+      .catch((err) => console.warn("Failed to load default address:", err));
   }, []);
 
   // Fetch slots whenever selectedDateISO changes
@@ -133,6 +154,8 @@ export default function ProviderBookingClient({
           preferredTime: selectedTimeSlot,
           providerId: provider.id,
           phone,
+          latitude: parseFloat(latitude.toString()),
+          longitude: parseFloat(longitude.toString()),
         }),
       });
 
@@ -341,6 +364,18 @@ export default function ProviderBookingClient({
             placeholder="10-digit mobile number"
             required
             minLength={10}
+          />
+        </div>
+
+        {/* Embedded Map Pin Picker */}
+        <div className="pt-2">
+          <MapPicker
+            latitude={latitude}
+            longitude={longitude}
+            onChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+            }}
           />
         </div>
       </div>

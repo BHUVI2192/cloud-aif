@@ -96,28 +96,65 @@ export default function BeforeAfterProofGallery({ requestId, isProvider }: Befor
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <input
-              type="url"
-              value={photoUrl}
-              onChange={(e) => setPhotoUrl(e.target.value)}
-              placeholder="Paste Image URL (e.g. https://...)"
-              className="flex-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs focus:border-emerald-600 focus:outline-none"
-            />
-            <input
-              type="text"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              placeholder="Caption (optional)"
-              className="w-1/3 rounded-lg border border-slate-300 px-3 py-1.5 text-xs focus:border-emerald-600 focus:outline-none"
-            />
-            <button
-              type="submit"
-              disabled={isUploading || !photoUrl.trim()}
-              className="btn btn-primary text-xs !py-1.5 !px-3 shrink-0"
-            >
-              {isUploading ? "Uploading..." : "Add Proof"}
-            </button>
+          <div className="flex flex-col gap-2.5">
+            <div className="flex items-center gap-2">
+              <label className="text-xs font-semibold text-slate">Upload Photo File:</label>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={isUploading}
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setIsUploading(true);
+                  setErrorMsg(null);
+                  try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("bucket", "proof-photos");
+                    const res = await fetch("/api/upload", {
+                      method: "POST",
+                      body: formData,
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.url) {
+                      setPhotoUrl(data.url);
+                    } else {
+                      setErrorMsg(data.error || "Upload failed");
+                    }
+                  } catch {
+                    setErrorMsg("Network error uploading file");
+                  } finally {
+                    setIsUploading(false);
+                  }
+                }}
+                className="text-xs flex-1"
+              />
+            </div>
+            
+            {photoUrl && (
+              <div className="flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-100 p-2 rounded-lg">
+                <span className="truncate flex-1">Selected photo: <strong>{photoUrl}</strong></span>
+                <button type="button" onClick={() => setPhotoUrl("")} className="font-bold text-red-600 hover:text-red-700">Clear</button>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder="Caption (optional)"
+                className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs focus:border-emerald-600 focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={isUploading || !photoUrl.trim()}
+                className="btn btn-primary text-xs !py-2 !px-4 shrink-0"
+              >
+                {isUploading ? "Uploading..." : "Add Proof"}
+              </button>
+            </div>
           </div>
           {errorMsg && <p className="text-xs font-bold text-red-600">{errorMsg}</p>}
         </form>

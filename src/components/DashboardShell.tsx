@@ -112,7 +112,16 @@ const NAV_ICONS: Record<string, React.ReactNode> = {
       <line x1="3" y1="18" x2="21" y2="18" />
     </svg>
   ),
+  "Book Provider": (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  ),
 };
+
 
 export default function DashboardShell({
   title,
@@ -162,7 +171,7 @@ export default function DashboardShell({
   };
 
   const bottomShortcuts = getBottomShortcuts();
-  const hasMoreMenu = nav.length > bottomShortcuts.length;
+  const hasMoreMenu = true; // Always show the "More" button on mobile so users can sign out & access profile options
 
   return (
     <div className="min-h-screen md:grid md:grid-cols-[240px_minmax(0,1fr)] bg-surface text-on-surface">
@@ -220,7 +229,7 @@ export default function DashboardShell({
       </aside>
 
       {/* 📱 Mobile Top Header Bar */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-outline-variant shadow-sm md:hidden">
+      <header className="sticky top-0 z-[45] bg-white/95 backdrop-blur border-b border-outline-variant shadow-sm md:hidden">
         <div className="flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2 min-w-0">
             {backHref ? (

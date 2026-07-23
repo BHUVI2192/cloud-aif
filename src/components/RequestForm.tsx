@@ -2,241 +2,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n";
+import MapPicker from "./MapPicker";
 
 type Area = { id: string; name: string };
 
-function MapPicker({
-  latitude,
-  longitude,
-  onChange,
-}: {
-  latitude: number;
-  longitude: number;
-  onChange: (lat: number, lng: number) => void;
-}) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const markerRef = useRef<any>(null);
-
-  useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-    let script: HTMLScriptElement | null = null;
-    let cssLink: HTMLLinkElement | null = null;
-
-    if (apiKey) {
-      // 1. Google Maps Mode
-      const initializeGoogleMap = () => {
-        if (!mapRef.current || !(window as any).google) return;
-
-        const googleObj = (window as any).google;
-        const map = new googleObj.maps.Map(mapRef.current, {
-          center: { lat: latitude, lng: longitude },
-          zoom: 14,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-        });
-
-        const marker = new googleObj.maps.Marker({
-          position: { lat: latitude, lng: longitude },
-          map: map,
-          draggable: true,
-        });
-
-        markerRef.current = marker;
-
-        map.addListener("click", (e: any) => {
-          const lat = e.latLng.lat();
-          const lng = e.latLng.lng();
-          marker.setPosition(e.latLng);
-          onChange(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6)));
-        });
-
-        marker.addListener("dragend", () => {
-          const pos = marker.getPosition();
-          if (pos) {
-            onChange(parseFloat(pos.lat().toFixed(6)), parseFloat(pos.lng().toFixed(6)));
-          }
-        });
-      };
-
-      script = document.getElementById("google-maps-script") as HTMLScriptElement;
-      if (!(window as any).google) {
-        if (!script) {
-          script = document.createElement("script");
-          script.id = "google-maps-script";
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-          script.async = true;
-          script.defer = true;
-          document.head.appendChild(script);
-        }
-        script.addEventListener("load", initializeGoogleMap);
-      } else {
-        initializeGoogleMap();
-      }
-
-      return () => {
-        if (script) {
-          script.removeEventListener("load", initializeGoogleMap);
-        }
-      };
-    } else {
-      // 2. Leaflet / OpenStreetMap Mode (No API Key Required!)
-      const initializeLeaflet = () => {
-        if (!mapRef.current || !(window as any).L) return;
-
-        const LObj = (window as any).L;
-        
-        // Clean up previous map if it exists to prevent multiple initializations
-        if ((mapRef.current as any)._leaflet_id) {
-          return;
-        }
-
-        const map = LObj.map(mapRef.current, {
-          zoomControl: true,
-          attributionControl: true,
-        }).setView([latitude, longitude], 14);
-
-        LObj.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Customize marker icon to match standard Leaflet CDN marker
-        const customIcon = LObj.icon({
-          iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41]
-        });
-
-        const marker = LObj.marker([latitude, longitude], {
-          draggable: true,
-          icon: customIcon,
-        }).addTo(map);
-
-        markerRef.current = marker;
-
-        map.on("click", (e: any) => {
-          const { lat, lng } = e.latlng;
-          marker.setLatLng(e.latlng);
-          onChange(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6)));
-        });
-
-        marker.on("dragend", () => {
-          const pos = marker.getLatLng();
-          if (pos) {
-            onChange(parseFloat(pos.lat().toFixed(6)), parseFloat(pos.lng().toFixed(6)));
-          }
-        });
-
-        // Trigger map layout updates after initialization to fix rendering glitches
-        setTimeout(() => {
-          map.invalidateSize();
-        }, 200);
-      };
-
-      cssLink = document.getElementById("leaflet-css") as HTMLLinkElement;
-      if (!cssLink) {
-        cssLink = document.createElement("link");
-        cssLink.id = "leaflet-css";
-        cssLink.rel = "stylesheet";
-        cssLink.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        document.head.appendChild(cssLink);
-      }
-
-      script = document.getElementById("leaflet-js") as HTMLScriptElement;
-      if (!(window as any).L) {
-        if (!script) {
-          script = document.createElement("script");
-          script.id = "leaflet-js";
-          script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-          script.async = true;
-          document.head.appendChild(script);
-        }
-        script.addEventListener("load", initializeLeaflet);
-      } else {
-        initializeLeaflet();
-      }
-
-      return () => {
-        if (script) {
-          script.removeEventListener("load", initializeLeaflet);
-        }
-      };
-    }
-  }, []);
-
-  // Update marker position if coordinates change externally
-  useEffect(() => {
-    if (markerRef.current) {
-      if ((window as any).google) {
-        const googleObj = (window as any).google;
-        const pos = new googleObj.maps.LatLng(latitude, longitude);
-        markerRef.current.setPosition(pos);
-        markerRef.current.getMap()?.panTo(pos);
-      } else if ((window as any).L) {
-        markerRef.current.setLatLng([latitude, longitude]);
-      }
-    }
-  }, [latitude, longitude]);
-
-  const landmarks = [
-    { name: "Gandhi Bazar", lat: 13.9312, lng: 75.5695 },
-    { name: "Shivamogga Bus Stand", lat: 13.9285, lng: 75.5658 },
-    { name: "Gopi Circle", lat: 13.9333, lng: 75.5684 },
-    { name: "Sominakoppa", lat: 13.9512, lng: 75.5487 },
-    { name: "Tunga River Bridge", lat: 13.9220, lng: 75.5800 },
-  ];
-
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="label">Pin Location (Drag marker or click on map to move pin)</label>
-        <span className="text-[12px] font-mono" style={{ color: "var(--forest)" }}>
-          {latitude.toFixed(6)}, {longitude.toFixed(6)}
-        </span>
-      </div>
-
-      <div
-        ref={mapRef}
-        className="w-full h-[250px] rounded-xl overflow-hidden relative"
-        style={{
-          border: "1px solid var(--line)",
-          boxShadow: "inset 0 2px 4px rgba(0,0,0,0.05)",
-          zIndex: 1
-        }}
-      />
-
-      <div className="flex flex-wrap gap-2 pt-1">
-        <span className="text-[12px] flex items-center" style={{ color: "var(--slate)" }}>Quick landmarks:</span>
-        {landmarks.map((lm) => (
-          <button
-            key={lm.name}
-            type="button"
-            className="text-[12px] px-2 py-0.5 rounded bg-white border hover:bg-gray-50 active:bg-gray-100"
-            style={{ borderColor: "var(--line)", color: "var(--forest)" }}
-            onClick={() => {
-              onChange(lm.lat, lm.lng);
-              if (markerRef.current) {
-                if ((window as any).google) {
-                  const googleObj = (window as any).google;
-                  const pos = new googleObj.maps.LatLng(lm.lat, lm.lng);
-                  markerRef.current.setPosition(pos);
-                  markerRef.current.getMap()?.panTo(pos);
-                } else if ((window as any).L) {
-                  markerRef.current.setLatLng([lm.lat, lm.lng]);
-                }
-              }
-            }}
-          >
-            {lm.name}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function RequestForm({
   categoryId,
@@ -260,6 +29,7 @@ export default function RequestForm({
     addressLine: "",
     landmark: "",
     preferredDate: "",
+    preferredTime: "",
     urgency: "FLEXIBLE",
     contactPreference: "ANY",
     budgetMin: "",
@@ -275,6 +45,27 @@ export default function RequestForm({
   const [done, setDone] = useState<{ id: string } | null>(null);
   const [aiTriaging, setAiTriaging] = useState(false);
 
+  // Load default address & phone on initialization
+  useEffect(() => {
+    fetch("/api/customer/default-address")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          if (data.phone) setForm((f) => ({ ...f, phone: data.phone }));
+          if (data.address) {
+            setForm((f) => ({
+              ...f,
+              addressLine: data.address.line1 || "",
+              landmark: data.address.line2 || "",
+              latitude: data.address.latitude || 13.9299,
+              longitude: data.address.longitude || 75.5681,
+            }));
+          }
+        }
+      })
+      .catch((err) => console.warn("Failed to load default address:", err));
+  }, []);
+
   // Audio recording state
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -288,7 +79,18 @@ export default function RequestForm({
   async function startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
+      let options: any = {};
+      if (MediaRecorder.isTypeSupported("audio/webm")) {
+        options = { mimeType: "audio/webm" };
+      } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+        options = { mimeType: "audio/mp4" };
+      } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+        options = { mimeType: "audio/ogg" };
+      } else if (MediaRecorder.isTypeSupported("audio/wav")) {
+        options = { mimeType: "audio/wav" };
+      }
+      
+      const recorder = new MediaRecorder(stream, options);
       const chunks: Blob[] = [];
       
       recorder.ondataavailable = (e) => {
@@ -296,15 +98,20 @@ export default function RequestForm({
       };
 
       recorder.onstop = async () => {
-        const blob = new Blob(chunks, { type: "audio/webm" });
+        let ext = ".webm";
+        if (recorder.mimeType.includes("mp4")) ext = ".mp4";
+        else if (recorder.mimeType.includes("ogg")) ext = ".ogg";
+        else if (recorder.mimeType.includes("wav")) ext = ".wav";
+
+        const blob = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
         const localUrl = URL.createObjectURL(blob);
         setAudioUrl(localUrl);
 
-        // Immediately upload to server
+        // Immediately upload to server using uploadFile storage helper
         setUploadingVoice(true);
         try {
           const data = new FormData();
-          data.append("file", blob, "voice-note.webm");
+          data.append("file", blob, `voice-note${ext}`);
           const response = await fetch("/api/upload-voice", {
             method: "POST",
             body: data,
@@ -349,6 +156,8 @@ export default function RequestForm({
     if (form.title.trim().length < 4) e.title = "Add a short title.";
     if (form.description.trim().length < 10) e.description = "Describe the job in a bit more detail.";
     if (!form.serviceAreaId) e.serviceAreaId = "Choose your locality.";
+    if (!form.preferredDate) e.preferredDate = "Choose a preferred date.";
+    if (!form.preferredTime) e.preferredTime = "Choose a preferred time slot.";
     if (!/^\d{10}$/.test(form.phone.trim())) e.phone = "Provide a valid 10-digit primary phone number.";
     if (form.alternatePhone.trim() && !/^\d{10}$/.test(form.alternatePhone.trim())) {
       e.alternatePhone = "Provide a valid 10-digit alternate phone number.";
@@ -480,10 +289,40 @@ export default function RequestForm({
             {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
           </select>
         </Field>
-        <Field label="Preferred date">
+        <Field label="Preferred date" error={errors.preferredDate}>
           <input type="date" className="input text-[14px]" value={form.preferredDate} onChange={(e) => set("preferredDate", e.target.value)} />
         </Field>
       </div>
+
+      {form.preferredDate && (
+        <Field label="Preferred time slot" error={errors.preferredTime}>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {[
+              "09:00 - 11:00",
+              "11:00 - 13:00",
+              "13:00 - 15:00",
+              "15:00 - 17:00"
+            ].map((slot) => {
+              const isSelected = form.preferredTime === slot;
+              return (
+                <button
+                  key={slot}
+                  type="button"
+                  onClick={() => set("preferredTime", slot)}
+                  className={`px-3 py-1.5 text-[12.5px] font-semibold rounded-full border transition-all duration-150 ${
+                    isSelected
+                      ? "bg-mist border-brand text-brand"
+                      : "bg-white border-line text-slate hover:border-slate/30"
+                  }`}
+                  style={{ minHeight: "36px" }}
+                >
+                  {slot}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Address">
