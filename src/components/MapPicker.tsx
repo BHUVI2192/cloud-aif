@@ -94,7 +94,7 @@ export default function MapPicker({
           attributionControl: true,
         }).setView([latitude, longitude], 14);
 
-        LObj.tileLayer("https://{s}.tile.openstreetmap.org/{x}/{y}.png", {
+        LObj.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
           attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 

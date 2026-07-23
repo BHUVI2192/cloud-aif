@@ -83,6 +83,31 @@ export default async function ProviderHome() {
         </div>
       </div>
 
+      {/* Quick Actions Navigation Bar */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <Link
+          href="/provider/requests"
+          className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-outline-variant bg-white hover:border-primary active:scale-95 transition-all text-center shadow-sm"
+        >
+          <span className="text-xl mb-1">📋</span>
+          <span className="text-[12px] font-extrabold text-forest uppercase tracking-wider">Job Leads</span>
+        </Link>
+        <Link
+          href="/provider/profile"
+          className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-outline-variant bg-white hover:border-primary active:scale-95 transition-all text-center shadow-sm"
+        >
+          <span className="text-xl mb-1">💼</span>
+          <span className="text-[12px] font-extrabold text-forest uppercase tracking-wider">My Profile</span>
+        </Link>
+        <Link
+          href="/provider/schedule"
+          className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-outline-variant bg-white hover:border-primary active:scale-95 transition-all text-center shadow-sm"
+        >
+          <span className="text-xl mb-1">📅</span>
+          <span className="text-[12px] font-extrabold text-forest uppercase tracking-wider">My Schedule</span>
+        </Link>
+      </div>
+
       {provider && (
         <div className="mb-6 grid gap-6 md:grid-cols-2">
           <ProfileCompletenessCard profile={provider as any} />

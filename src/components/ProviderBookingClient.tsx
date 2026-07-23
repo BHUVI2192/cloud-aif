@@ -181,34 +181,14 @@ export default function ProviderBookingClient({
           {isKn ? "೧. ಸೇವಾ ದಿನಾಂಕ ಆಯ್ಕೆಮಾಡಿ" : "1. Select Date"}
         </h3>
         
-        {/* Horizontal scroll container for mobile */}
-        <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
-          {dateOptions.map((date) => {
-            const iso = date.toISOString().split("T")[0];
-            const isSelected = selectedDateISO === iso;
-            const dayName = date.toLocaleDateString(isKn ? "kn-IN" : "en-US", { weekday: "short" });
-            const dayNum = date.getDate();
-            const monthName = date.toLocaleDateString(isKn ? "kn-IN" : "en-US", { month: "short" });
-
-            return (
-              <button
-                key={iso}
-                type="button"
-                onClick={() => setSelectedDateISO(iso)}
-                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-150 min-w-[70px] ${
-                  isSelected
-                    ? "bg-mist border-brand text-brand"
-                    : "bg-white border-line text-slate hover:border-slate/30"
-                }`}
-                style={{ minHeight: "80px" }}
-              >
-                <span className="text-[11px] font-semibold opacity-80 uppercase">{dayName}</span>
-                <span className="text-[18px] font-extrabold my-0.5">{dayNum}</span>
-                <span className="text-[11px] font-medium opacity-80">{monthName}</span>
-              </button>
-            );
-          })}
-        </div>
+        <input
+          type="date"
+          className="input text-[14px] w-full"
+          value={selectedDateISO}
+          onChange={(e) => setSelectedDateISO(e.target.value)}
+          min={new Date().toISOString().split("T")[0]}
+          required
+        />
       </div>
 
       {/* 2. Slots Selector */}

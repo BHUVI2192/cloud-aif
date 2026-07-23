@@ -80,6 +80,31 @@ export default async function CustomerDashboard() {
       active="/customer"
       user={session.user}
     >
+      {/* Quick Actions Navigation Bar */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <Link
+          href="/services"
+          className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-outline-variant bg-white hover:border-primary active:scale-95 transition-all text-center shadow-sm"
+        >
+          <span className="text-xl mb-1">🛠️</span>
+          <span className="text-[12px] font-extrabold text-forest uppercase tracking-wider">Request Service</span>
+        </Link>
+        <Link
+          href="/customer/book"
+          className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-outline-variant bg-white hover:border-primary active:scale-95 transition-all text-center shadow-sm"
+        >
+          <span className="text-xl mb-1">📖</span>
+          <span className="text-[12px] font-extrabold text-forest uppercase tracking-wider">Book Direct</span>
+        </Link>
+        <Link
+          href="/customer/profile"
+          className="flex flex-col items-center justify-center p-3.5 rounded-2xl border border-outline-variant bg-white hover:border-primary active:scale-95 transition-all text-center shadow-sm"
+        >
+          <span className="text-xl mb-1">👤</span>
+          <span className="text-[12px] font-extrabold text-forest uppercase tracking-wider">My Profile</span>
+        </Link>
+      </div>
+
       {requests.length === 0 ? (
         <div className="card text-center py-12 px-6">
           <div

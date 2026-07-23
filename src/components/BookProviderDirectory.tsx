@@ -169,16 +169,16 @@ export default function BookProviderDirectory({
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-2 mt-4 pt-3 border-t border-outline-variant">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4 pt-3 border-t border-outline-variant">
                 <Link
                   href={`/p/${p.id}`}
-                  className="btn btn-ghost flex-1 text-[12px] !py-2 text-center"
+                  className="btn btn-ghost flex-1 text-[13px] !py-2.5 text-center min-h-[44px] flex items-center justify-center"
                 >
                   View Profile
                 </Link>
                 <Link
                   href={`/services/${p.primaryCategorySlug}/book/${p.id}`}
-                  className="btn btn-primary flex-1 text-[12px] !py-2 text-center font-bold"
+                  className="btn btn-primary flex-1 text-[13px] !py-2.5 text-center font-bold min-h-[44px] flex items-center justify-center"
                 >
                   Book Directly
                 </Link>
