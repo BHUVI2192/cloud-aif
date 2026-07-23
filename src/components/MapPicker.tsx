@@ -17,165 +17,71 @@ export default function MapPicker({
 
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-    let script: HTMLScriptElement | null = null;
-    let cssLink: HTMLLinkElement | null = null;
+    
+    const initializeGoogleMap = () => {
+      if (!mapRef.current || !(window as any).google) return;
 
-    if (apiKey) {
-      // 1. Google Maps Mode
-      const initializeGoogleMap = () => {
-        if (!mapRef.current || !(window as any).google) return;
+      const googleObj = (window as any).google;
+      const map = new googleObj.maps.Map(mapRef.current, {
+        center: { lat: latitude, lng: longitude },
+        zoom: 14,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
 
-        const googleObj = (window as any).google;
-        const map = new googleObj.maps.Map(mapRef.current, {
-          center: { lat: latitude, lng: longitude },
-          zoom: 14,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-        });
+      const marker = new googleObj.maps.Marker({
+        position: { lat: latitude, lng: longitude },
+        map: map,
+        draggable: true,
+      });
 
-        const marker = new googleObj.maps.Marker({
-          position: { lat: latitude, lng: longitude },
-          map: map,
-          draggable: true,
-        });
+      markerRef.current = marker;
 
-        markerRef.current = marker;
+      map.addListener("click", (e: any) => {
+        const lat = e.latLng.lat();
+        const lng = e.latLng.lng();
+        marker.setPosition(e.latLng);
+        onChange(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6)));
+      });
 
-        map.addListener("click", (e: any) => {
-          const lat = e.latLng.lat();
-          const lng = e.latLng.lng();
-          marker.setPosition(e.latLng);
-          onChange(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6)));
-        });
-
-        marker.addListener("dragend", () => {
-          const pos = marker.getPosition();
-          if (pos) {
-            onChange(parseFloat(pos.lat().toFixed(6)), parseFloat(pos.lng().toFixed(6)));
-          }
-        });
-      };
-
-      script = document.getElementById("google-maps-script") as HTMLScriptElement;
-      if (!(window as any).google) {
-        if (!script) {
-          script = document.createElement("script");
-          script.id = "google-maps-script";
-          script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
-          script.async = true;
-          script.defer = true;
-          document.head.appendChild(script);
+      marker.addListener("dragend", () => {
+        const pos = marker.getPosition();
+        if (pos) {
+          onChange(parseFloat(pos.lat().toFixed(6)), parseFloat(pos.lng().toFixed(6)));
         }
-        script.addEventListener("load", initializeGoogleMap);
-      } else {
-        initializeGoogleMap();
+      });
+    };
+
+    let script = document.getElementById("google-maps-script") as HTMLScriptElement;
+    if (!(window as any).google) {
+      if (!script) {
+        script = document.createElement("script");
+        script.id = "google-maps-script";
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+        script.async = true;
+        script.defer = true;
+        document.head.appendChild(script);
       }
-
-      return () => {
-        if (script) {
-          script.removeEventListener("load", initializeGoogleMap);
-        }
-      };
+      script.addEventListener("load", initializeGoogleMap);
     } else {
-      // 2. Leaflet / OpenStreetMap Mode (No API Key Required!)
-      const initializeLeaflet = () => {
-        if (!mapRef.current || !(window as any).L) return;
-
-        const LObj = (window as any).L;
-        
-        // Clean up previous map if it exists to prevent multiple initializations
-        if ((mapRef.current as any)._leaflet_id) {
-          return;
-        }
-
-        const map = LObj.map(mapRef.current, {
-          zoomControl: true,
-          attributionControl: true,
-        }).setView([latitude, longitude], 14);
-
-        LObj.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Customize marker icon to match standard Leaflet CDN marker
-        const customIcon = LObj.icon({
-          iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41]
-        });
-
-        const marker = LObj.marker([latitude, longitude], {
-          draggable: true,
-          icon: customIcon,
-        }).addTo(map);
-
-        markerRef.current = marker;
-
-        map.on("click", (e: any) => {
-          const { lat, lng } = e.latlng;
-          marker.setLatLng(e.latlng);
-          onChange(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6)));
-        });
-
-        marker.on("dragend", () => {
-          const pos = marker.getLatLng();
-          if (pos) {
-            onChange(parseFloat(pos.lat().toFixed(6)), parseFloat(pos.lng().toFixed(6)));
-          }
-        });
-
-        // Trigger map layout updates after initialization to fix rendering glitches
-        setTimeout(() => {
-          map.invalidateSize();
-        }, 200);
-      };
-
-      cssLink = document.getElementById("leaflet-css") as HTMLLinkElement;
-      if (!cssLink) {
-        cssLink = document.createElement("link");
-        cssLink.id = "leaflet-css";
-        cssLink.rel = "stylesheet";
-        cssLink.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        document.head.appendChild(cssLink);
-      }
-
-      script = document.getElementById("leaflet-js") as HTMLScriptElement;
-      if (!(window as any).L) {
-        if (!script) {
-          script = document.createElement("script");
-          script.id = "leaflet-js";
-          script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-          script.async = true;
-          document.head.appendChild(script);
-        }
-        script.addEventListener("load", initializeLeaflet);
-      } else {
-        initializeLeaflet();
-      }
-
-      return () => {
-        if (script) {
-          script.removeEventListener("load", initializeLeaflet);
-        }
-      };
+      initializeGoogleMap();
     }
+
+    return () => {
+      if (script) {
+        script.removeEventListener("load", initializeGoogleMap);
+      }
+    };
   }, []);
 
   // Update marker position if coordinates change externally
   useEffect(() => {
-    if (markerRef.current) {
-      if ((window as any).google) {
-        const googleObj = (window as any).google;
-        const pos = new googleObj.maps.LatLng(latitude, longitude);
-        markerRef.current.setPosition(pos);
-        markerRef.current.getMap()?.panTo(pos);
-      } else if ((window as any).L) {
-        markerRef.current.setLatLng([latitude, longitude]);
-      }
+    if (markerRef.current && (window as any).google) {
+      const googleObj = (window as any).google;
+      const pos = new googleObj.maps.LatLng(latitude, longitude);
+      markerRef.current.setPosition(pos);
+      markerRef.current.getMap()?.panTo(pos);
     }
   }, [latitude, longitude]);
 
@@ -186,6 +92,8 @@ export default function MapPicker({
     { name: "Sominakoppa", lat: 13.9512, lng: 75.5487 },
     { name: "Tunga River Bridge", lat: 13.9220, lng: 75.5800 },
   ];
+
+  const hasApiKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   return (
     <div className="space-y-2">
@@ -213,6 +121,12 @@ export default function MapPicker({
         ref={mapRef}
         className="h-[240px] w-full rounded-2xl border border-outline-variant bg-surface-container shadow-inner overflow-hidden z-10 relative"
       />
+
+      {!hasApiKey && (
+        <p className="text-[11px] text-amber-600 font-semibold">
+          ⚠️ Note: Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in .env to enable full Google Maps functionality.
+        </p>
+      )}
     </div>
   );
 }
