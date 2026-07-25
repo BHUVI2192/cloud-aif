@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getAIProvider } from "@/lib/ai";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
