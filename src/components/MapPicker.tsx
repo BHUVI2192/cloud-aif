@@ -13,75 +13,113 @@ export default function MapPicker({
   onChange,
 }: MapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const markerRef = useRef<any>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerInstanceRef = useRef<any>(null);
 
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-    
-    const initializeGoogleMap = () => {
-      if (!mapRef.current || !(window as any).google) return;
+    let script: HTMLScriptElement | null = null;
+    let cssLink: HTMLLinkElement | null = null;
 
-      const googleObj = (window as any).google;
-      const map = new googleObj.maps.Map(mapRef.current, {
-        center: { lat: latitude, lng: longitude },
-        zoom: 14,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
+    const initializeLeaflet = () => {
+      if (!mapRef.current || !(window as any).L) return;
+
+      const L = (window as any).L;
+
+      // Clean up previous map instance to prevent duplicate initialization error
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+
+      // Initialize map
+      const map = L.map(mapRef.current, {
+        zoomControl: true,
+        attributionControl: true,
+      }).setView([latitude, longitude], 14);
+
+      mapInstanceRef.current = map;
+
+      // Load OSM tile layer with exact zoom template parameter {z}
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors',
+        maxZoom: 19,
+      }).addTo(map);
+
+      // Custom marker icon using divIcon (bulletproof emoji structure, no PNG asset load needed)
+      const pinIcon = L.divIcon({
+        className: "custom-pin-icon",
+        html: `<div style="font-size: 26px; background: white; border: 2px solid var(--forest); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2)">📍</div>`,
+        iconSize: [38, 38],
+        iconAnchor: [19, 19],
       });
 
-      const marker = new googleObj.maps.Marker({
-        position: { lat: latitude, lng: longitude },
-        map: map,
+      // Add draggable marker
+      const marker = L.marker([latitude, longitude], {
         draggable: true,
-      });
+        icon: pinIcon,
+      }).addTo(map);
 
-      markerRef.current = marker;
+      markerInstanceRef.current = marker;
 
-      map.addListener("click", (e: any) => {
-        const lat = e.latLng.lat();
-        const lng = e.latLng.lng();
-        marker.setPosition(e.latLng);
+      // Click to move pin
+      map.on("click", (e: any) => {
+        const { lat, lng } = e.latlng;
+        marker.setLatLng(e.latlng);
         onChange(parseFloat(lat.toFixed(6)), parseFloat(lng.toFixed(6)));
       });
 
-      marker.addListener("dragend", () => {
-        const pos = marker.getPosition();
+      // Drag to move pin
+      marker.on("dragend", () => {
+        const pos = marker.getLatLng();
         if (pos) {
-          onChange(parseFloat(pos.lat().toFixed(6)), parseFloat(pos.lng().toFixed(6)));
+          onChange(parseFloat(pos.lat.toFixed(6)), parseFloat(pos.lng().toFixed(6)));
         }
       });
+
+      // Force layout update to prevent partial rendering
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 200);
     };
 
-    let script = document.getElementById("google-maps-script") as HTMLScriptElement;
-    if (!(window as any).google) {
+    // Load CSS dynamically
+    cssLink = document.getElementById("leaflet-css") as HTMLLinkElement;
+    if (!cssLink) {
+      cssLink = document.createElement("link");
+      cssLink.id = "leaflet-css";
+      cssLink.rel = "stylesheet";
+      cssLink.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(cssLink);
+    }
+
+    // Load JS script dynamically
+    script = document.getElementById("leaflet-js") as HTMLScriptElement;
+    if (!(window as any).L) {
       if (!script) {
         script = document.createElement("script");
-        script.id = "google-maps-script";
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}`;
+        script.id = "leaflet-js";
+        script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
         script.async = true;
-        script.defer = true;
         document.head.appendChild(script);
       }
-      script.addEventListener("load", initializeGoogleMap);
+      script.addEventListener("load", initializeLeaflet);
     } else {
-      initializeGoogleMap();
+      initializeLeaflet();
     }
 
     return () => {
       if (script) {
-        script.removeEventListener("load", initializeGoogleMap);
+        script.removeEventListener("load", initializeLeaflet);
       }
     };
   }, []);
 
-  // Update marker position if coordinates change externally
+  // Update marker & pan map if coordinates change externally (such as landmark clicks)
   useEffect(() => {
-    if (markerRef.current && (window as any).google) {
-      const googleObj = (window as any).google;
-      const pos = new googleObj.maps.LatLng(latitude, longitude);
-      markerRef.current.setPosition(pos);
-      markerRef.current.getMap()?.panTo(pos);
+    if (markerInstanceRef.current && mapInstanceRef.current) {
+      const pos = [latitude, longitude];
+      markerInstanceRef.current.setLatLng(pos);
+      mapInstanceRef.current.panTo(pos);
     }
   }, [latitude, longitude]);
 
@@ -92,8 +130,6 @@ export default function MapPicker({
     { name: "Sominakoppa", lat: 13.9512, lng: 75.5487 },
     { name: "Tunga River Bridge", lat: 13.9220, lng: 75.5800 },
   ];
-
-  const hasApiKey = !!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
   return (
     <div className="space-y-2">
@@ -121,12 +157,6 @@ export default function MapPicker({
         ref={mapRef}
         className="h-[240px] w-full rounded-2xl border border-outline-variant bg-surface-container shadow-inner overflow-hidden z-10 relative"
       />
-
-      {!hasApiKey && (
-        <p className="text-[11px] text-amber-600 font-semibold">
-          ⚠️ Note: Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in .env to enable full Google Maps functionality.
-        </p>
-      )}
     </div>
   );
 }
