@@ -75,6 +75,47 @@ function LoginInner() {
     }
   }
 
+  const handleGoogleSignIn = async () => {
+    // Dynamically load Capacitor and GoogleAuth on click to prevent static build failures
+    const { Capacitor } = await import("@capacitor/core");
+    
+    if (Capacitor.isNativePlatform()) {
+      setLoading(true);
+      setError("");
+      setSuccessMsg("");
+      try {
+        const { GoogleAuth } = await import("@codetrix-studio/capacitor-google-auth");
+        
+        // Initialize GoogleAuth if on native app
+        GoogleAuth.initialize();
+
+        const result = await GoogleAuth.signIn();
+        const idToken = result.authentication.idToken;
+        const emailAddress = result.email;
+
+        // Login using custom NextAuth credentials integration
+        const res = await signIn("credentials", {
+          email: emailAddress,
+          idToken,
+          redirect: false,
+        });
+
+        if (res?.error) {
+          setError("Native Google Authentication failed.");
+        } else {
+          window.location.href = callbackUrl;
+        }
+      } catch (err: any) {
+        console.error("Native Google Auth Error:", err);
+        setError(err.message || "Google Sign-In cancelled.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      signIn("google", { callbackUrl });
+    }
+  };
+
   return (
     <div className="mx-auto flex min-h-screen max-w-[440px] flex-col justify-center px-7 py-16">
       <Link href="/" className="mb-8 flex items-center gap-2.5 font-display text-[22px] font-semibold" style={{ color: "var(--forest)" }}>
@@ -85,7 +126,7 @@ function LoginInner() {
       <h1 className="text-[32px]">Welcome back</h1>
       <p className="mb-7 mt-2 text-[15px]" style={{ color: "var(--slate)" }}>Sign in to request services or manage your dashboard.</p>
 
-      <button className="btn btn-ghost mb-3 w-full" onClick={() => signIn("google", { callbackUrl })}>
+      <button className="btn btn-ghost mb-3 w-full" onClick={handleGoogleSignIn} disabled={loading}>
         Continue with Google
       </button>
 

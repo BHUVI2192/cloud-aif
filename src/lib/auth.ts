@@ -26,11 +26,50 @@ const providers: NextAuthOptions["providers"] = [
     credentials: {
       email: { label: "Email", type: "email", placeholder: "user@example.com" },
       password: { label: "Password", type: "password" },
+      idToken: { label: "Google ID Token", type: "text" },
     },
     async authorize(credentials) {
       console.log("DEBUG: authorize callback entered with credentials:", { email: credentials?.email });
       const email = credentials?.email?.toLowerCase().trim();
       const password = credentials?.password;
+      const idToken = credentials?.idToken;
+
+      // 1. Handle Native Google Sign-In via ID Token
+      if (idToken) {
+        try {
+          const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+          if (!verifyRes.ok) {
+            console.log("DEBUG: failed to verify Google ID Token with Google servers");
+            return null;
+          }
+          const tokenInfo = await verifyRes.json();
+          // Verify that the token is intended for our app
+          if (tokenInfo.aud !== process.env.GOOGLE_CLIENT_ID) {
+            console.log("DEBUG: Google ID Token audience mismatch:", tokenInfo.aud);
+            return null;
+          }
+          const tokenEmail = tokenInfo.email?.toLowerCase().trim();
+          if (!tokenEmail) return null;
+
+          let user = await db.user.findUnique({ where: { email: tokenEmail } });
+          if (!user) {
+            user = await db.user.create({
+              data: {
+                email: tokenEmail,
+                name: tokenInfo.name || tokenEmail.split("@")[0],
+                image: tokenInfo.picture || null,
+                role: "CUSTOMER",
+              },
+            });
+          }
+          return { id: user.id, email: user.email, name: user.name, image: user.image };
+        } catch (err) {
+          console.error("Native Google token validation error:", err);
+          return null;
+        }
+      }
+
+      // 2. Fallback to standard email/password credentials login
       if (!email || !password) {
         console.log("DEBUG: email or password is empty");
         return null;

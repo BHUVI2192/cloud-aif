@@ -9,5 +9,12 @@
       "*.vercel.app"
     ],
     "cleartext": true
+  },
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "clientId": "427732471870-7ts6jk0ksn4gq5jsa1jkv0dtb192pkbb.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
   }
 }
