@@ -7,6 +7,21 @@
       "namespace": "android_app",
       "package_name": "in.cloudaif.app",
       "sha256_cert_fingerprints": [
+        "8B:39:CE:57:81:8E:BA:45:F5:32:DA:16:80:D7:59:21:EE:50:CA:43:BF:D9:6A:E4:7B:5B:0B:26:A1:18:3E:99",
+        "EA:99:F5:B8:64:17:DB:FE:5B:1A:5D:8D:D3:2C:1C:78:63:51:06:F8:B3:6A:C9:04:E8:2A:20:60:32:5D:A6:3B",
+        "3F:1B:2A:87:0B:77:61:C3:4F:13:40:7E:D1:E0:ED:26:22:5F:3E:20:F6:10:0F:03:63:D1:8A:D8:56:39:C4:24"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.ogenzo.app",
+      "sha256_cert_fingerprints": [
+        "8B:39:CE:57:81:8E:BA:45:F5:32:DA:16:80:D7:59:21:EE:50:CA:43:BF:D9:6A:E4:7B:5B:0B:26:A1:18:3E:99",
         "EA:99:F5:B8:64:17:DB:FE:5B:1A:5D:8D:D3:2C:1C:78:63:51:06:F8:B3:6A:C9:04:E8:2A:20:60:32:5D:A6:3B",
         "3F:1B:2A:87:0B:77:61:C3:4F:13:40:7E:D1:E0:ED:26:22:5F:3E:20:F6:10:0F:03:63:D1:8A:D8:56:39:C4:24"
       ]
