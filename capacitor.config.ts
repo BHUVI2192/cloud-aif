@@ -6,6 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'public',
   server: {
     url: 'https://cloud-aif.vercel.app',
+    allowNavigation: [
+      'cloud-aif.vercel.app',
+      '*.vercel.app'
+    ],
     cleartext: true
   }
 };
