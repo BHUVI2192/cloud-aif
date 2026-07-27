@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import WebVitals from "@/components/WebVitals";
+import DeepLinkHandler from "@/components/DeepLinkHandler";
 
 export const metadata: Metadata = {
   title: "Ogenzo — Verified local services in Shivamogga",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/logo_192.png" />
       </head>
       <body>
+        <DeepLinkHandler />
         <WebVitals />
         <Providers>{children}</Providers>
       </body>
