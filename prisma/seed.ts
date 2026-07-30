@@ -13,64 +13,106 @@ const slug = (s: string) =>
 // ---- Taxonomy -------------------------------------------------------------
 const TAXONOMY: { name: string; icon: string; subs: string[] }[] = [
   {
-    name: "Home Repair & Handyman",
-    icon: "wrench",
+    name: "Electrical Services",
+    icon: "zap",
     subs: [
-      "Electrician",
-      "Plumber",
-      "Carpenter",
-      "Fan & Light Installation",
-      "Switchboard Repair",
-      "Appliance Repair",
-      "Door Lock / Minor Fittings",
+      "Fan Repair & Installation",
+      "Switch, Socket & Switchboard Repair",
+      "Lights & Chandelier Installation",
+      "House Wiring & Short Circuit Troubleshooting",
+      "MCB, Fuse & Distribution Board Repair",
+      "Inverter Installation & Service",
+      "Doorbell & Intercom Repair",
     ],
   },
   {
-    name: "Cleaning & Pest Control",
+    name: "Plumbing Services",
+    icon: "droplet",
+    subs: [
+      "Tap, Mixer & Faucet Repair",
+      "Toilet, Flush & Commode Repair",
+      "Pipe Leakage & Line Repair",
+      "Sink, Washbasin & Drain Unclogging",
+      "Water Pump & Motor Repair",
+      "Geyser Installation & Connection",
+      "Water Filter (RO) Installation & Service",
+    ],
+  },
+  {
+    name: "Carpentry & Woodwork",
+    icon: "hammer",
+    subs: [
+      "Door, Window & Hinges Repair",
+      "Wardrobe, Drawer & Cabinet Fixing",
+      "Door Lock, Handle & Latch Installation",
+      "Furniture Assembly & Repair",
+      "Wall Shelves, TV Units & Mirror Hanging",
+      "Balcony Safety Net & Mesh Installation",
+    ],
+  },
+  {
+    name: "Appliance Repair",
+    icon: "tv",
+    subs: [
+      "AC Service & Repair",
+      "Washing Machine Repair",
+      "Refrigerator Repair",
+      "Microwave & Oven Repair",
+      "Kitchen Chimney & Hob Cleaning",
+      "TV Mounting & Installation",
+    ],
+  },
+  {
+    name: "Cleaning & Sanitation",
     icon: "sparkles",
     subs: [
-      "Bathroom Cleaning",
-      "Kitchen Cleaning",
-      "Full Home Cleaning",
-      "Sofa Cleaning",
-      "Pest Control",
-      "Water Tank Cleaning",
+      "Deep Bathroom Cleaning",
+      "Deep Kitchen Cleaning",
+      "Full Home Deep Cleaning",
+      "Sofa & Carpet Shampooing",
+      "Water Tank & Sump Cleaning",
     ],
   },
   {
-    name: "Painting & Home Improvement",
-    icon: "roller",
+    name: "Pest Control",
+    icon: "bug",
     subs: [
-      "Room Painting",
-      "Wall Repair",
-      "Waterproofing",
-      "Minor Civil Work",
-      "Furniture Polish",
-      "Small Renovation Help",
+      "Cockroach & Ant Control",
+      "Termite Treatment",
+      "Bed Bugs Treatment",
+      "Mosquito & General Insect Control",
     ],
   },
   {
-    name: "Salon, Spa & Beauty",
+    name: "Painting & Waterproofing",
+    icon: "paint-roller",
+    subs: [
+      "Interior House Painting",
+      "Exterior Painting & Putty",
+      "Wall Putty & Damp Repair",
+      "Terrace & Bathroom Waterproofing",
+      "Wood Polishing & Varnish",
+    ],
+  },
+  {
+    name: "Salon & Grooming",
     icon: "scissors",
     subs: [
-      "Haircut / Styling",
-      "Facial",
-      "Waxing",
-      "Manicure / Pedicure",
-      "Bridal Makeup",
-      "Massage / Spa",
+      "Haircut, Styling & Color",
+      "Facial, Scrub & Bleach",
+      "Waxing & Threading",
+      "Manicure & Pedicure",
+      "Bridal & Party Makeup",
     ],
   },
   {
-    name: "Education, Tutoring & Coaching",
+    name: "Education & Coaching",
     icon: "book",
     subs: [
-      "Home Tuition",
-      "Exam Coaching",
-      "Spoken English",
-      "Coding Classes",
-      "Music / Dance Classes",
-      "Subject Tutoring",
+      "Home Tuition (K-10)",
+      "Exam Coaching (PUC / CET)",
+      "Spoken English & Communication",
+      "Coding & Computer Classes",
     ],
   },
 ];
@@ -92,18 +134,54 @@ const LOCALITIES = [
 ];
 
 async function main() {
+  console.log("Cleaning up old categories not in the new taxonomy...");
+  const newCategorySlugs = TAXONOMY.map(cat => slug(cat.name));
+  
+  // Set isActive = false for categories not in the new list
+  await prisma.category.updateMany({
+    where: {
+      slug: { notIn: newCategorySlugs }
+    },
+    data: {
+      isActive: false
+    }
+  });
+
+  // Ensure seeded categories are active
+  await prisma.category.updateMany({
+    where: {
+      slug: { in: newCategorySlugs }
+    },
+    data: {
+      isActive: true
+    }
+  });
+
   console.log("Seeding categories & subservices...");
   for (const [ci, cat] of TAXONOMY.entries()) {
     const category = await prisma.category.upsert({
       where: { slug: slug(cat.name) },
-      update: {},
-      create: { name: cat.name, slug: slug(cat.name), iconKey: cat.icon, sortOrder: ci },
+      update: { name: cat.name, iconKey: cat.icon, sortOrder: ci, isActive: true },
+      create: { name: cat.name, slug: slug(cat.name), iconKey: cat.icon, sortOrder: ci, isActive: true },
     });
+
+    const newSubSlugs = cat.subs.map(sub => slug(sub));
+    // Deactivate subservices that are not in the new list for this category
+    await prisma.subservice.updateMany({
+      where: {
+        categoryId: category.id,
+        slug: { notIn: newSubSlugs }
+      },
+      data: {
+        isActive: false
+      }
+    });
+
     for (const [si, sub] of cat.subs.entries()) {
       await prisma.subservice.upsert({
         where: { categoryId_slug: { categoryId: category.id, slug: slug(sub) } },
-        update: {},
-        create: { categoryId: category.id, name: sub, slug: slug(sub), sortOrder: si },
+        update: { name: sub, sortOrder: si, isActive: true },
+        create: { categoryId: category.id, name: sub, slug: slug(sub), sortOrder: si, isActive: true },
       });
     }
   }
@@ -123,7 +201,7 @@ async function main() {
     ["support_phone", "+91 80000 00000", "string", "support"],
     ["default_city", "Shivamogga", "string", "general"],
     ["provider_auto_approve", "false", "boolean", "providers"],
-    ["featured_category_slugs", JSON.stringify(["home-repair-handyman", "cleaning-pest-control"]), "json", "featured"],
+    ["featured_category_slugs", JSON.stringify(["electrical-services", "plumbing-services"]), "json", "featured"],
   ];
   for (const [key, value, valueType, group] of settings) {
     await prisma.platformSetting.upsert({
@@ -187,7 +265,7 @@ async function main() {
     },
   });
 
-  const homeRepair = await prisma.category.findUnique({ where: { slug: "home-repair-handyman" } });
+  const electricalServices = await prisma.category.findUnique({ where: { slug: "electrical-services" } });
   const providerUser = await prisma.user.upsert({
     where: { email: "provider@example.com" },
     update: { passwordHash: defaultPasswordHash },
@@ -205,7 +283,7 @@ async function main() {
           businessName: "Suresh Electricals",
           headline: "Trusted electrician serving Shivamogga since 2015",
           workType: WorkType.SOLO,
-          primaryCategoryId: homeRepair?.id,
+          primaryCategoryId: electricalServices?.id,
           experienceYears: 9,
           languages: ["Kannada", "Hindi", "English"],
           serviceRadiusKm: 12,
@@ -225,19 +303,19 @@ async function main() {
 
   // ---- Provider sub-data, a pending provider, and a sample request/assignment ----
   const provider = await prisma.providerProfile.findUnique({ where: { userId: providerUser.id } });
-  const electrician = await prisma.subservice.findFirst({ where: { slug: "electrician" } });
+  const fanInstallation = await prisma.subservice.findFirst({ where: { slug: "fan-repair-installation" } });
   const vidyanagar = await prisma.serviceArea.findUnique({ where: { slug: "vidyanagar" } });
 
-  if (provider && homeRepair && electrician && vidyanagar) {
+  if (provider && electricalServices && fanInstallation && vidyanagar) {
     await prisma.providerCategory.upsert({
-      where: { providerId_categoryId: { providerId: provider.id, categoryId: homeRepair.id } },
+      where: { providerId_categoryId: { providerId: provider.id, categoryId: electricalServices.id } },
       update: {},
-      create: { providerId: provider.id, categoryId: homeRepair.id },
+      create: { providerId: provider.id, categoryId: electricalServices.id },
     });
     await prisma.providerSubservice.upsert({
-      where: { providerId_subserviceId: { providerId: provider.id, subserviceId: electrician.id } },
+      where: { providerId_subserviceId: { providerId: provider.id, subserviceId: fanInstallation.id } },
       update: {},
-      create: { providerId: provider.id, subserviceId: electrician.id },
+      create: { providerId: provider.id, subserviceId: fanInstallation.id },
     });
     await prisma.providerServiceArea.upsert({
       where: { providerId_serviceAreaId: { providerId: provider.id, serviceAreaId: vidyanagar.id } },
@@ -254,7 +332,7 @@ async function main() {
       }
     }
     await prisma.providerPricing.create({
-      data: { providerId: provider.id, subserviceId: electrician.id, label: "Standard electrical visit", unit: "PER_VISIT", amountMin: 30000, amountMax: 80000 },
+      data: { providerId: provider.id, subserviceId: fanInstallation.id, label: "Standard electrical visit", unit: "PER_VISIT", amountMin: 30000, amountMax: 80000 },
     }).catch(() => {});
     await prisma.providerDocument.create({
       data: { providerId: provider.id, type: "ID_PROOF", status: "APPROVED", fileUrl: "private/seed/id-proof.pdf", fileName: "aadhaar.pdf" },
@@ -266,8 +344,8 @@ async function main() {
       const request = await prisma.serviceRequest.create({
         data: {
           customerId: customer.id,
-          categoryId: homeRepair.id,
-          subserviceId: electrician.id,
+          categoryId: electricalServices.id,
+          subserviceId: fanInstallation.id,
           serviceAreaId: vidyanagar.id,
           title: "Ceiling fan installation",
           description: "Need two ceiling fans installed in the living room and bedroom. Wiring is already in place.",
